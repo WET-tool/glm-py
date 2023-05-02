@@ -16,7 +16,7 @@ pip install "mkdocstrings[python]"==0.21.2
 pip install mkdocs-material==9.1.8
 ```
 
-Build the docs (from the package rooot): 
+Build the docs (from the package root): 
 
 ```
 mkdocs serve 
