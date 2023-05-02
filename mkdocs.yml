@@ -1,0 +1,28 @@
+site_name: GLM-py
+
+theme:
+    name: material
+    logo: 'img/glm-icon2.png'
+
+extra_css:
+    - css/extra.css
+
+plugins:
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        options:
+          docstring_style: numpy
+          show_source: false
+
+extra:
+  social:
+    - icon: "fontawesome/brands/github"
+      link: "https://github.com/"
+
+nav:
+  - glm-py: index.md
+  - API Reference:
+    - NML: nml.md
+    - Dimensions: dimensions.md
