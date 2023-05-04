@@ -12,20 +12,13 @@ readme = "README.md"
 authors = []
 license = { file = "LICENSE" }
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
 keywords = ["GLM", "Lake", "Model"]
-dependencies = [
-
-]
 requires-python = ">=3.9"
 
-[project.optional-dependencies]
-dev = ["autopep8", "mkdocs==1.4.2", "'mkdocstrings[python]'==0.21.2", "mkdocs-material==9.1.8"]
-
 [project.urls]
-Homepage = ""
+Repository = "https://github.com/WET-tool/glm-py"
 
 [project.scripts]

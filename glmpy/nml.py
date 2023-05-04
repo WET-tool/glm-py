@@ -1,8 +1,9 @@
 from typing import Union
+import json
 
 
 class NML:
-    """ Generate .nml files  
+    """ Generate .nml files.  
 
     .nml files store config information required for running a simulation with the General Lake Model (GLM). 
     Instances of this class store values that can be written to .nml files and have methods to write .nml files.
@@ -53,7 +54,7 @@ class NML:
         self.wq_setup = wq_setup
 
     def write_nml(self, nml_file_path: str = "sim.nml"):
-        """ Write a .nml file
+        """ Write a .nml file.
 
         Writes a .nml file to the file path specified in `nml_file_path`. 
         The .nml file stores config for a GLM simulation.
@@ -95,7 +96,7 @@ class NML:
 
 class NMLSetup:
 
-    """ Class for the configuring the &glm_setup component of a .nml file
+    """ Class for the configuring the &glm_setup component of a .nml file.
 
     Attributes
     ----------
@@ -573,7 +574,7 @@ class NMLInflows:
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
 
-class NMLOutflows:
+class NMLOutflows: 
     """"""
 
     def __init__(self):
@@ -713,3 +714,5 @@ class NMLWQSetup:
             (f"   mobility_off = {self.mobility_off}", self.mobility_off)
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+
+

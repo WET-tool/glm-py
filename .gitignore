@@ -1,2 +1,11 @@
 examples
+
 *.DS_Store
+
+dist
+
+build
+
+**/__pycache__
+
+glm_py.egg-info
