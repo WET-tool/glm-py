@@ -1,15 +1,17 @@
 from typing import Union
+from typing import List
 import json
 
-
 class NML:
-    """ Generate .nml files.  
+    """
+    Generate .nml files.
 
-    .nml files store config information required for running a simulation with the General Lake Model (GLM). 
-    Instances of this class store values that can be written to .nml files and have methods to write .nml files.
+    .nml files store config information required for running a simulation with
+    the General Lake Model (GLM). Instances of this class store values that can
+    be written to .nml files and have methods to write .nml files.
 
     Attributes
-    ---------- 
+    ----------
     setup : str
         String representation of the `glm_setup` component of the .nml file
     mixing : str
@@ -19,6 +21,26 @@ class NML:
 
     Examples
     --------
+    >>> from glmpy import NML
+    >>> from glmpy import JSONToNML
+    >>> my_json = JSONToNML("config.json")
+    >>> nml = NML(
+    ...     setup=my_json.get_nml_attributes("setup"),
+    ...     mixing=my_json.get_nml_attributes("mixing"),
+    ...     morphometry=my_json.get_nml_attributes("morphometry"),
+    ...     time=my_json.get_nml_attributes("time"),
+    ...     output=my_json.get_nml_attributes("output"),
+    ...     init_profiles=my_json.get_nml_attributes("init_profiles"),
+    ...     meteorology=my_json.get_nml_attributes("meteorology"),
+    ...     light=my_json.get_nml_attributes("light"),
+    ...     bird_model=my_json.get_nml_attributes("bird_model"),
+    ...     inflows=my_json.get_nml_attributes("inflows"),
+    ...     outflows=my_json.get_nml_attributes("outflows"),
+    ...     sediment=my_json.get_nml_attributes("sediment"),
+    ...     ice_snow=my_json.get_nml_attributes("ice_snow"),
+    ...     wq_setup=my_json.get_nml_attributes("wq_setup")
+    ... )
+    >>> nml.write_nml()
     """
 
     def __init__(
@@ -56,7 +78,7 @@ class NML:
     def write_nml(self, nml_file_path: str = "sim.nml"):
         """ Write a .nml file.
 
-        Writes a .nml file to the file path specified in `nml_file_path`. 
+        Writes a .nml file to the file path specified in `nml_file_path`.
         The .nml file stores config for a GLM simulation.
 
         Parameters
@@ -66,12 +88,65 @@ class NML:
 
         Examples
         --------
+        >>> from glmpy import NML
+        >>> nml = NML(
+        ...     setup=my_json.get_nml_attributes("setup"),
+        ...     mixing=my_json.get_nml_attributes("mixing"),
+        ...     morphometry=my_json.get_nml_attributes("morphometry"),
+        ...     time=my_json.get_nml_attributes("time"),
+        ...     output=my_json.get_nml_attributes("output"),
+        ...     init_profiles=my_json.get_nml_attributes("init_profiles"),
+        ...     meteorology=my_json.get_nml_attributes("meteorology"),
+        ...     light=my_json.get_nml_attributes("light"),
+        ...     bird_model=my_json.get_nml_attributes("bird_model"),
+        ...     inflows=my_json.get_nml_attributes("inflows"),
+        ...     outflows=my_json.get_nml_attributes("outflows"),
+        ...     sediment=my_json.get_nml_attributes("sediment"),
+        ...     ice_snow=my_json.get_nml_attributes("ice_snow"),
+        ...     wq_setup=my_json.get_nml_attributes("wq_setup")
+        ... )
+        >>> nml.write_nml(nml_file_path="sim.nml")
         """
 
         def nml_block(block_name, block):
+            """
+            Returns a .nml block string representation.
+
+            Returns a string representation for a particular .nml block.
+
+            Parameters
+            ----------
+            block_name : str
+                the name of the .nml block
+            block : str
+                the string representation of the .nml block
+
+            Returns
+            -------
+            str
+                the string representation of the .nml block
+
+            Examples
+            --------
+            >>> nml_block("morphometry", self.morphometry)
+            """
             return f"&{block_name}\n{block}\n/\n"
 
         def nml_output():
+            """
+            Returns a string representation of the .nml file.
+
+            Constructs a string representation of the .nml file from `nml_block()`.
+
+            Returns
+            -------
+            str
+                the string representation of the .nml file
+
+            Examples
+            --------
+            >>> nml_output()
+            """
             blocks = [
                 (nml_block("glm_setup", self.setup), self.setup),
                 (nml_block("mixing", self.mixing), self.mixing),
@@ -93,34 +168,118 @@ class NML:
         with open(file=nml_file_path, mode='w') as file:
             file.write(nml_output())
 
+class NMLBase:
+    """
+    Base class for each  NML block class.
 
-class NMLSetup:
+    Provides the `set_attributes()` method for assigning a dictionary of
+    attributes any NML block class.
 
-    """ Class for the configuring the &glm_setup component of a .nml file.
+    Attributes
+    ----------
+    attrs_dict : dict
+        A dictionary containing the GLM configuration options as keys and the
+        corresponding values to set.
+    update : dict
+        A dictionary containing GLM configuration options/values to update or
+        add to the `attrs_dict`.
+
+    Examples
+    --------
+    >>> from glmpy import NMLBase
+    >>> from glmpy import NMLMorphometry
+    >>> morphometry = NMLMorphometry()
+    >>> morphometry.set_attributes(
+    ...     attrs_dict={
+    ...         "lake_name": "Example Lake'",
+    ...         "latitude":  32,
+    ...         "longitude": 35,
+    ...         "crest_elev": -203.9,
+    ...         "bsn_len": 21000,
+    ...         "bsn_wid": 13000,
+    ...         "max_layer_thick": 0.1,
+    ...         "density_model": 1
+    ...     },
+    ...     update={
+    ...         "bsn_vals": "3",
+    ...         "H": [-252.9,  -251.9,  -250.9],
+    ...         "A": [0,  9250000,  15200000,],
+    ...     }
+    ... )
+    """
+    def set_attributes(self, attrs_dict, update: dict):
+        """
+        Set attributes for the NMLSetup class.
+
+        Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
+
+        Parameters
+        ----------
+        attrs_dict : dict
+            A dictionary containing the attribute names as keys and the corresponding values to set.
+        custom : dict
+            A dictionary containing custom attribute names and values to update the attrs_dict with.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> from glmpy import NMLBase
+        >>> from glmpy import NMLMorphometry
+        >>> morphometry = NMLMorphometry()
+        >>> morphometry.set_attributes(
+        ...     attrs_dict={
+        ...         "lake_name": "Example Lake'",
+        ...         "latitude":  32,
+        ...         "longitude": 35,
+        ...         "crest_elev": -203.9,
+        ...         "bsn_len": 21000,
+        ...         "bsn_wid": 13000,
+        ...         "max_layer_thick": 0.1,
+        ...         "density_model": 1
+        ...     },
+        ...     update={
+        ...         "bsn_vals": "3",
+        ...         "H": [-252.9,  -251.9,  -250.9],
+        ...         "A": [0,  9250000,  15200000,],
+        ...     }
+        ... )
+        """
+        if update is not None:
+            attrs_dict.update(update)
+        for key, value in attrs_dict.items():
+            setattr(self, key, value)
+
+
+class NMLSetup(NMLBase):
+    """
+    Define the glm_setup block of a GLM simulation configuration.
+
+    The glm_setup component is used to define the simulations layer details.
+    Attributes are set using the `set_attributes()` method and returned as a
+    formatted string using the `__str__()` method.
 
     Attributes
     ----------
     sim_name : str
-        Name of the simulation
+        Title of simulation.
     max_layers : int
-        Maximum number of layers, default 500
+        Maximum number of layers.
     min_layer_vol : float
-        Minimum layer volume
+        Minimum layer volume.
     min_layer_thick : float
-        Minimum thickness of a layer (m)
+        Minimum thickness of a layer (m).
     max_layer_thick : float
-        Maximum thickness of a layer (m)
+        Maximum thickness of a layer (m).
     density_model : int
-        Switch to set the density equation, default 1
+        Switch to set the density equation.
 
-    Methods
-    -------
-    set_attributes(attrs_dict)
-        Sets the attributes of the class to the values in the attrs_dict dictionary
-    get_attributes(key)
-        Prints the value of the attribute specified by the key
-    __str__()
-        Returns a string representation of the class attributes
+    Examples
+    --------
+    >>> from glmpy import NMLSetup
+    >>> setup = NMLSetup()
     """
 
     def __init__(self):
@@ -131,16 +290,25 @@ class NMLSetup:
         self.max_layer_thick = None
         self.density_model = 1
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
-        print(getattr(self, key))
-
     def __str__(self):
+        """
+        Return the string representation of the NMLSetup object.
+
+        Returns a formatted string of the NMLSetup configution options and
+        values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLSetup object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLSetup
+        >>> setup = NMLSetup()
+        >>> setup.set_attributes(attributes)
+        >>> print(setup)
+        """
         params = [
             (f"   sim_name = '{self.sim_name}'", self.sim_name),
             (f"   max_layers = {self.max_layers}", self.max_layers),
@@ -153,40 +321,39 @@ class NMLSetup:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLMorphometry(NMLBase):
+    """
+    Define the morphometry block of a GLM simulation configuration.
 
-class NMLMorphometry:
-
-    """ Class for the configuring the &morphometry component of a .nml file
+    Used to configure the location, depth & hypsographic curve. Attributes are
+    set using the `set_attributes()` method and returned as a formatted string
+    using the `__str__()` method.
 
     Attributes
     ----------
     lake_name : str
-        Site name
+        Site name.
     latitude : float
-        Latitude, positive North
+        Latitude, positive North.
     longitude : float
-        Longitude, positive East
+        Longitude, positive East.
     crest_elev : float
-        Elevation of the bottom-most point of the lake (m above datum)
+        Elevation of the bottom-most point of the lake (m above datum).
     bsn_len : float
-        Length of the lake basin, at crest height (m)
+        Length of the lake basin, at crest height (m).
     bsn_wid : float
-        Width of the lake basin, at crest height (m)
+        Width of the lake basin, at crest height (m).
     bsn_vals : float
-        Number of points being provided to described the hyposgraphic details
+        Number of points being provided to described the hyposgraphic details.
     H : list
-        Comma-separated list of lake elevations (m above datum)
+        Comma-separated list of lake elevations (m above datum).
     A : list
-        Comma-separated list of lake areas (m^2)
+        Comma-separated list of lake areas (m^2).
 
-    Methods
-    -------
-    set_attributes(attrs_dict)
-        Sets the attributes of the class to the values in the attrs_dict dictionary
-    get_attributes(key)
-        Prints the value of the attribute specified by the key
-    __str__()
-        Returns a string representation of the class attributes
+    Examples
+    --------
+    >>> from glmpy import NMLMorphometry
+    >>> morphometry = NMLMorphometry()
     """
 
     def __init__(self):
@@ -200,16 +367,41 @@ class NMLMorphometry:
         self.H = None
         self.A = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
-        print(getattr(self, key))
-
     def __str__(self):
+        """
+        Return the string representation of the NMLMorphometry object.
+
+        Returns a formatted string of the NMLMorphometry configution options and
+        values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLMorphometry object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLMorphometry
+        >>> morphometry = NMLMorphometry()
+        >>>  morphometry.set_attributes(
+        ...     attrs_dict={
+        ...         "lake_name": "Example Lake'",
+        ...         "latitude":  32,
+        ...         "longitude": 35,
+        ...         "crest_elev": -203.9,
+        ...         "bsn_len": 21000,
+        ...         "bsn_wid": 13000,
+        ...         "max_layer_thick": 0.1,
+        ...         "density_model": 1
+        ...     },
+        ...     update={
+        ...         "bsn_vals": "3",
+        ...         "H": [-252.9,  -251.9,  -250.9],
+        ...         "A": [0,  9250000,  15200000,],
+        ...     }
+        ... )
+        >>> print(morphometry)
+        """
         params = [
             (f"   lake_name = '{self.lake_name}'", self.lake_name),
             (f"   latitude = {self.latitude}", self.latitude),
@@ -223,40 +415,40 @@ class NMLMorphometry:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLMixing(NMLBase):
+    """
+    Define the mixing block of a GLM simulation configuration.
 
-class NMLMixing:
-
-    """ Class for the configuring the &mixing component of a .nml file
+    Used to configure mixing parameters. Attributes are set using the
+    `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
 
     Attributes
     ----------
     surface_mixing : int
-        Switch to select the options of the surface mixing model
+        Switch to select the options of the surface mixing model.
     coef_mix_conv : float
-        Mixing efficiency - convective overturn
+        Mixing efficiency - convective overturn.
     coef_wind_stir : float
-        Mixing efficiency - wind stirring
+        Mixing efficiency - wind stirring.
     coef_mix_shear : float
-        Mixing efficiency - shear production
+        Mixing efficiency - shear production.
     coef_mix_turb : float
         Mixing efficiency - unsteady turbulence effects
     coef_mix_KH : float
-        Mixing efficiency - Kelvin-Helmholtz billowing
+        Mixing efficiency - Kelvin-Helmholtz billowing.
     deep_mixing : int
-        Switch to select the options of the deep (hypolimnetic) mixing model (0 = no deep mixing, 1 = constant diffusivity, 2 = weinstock model)
+        Switch to select the options of the deep (hypolimnetic) mixing model
+        (0 = no deep mixing, 1 = constant diffusivity, 2 = weinstock model).
     coef_mix_hyp : float
-        Mixing efficiency - hypolimnetic turbulence
+        Mixing efficiency - hypolimnetic turbulence.
     diff : float
-        Background (molecular) diffusivity in the hypolimnion
+        Background (molecular) diffusivity in the hypolimnion.
 
-    Methods
-    -------
-    set_attributes(attrs_dict)
-        Sets the attributes of the class to the values in the attrs_dict dictionary
-    get_attributes(key)
-        Prints the value of the attribute specified by the key
-    __str__()
-        Returns a string representation of the class attributes
+    Examples
+    --------
+    >>> from glmpy import NMLMixing
+    >>> mixing = NMLMixing()
     """
 
     def __init__(self):
@@ -270,16 +462,19 @@ class NMLMixing:
         self.coef_mix_hyp = None
         self.diff = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
-        print(getattr(self, key))
-
     def __str__(self):
+        """
+        Return the string representation of the NMLMixing object.
+
+        Returns a formatted string of the NMLMixing configution options and
+        values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLMixing object.
+
+        """
         params = [
             (f"   surface_mixing = {self.surface_mixing}",
              self.surface_mixing),
@@ -296,9 +491,33 @@ class NMLMixing:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
-
-class NMLTime:
+class NMLTime(NMLBase):
     """
+    Define the time block of a GLM simulation configuration.
+
+    Used to configure the simulation period, time step, and time zone.
+    Attributes are set using the `set_attributes()` method and returned as a
+    formatted string using the `__str__()` method.
+
+    Attributes
+    ----------
+    timefmt : int
+        Time configuration switch.
+    start : str
+        Start time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'.
+    stop : str
+        End time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'.
+    dt : float
+        Time step (seconds).
+    num_days : int
+        Number of days to simulate.
+    timezone : float
+        UTC time zone.
+
+    Examples
+    --------
+    >>> from glmpy import NMLSetup
+    >>> time = NMLTime()
     """
 
     def __init__(self):
@@ -309,16 +528,20 @@ class NMLTime:
         self.num_days = None
         self.timezone = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
-        print(getattr(self, key))
-
     def __str__(self):
+        """
+        Return the string representation of the NMLTime object.
+
+        Returns a formatted string of the NMLTime configution options and
+        values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLTime object.
+
+        """
+
         params = [
             (f"   timefmt = {self.timefmt}", self.timefmt),
             (f"   start = '{self.start}'", self.start),
@@ -329,8 +552,55 @@ class NMLTime:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLOutput(NMLBase):
+    """
+    Define the output block of a GLM simulation configuration.
 
-class NMLOutput:
+    Used to configure the netcdf & csv output details. Attributes are set using
+    the `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
+
+    Attributes
+    ----------
+    out_dir : str
+        Directory to write the output files.
+    out_fn : str
+        Filename of the main NetCDF output file.
+    nsave : int
+        Frequency to write to the NetCDF and CSV point files.
+    csv_lake_fname : str
+        Filename for the daily summary file.
+    csv_point_nlevs : float
+        Number of specific level/depth csv files to be created.
+    csv_point_fname : str
+        Name to be appended to specified depth CSV files.
+    csv_point_frombot : float
+        Comma separated list identify whether each output point listed in
+        csv_point_at is relative to the bottom (ie heights) or the surface
+        (ie depths).
+    csv_point_at : float
+        Height or Depth of points to output at (comma separated list).
+    csv_point_nvars : int
+        Number of variables to output into the csv files.
+    csv_point_vars : str
+        Comma separated list of variable names.
+    csv_outlet_allinone : string
+        Switch to create an optional outlet file combining all outlets.
+    csv_outlet_fname : str
+        Name to be appended to each of the outlet CSV files.
+    csv_outlet_nvars : int
+        Number of variables to be written into the outlet file(s).
+    csv_outlet_vars : str
+        Comma separated list of variable names to be included in the output
+        file(s)
+    csv_ovrflw_fname : str
+        Filename to be used for recording the overflow details.
+
+    Examples
+    --------
+    >>> from glmpy import NMLOutput
+    >>> output = NMLOutput()
+    """
     def __init__(self):
         self.out_dir = None
         self.out_fn = None
@@ -347,16 +617,18 @@ class NMLOutput:
         self.csv_outlet_vars = None
         self.csv_ovrflw_fname = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
-        print(getattr(self, key))
-
     def __str__(self):
+        """
+        Return the string representation of the NMLOutput object.
+
+        Returns a formatted string of the NMLOutput configution options and
+        values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLOutput object.
+        """
         params = [
             (f"   out_dir = '{self.out_dir}'", self.out_dir),
             (f"   out_fn = '{self.out_fn}'", self.out_fn),
@@ -383,9 +655,38 @@ class NMLOutput:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLInitProfiles(NMLBase):
+    """
+    Define the initial profiles block of a GLM simulation configuration.
 
-class NMLInitProfiles:
-    """"""
+    Used to configure the initial temperature and salinity profiles.
+    Attributes are set using the `set_attributes()` method and returned as a
+    formatted string using the `__str__()` method.
+
+    Attributes
+    ----------
+    lake_depth : float
+        Initial lake height/depth (m).
+    num_depths : int
+        Number of depths provided for initial profiles.
+    the_depths : list[float]
+        The depths of the initial profile points (m).
+    the_temps : list[float]
+        The temperature (C) at each of the initial profile points.
+    the_sals : list[float]
+        The salinity (ppt) at each of the initial profile points.
+    num_wq_vars : int
+        Number of non GLM (ie FABM or AED2) variables to be initialised.
+    wq_names : list[str]
+        Names of non GLM (ie FABM or AED2) variables to be initialised.
+    wq_init_vals : float
+        Array of WQ variable initial data (rows = vars; cols = depths)
+
+    Examples
+    --------
+    >>> from glmpy import NMLSetup
+    >>> init_profiles = NMLInitProfiles()
+    """
 
     def __init__(self):
         self.lake_depth = None
@@ -394,16 +695,20 @@ class NMLInitProfiles:
         self.the_temps = None
         self.the_sals = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLInitProfiles object.
+
+        Returns a formatted string of the NMLInitProfiles configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLInitProfiles object.
+        """
         params = [
             (f"   lake_depth = {self.lake_depth}", self.lake_depth),
             (f"   num_depths = {self.num_depths}", self.num_depths),
@@ -413,9 +718,60 @@ class NMLInitProfiles:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLMeteorology(NMLBase):
+    """
+    Define the meteorology block of a GLM simulation configuration.
 
-class NMLMeteorology:
-    """"""
+    Used to configure the surface energy balance options, and  local run-off
+    parameters. Attributes are set using the `set_attributes()` method and
+    returned as a formatted string using the `__str__()` method.
+
+    Attributes
+    ----------
+    met_sw : str
+        Switch to enable the surface heating module
+    lw_type : str
+        Switch to configure which input approach is being used for
+        longwave/cloud data in the meteo_fl.
+    rain_sw : str
+        Switch to configure rainfall input concentrations.
+    atm_stab : int
+        Switch to configure which approach to atmospheric stability is used.
+    fetch_mode : int
+        Switch to configure which wind-sheltering/fetch option to use.
+    rad_mode : int
+        Switch to configure which incoming radiation option to use.
+    albedo_mode : int
+        Switch to configure which albedo calculation option is used.
+    cloud_mode : int
+        Switch to configure which atmospheric emmissivity calculation
+        option is used.
+    subdaily : bool
+        Switch to indicate the meteorological data is provided with sub-daily
+        resolution, at an interval equivalent to Δt
+    meteo_fl : str
+        Filename of the meterological file.
+    wind_factor : float
+        Scaling factor to adjust the windspeed data provided in the meteo_fl
+    lw_factor : float
+        Scaling factor to adjust the longwave (or cloud) data provided in the
+        meteo_fl
+    lw_offset : float
+        !!!!! Not sure what this is for - can't find it in the docs
+    ce : float
+        Bulk aerodynamic transfer coefficient for latent heat flux.
+    ch : float
+        Bulk aerodynamic transfer coefficient for sensible heat flux.
+    cd : float
+        Bulk aerodynamic transfer coefficient for momentum.
+
+    Examples
+    --------
+    >>> from glmpy import NMLMeteorology
+    >>> meteorology = NMLMeteorology()
+    >>> print(meteorology)
+
+    """
 
     def __init__(self):
         self.met_sw = None
@@ -434,17 +790,21 @@ class NMLMeteorology:
         self.ce = None
         self.ch = None
         self.cd = None
-
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLMeteorology object.
+
+        Returns a formatted string of the NMLMeteorology configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLMeteorology object.
+        """
+
         params = [
             (f"   met_sw = {str(self.met_sw)}", self.met_sw),
             (f"   lw_type = '{self.lw_type}'", self.lw_type),
@@ -465,9 +825,35 @@ class NMLMeteorology:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLLight(NMLBase):
+    """
+    Define the light block of a GLM simulation configuration.
 
-class NMLLight:
-    """"""
+    Used to configure the light settings. Attributes are set using the
+    `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
+
+    Attributes
+    ----------
+    light_mode : int
+        Switch to configure the approach to light penetration.
+    Kw : float
+        Light extinction coefficient.
+    n_bands : int
+        Number of light bandwidths to simulate.
+    light_extc : float
+        Comma-separated list of light extinction coefficients for each waveband.
+    energy_frac : float
+        Comma-separated list of energy fraction captured by each waveband.
+    Benthic_Imin : float
+        Critical fraction of incident light reaching the benthos.
+
+    Examples
+    --------
+    >>> from glmpy import NMLLight
+    >>> light = NMLLight()
+    >>> print(light)
+    """
 
     def __init__(self):
         self.light_mode = None
@@ -477,16 +863,20 @@ class NMLLight:
         self.energy_frac = None
         self.Benthic_Imin = None
 
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLLight object.
+
+        Returns a formatted string of the NMLLight configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLLight object.
+        """
         params = [
             (f"   light_mode = {self.light_mode}", self.light_mode),
             (f"   Kw = {self.Kw}", self.Kw),
@@ -497,9 +887,35 @@ class NMLLight:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLBirdModel(NMLBase):
+    """
+    Define the bird model block of a GLM simulation configuration.
 
-class NMLBirdModel:
-    """"""
+    Used to configure the surface energy balance options, and  local run-off
+    parameters. Attributes are set using the `set_attributes()` method and
+    returned as a formatted string using the `__str__()` method.
+
+    Attributes
+    ----------
+    AP : float
+        Atmospheric pressure (hPa).
+    Oz : float
+        Ozone concentration (atm-cm).
+    WatVap : float
+        Total Precipitable water vapor (atm-cm).
+    AOD500 : float
+        Dimensionless Aerosol Optical Depth at wavelength 500 nm.
+    AOD380 : float
+        Dimensionless Aerosol Optical Depth at wavelength 380 nm.
+    Albedo : float
+        Albedo of the surface used for Bird Model insolation calculation.
+
+    Examples
+    --------
+    >>> from glmpy import NMLBirdModel
+    >>> bird = NMLBirdModel()
+    >>> print(bird)
+    """
 
     def __init__(self):
         self.AP = None
@@ -508,17 +924,20 @@ class NMLBirdModel:
         self.AOD500 = None
         self.AOD380 = None
         self.Albedo = None
-
-    def set_attributes(self, attrs_dict, custom: dict):
-        if custom is not None:
-            attrs_dict.update(custom)
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLBirdModel object.
+
+        Returns a formatted string of the NMLBirdModel configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLBirdModel object.
+        """
         params = [
             (f"   AP = {self.AP}", self.AP),
             (f"   Oz = {self.Oz}", self.Oz),
@@ -529,9 +948,48 @@ class NMLBirdModel:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLInflows(NMLBase):
+    """
+    Define the inflows block of a GLM simulation configuration.
 
-class NMLInflows:
-    """"""
+    Used to configure the number/type of inflows and inflow files. Attributes
+    are set using the `set_attributes()` method and returned as a formatted
+    string using the `__str__()` method.
+
+    Attributes
+    ----------
+    num_inflows : int
+        Number of inflows to be simulated in this simulation.
+    names_of_strms : str
+        Names of each inflow.
+    subm_flag : str
+        Switch indicating if the inflow I is entering as a submerged input.
+    strm_hf_angle : float
+        Angle describing the width of an inflow river channel ("half angle").
+    strmbd_slope : float
+        Slope of the streambed / river thalweg for each river (degrees)
+    strmbd_drag : float
+        Drag coefficient of the river inflow thalweg, to calculate entrainment
+        during insertion
+    inflow_factor : float
+        Scaling factor that can be applied to adjust the provided input data.
+    inflow_fl : str
+        Filename(s) of the inflow CSV boundary condition files.
+    inflow_varnum : int
+        Number of variables being listed in the columns of inflow_fl
+        (comma-separated list)
+    inflow_vars : str
+        Names of the variables in the inflow_fl
+    coef_inf_entrain : float
+    time_fmt : str
+        Time format of the 1st column in the inflow_fl
+
+    Examples
+    --------
+    >>> from glmpy import NMLInflows
+    >>> inflows = NMLInflows()
+    >>> print(inflows)
+    """
 
     def __init__(self):
         self.num_inflows = None
@@ -547,15 +1005,20 @@ class NMLInflows:
         self.inflow_vars = None
         self.coef_inf_entrain = None
         self.time_fmt = None
-
-    def set_attributes(self, attrs_dict):
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLInflows object.
+
+        Returns a formatted string of the NMLInflows configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLInflows object.
+        """
         params = [
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
             (f"   names_of_strms = {', '.join([repr(var) for var in self.names_of_strms]) if self.names_of_strms else None}", self.names_of_strms),
@@ -573,10 +1036,47 @@ class NMLInflows:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLOutflows(NMLBase):
+    """
+    Define the outflows block of a GLM simulation configuration.
 
-class NMLOutflows: 
-    """"""
+    Used to configure the number/type of outflows and outflow files. Attributes
+    are set using the `set_attributes()` method and returned as a formatted
+    string using the `__str__()` method.
 
+    Attributes
+    ----------
+    num_outlet : int
+        Number of outflows (including withdrawals, outlets or offtakes) to be
+        included in this simulation.
+    flt_off_sw : str
+        Switch to indicate if the outflows are floating offtakes
+        (taking water from near the surface).
+    outlet_type : int
+        Switch to configure approach of each withdrawal.
+    outl_elvs : float
+        Outlet elevations (m)
+    bsn_len_outl : float
+        Basin length at the outlet height(s) (m)
+    bsn_wid_outl : float
+        Basin width at the outlet heights (m)
+    outflow_fl : str
+        Filename of the file containing the outflow time-series.
+    outflow_factor : float
+        Scaling factor used as a multiplier for outflows.
+    outflow_thick_limit : float
+        Maximum vertical limit of withdrawal entrainment.
+    seepage : str
+        Switch to enable the seepage of water from the lake bottom.
+    seepage_rate : float
+        Seepage rate of water, or, soil hydraulic conductivity
+
+    Examples
+    --------
+    >>> from glmpy import NMLOutflows
+    >>> outflows = NMLOutflows()
+    >>> print(outflows)
+    """
     def __init__(self):
         self.num_outlet = None
         self.flt_off_sw = None
@@ -590,14 +1090,20 @@ class NMLOutflows:
         self.seepage = None
         self.seepage_rate = None
 
-    def set_attributes(self, attrs_dict):
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLOutflows object.
+
+        Returns a formatted string of the NMLOutflows configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLOutflows object.
+        """
         params = [
             (f"   num_outlet = {self.num_outlet}", self.num_outlet),
             (f"   flt_off_sw = {self.flt_off_sw}", self.flt_off_sw),
@@ -615,9 +1121,45 @@ class NMLOutflows:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLSediment(NMLBase):
+    """
+    Define the sediment block of a GLM simulation configuration.
 
-class NMLSediment:
-    """"""
+    Used to configure the sediment thermal properties. Attributes are set using
+    the `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
+
+    Attributes
+    ----------
+    sed_heat_Ksoil : float
+        Heat conductivity of soil/sediment.
+    sed_temp_depth : float
+        Depth of soil/sediment layer below the lake bottom, used for heat flux
+        calculation.
+    benthic_mode : int
+        Switch to configure which mode of benthic interaction to apply.
+    n_zones : int
+        Number of sediment zones to simulate.
+    zone_heights : float
+        Upper height of zone boundary.
+    sed_temp_mean : float
+        Annual mean sediment temperature.
+    sed_temp_amplitude : float
+        Amplitude of temperature variation experienced in the sediment over one
+        year.
+    sed_temp_peak_doy : int
+        Day of the year where the sediment temperature peaks.
+    sed_reflectivity : float
+        Sediment reflectivity.
+    sed_roughness : float
+        Sediment roughness.
+
+    Examples
+    --------
+    >>> from glmpy import NMLSediment
+    >>> sediment = NMLSediment()
+    >>> print(sediment)
+    """
 
     def __init__(self):
         self.sed_heat_Ksoil = None
@@ -630,15 +1172,20 @@ class NMLSediment:
         self.sed_temp_peak_doy = None
         self.sed_reflectivity = None
         self.sed_roughness = None
-
-    def set_attributes(self, attrs_dict):
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLSediment object.
+
+        Returns a formatted string of the NMLSediment configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLSediment object.
+        """
         params = [
             (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
              self.sed_heat_Ksoil),
@@ -655,23 +1202,48 @@ class NMLSediment:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLIceSnow(NMLBase):
+    """
+    Define the ice/snow block of a GLM simulation configuration.
 
-class NMLIceSnow:
-    """"""
+    Used to configure the surface energy balance options, and  local run-off
+    parameters. Attributes are set using the `set_attributes()` method and
+    returned as a formatted string using the `__str__()` method.
 
+    Attributes
+    ----------
+    snow_albedo_factor : float
+        Scaling factor used to as a multiplier to scale the snow/ice albedo
+        estimate.
+    snow_rho_max : float
+        Minimum snow density allowable.
+    snow_rho_min : float
+        Maximum snow density allowable.
+
+    Examples
+    --------
+    >>> from glmpy import NMLIceSnow
+    >>> ice_snow = NMLIceSnow()
+    >>> print(ice_snow)
+    """
     def __init__(self):
         self.snow_albedo_factor = None
         self.snow_rho_max = None,
         self.snow_rho_min = None
-
-    def set_attributes(self, attrs_dict):
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLIceSnow object.
+
+        Returns a formatted string of the NMLIceSnow configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLIceSnow object.
+        """
         params = [
             (f"   snow_albedo_factor = {self.snow_albedo_factor}",
              self.snow_albedo_factor),
@@ -680,9 +1252,38 @@ class NMLIceSnow:
         ]
         return "\n".join(param_str for param_str, param_val in params if param_val is not None)
 
+class NMLWQSetup(NMLBase):
+    """
+    Define the water quality setup block of a GLM simulation configuration.
 
-class NMLWQSetup:
-    """"""
+    Used to configure the water quality library selection, solution options,
+    and  benthic coupling mode. Attributes are set using the `set_attributes()`
+    method and returned as a formatted string using the `__str__()` method.
+
+    Attributes
+    ----------
+    wq_lib : str
+        Water quality model selection.
+    wq_nml_file : str
+        Filename of WQ configuration file.
+    ode_method : int
+        Method to use for ODE solution of water quality module.
+    split_factor : float
+        Factor weighting implicit vs explicit numerical solution of the WQ
+        model.
+    bioshade_feedback : string
+        Switch to enable Kw to be updated by the WQ model.
+    repair_state : string
+        Switch to correct negative or out of range WQ variables.
+    mobility_off : string
+        Switch to enable settling within the WQ model.
+
+    Examples
+    --------
+    >>> from glmpy import NMLWQSetup
+    >>> wq_setup = NMLWQSetup()
+    >>> print(wq_setup)
+    """
 
     def __init__(self):
         self.wq_lib = None
@@ -695,14 +1296,20 @@ class NMLWQSetup:
         self.repair_state = None
         self.mobility_off = None
 
-    def set_attributes(self, attrs_dict):
-        for key, value in attrs_dict.items():
-            setattr(self, key, value)
-
-    def get_attributes(self, key):
         print(getattr(self, key))
 
     def __str__(self):
+        """
+        Return the string representation of the NMLWQSetup object.
+
+        Returns a formatted string of the NMLWQSetup configution options
+        and values.
+
+        Returns
+        -------
+        str
+            String representation of the NMLWQSetup object.
+        """
         params = [
             (f"   wq_lib = '{self.wq_lib}'", self.wq_lib),
             (f"   wq_nml_file = '{self.wq_nml_file}'", self.wq_nml_file),

@@ -26,3 +26,4 @@ nav:
   - API Reference:
     - NML: nml.md
     - Dimensions: dimensions.md
+    - JSON-to-NML: json-to-nml.md
