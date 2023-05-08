@@ -14,6 +14,10 @@ Install packages for documentation:
 pip install mkdocs==1.4.2
 pip install "mkdocstrings[python]"==0.21.2
 pip install mkdocs-material==9.1.8
+pip install pre-commit
+pip install flake8
+pip install black
+pip install "pandas[excel]"==2.0.1
 ```
 
 Build the docs (from the package root): 
@@ -82,3 +86,10 @@ Examples
 * Notes - optional notes section
 
 Do not list methods - add docstrings to methods within the class. 
+
+
+### Build package
+
+```
+python -m build
+```

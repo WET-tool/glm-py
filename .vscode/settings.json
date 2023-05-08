@@ -13,5 +13,8 @@
         "80"
     ],
     "autoDocstring.docstringFormat": "numpy",
-    "python.linting.pydocstyleEnabled": true
+    "python.linting.pydocstyleEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    }
 }

@@ -26,3 +26,4 @@ nav:
   - API Reference:
     - NML: nml.md
     - Dimensions: dimensions.md
+    - Simulations: simulations.md
