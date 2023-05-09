@@ -31,6 +31,6 @@ Take simple user descriptions of lake geometry or dimensions and generate detail
 
 Tools to convert JSON data to `.nml` format data. Useful for handling client requests if GLM is deployed within a web API / REST API.
 
-## Simulations
+### Simulations
 
 Classes to handle running GLM simulations and processing output data into CSV, JSON, or NetCDF files or generating a JSON stream to pass onto clients. 
