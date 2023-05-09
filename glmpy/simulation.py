@@ -6,10 +6,10 @@ import pandas as pd
 
 
 class GlmSim:
-    """ Prepare inputs and run a GLM simulation. 
+    """Prepare inputs and run a GLM simulation.
 
     Attributes
-    ---------- 
+    ----------
     input_files : UploadFile
         FastAPI `UploadFile` object storing input files for a GLM simulation.
     api : bool
@@ -18,9 +18,9 @@ class GlmSim:
         File path to directory to save input files for GLM simulation.
 
     Examples
-    --------    
+    --------
 
-    `files` is a FastAPI `UploadFile` object. 
+    `files` is a FastAPI `UploadFile` object.
 
     >>> glm_sim = glmpy.GlmSim(files, True, "/inputs)
     >>> inputs_dir = glm_sim.prepare_inputs()
@@ -33,12 +33,12 @@ class GlmSim:
         self.inputs_dir = inputs_dir
 
     def prepare_inputs(self) -> str:
-        """Prepare input files for a GLM simulation. 
+        """Prepare input files for a GLM simulation.
 
         Returns
         -------
-        str
-            File path to directory with input files required for a GLM simulation.
+        str     File path to directory with input files
+        required for a GLM simulation.
         """
         if self.fast_api:
             if os.path.isdir(self.inputs_dir):
@@ -61,14 +61,14 @@ class GlmSim:
         return self.inputs_dir
 
     def glm_run(self, inputs_dir: str, glm_dir: str) -> None:
-        """Run a GLM simulation. 
+        """Run a GLM simulation.
 
         Parameters
         ----------
         inputs_dir : str
-            File path to directory with input files required for a GLM simulation. 
+        File path to directory with input files required for a GLM simulation.
         glm_dir : str
-            Path to location of GLM binary. 
+        Path to location of GLM binary.
         """
         if self.fast_api:
             nml_file = str(os.path.join(inputs_dir, "glm3.nml"))
@@ -83,7 +83,9 @@ class GlmPostProcessor:
     def zip_outputs(self):
         outputs = os.listdir(self.outputs_path)
 
-        with zipfile.ZipFile(os.path.join(self.outputs_path, "glm_outputs.zip"), "w") as z:
+        with zipfile.ZipFile(
+            os.path.join(self.outputs_path, "glm_outputs.zip"), "w"
+        ) as z:
             for i in outputs:
                 z.write(os.path.join(self.outputs_path, i))
 
@@ -96,7 +98,9 @@ class GlmPostProcessor:
             if i.endswith(".csv"):
                 csvs.append(os.path.join(self.outputs_path, i))
 
-        with zipfile.ZipFile(os.path.join(self.outputs_path, "glm_csvs.zip"), "w") as z:
+        with zipfile.ZipFile(
+            os.path.join(self.outputs_path, "glm_csvs.zip"), "w"
+        ) as z:
             for i in csvs:
                 z.write(i)
 
@@ -109,7 +113,9 @@ class GlmPostProcessor:
             if i.endswith(".json"):
                 jsons.append(os.path.join(self.outputs_path, i))
 
-        with zipfile.ZipFile(os.path.join(self.outputs_path, "glm_json.zip"), "w") as z:
+        with zipfile.ZipFile(
+            os.path.join(self.outputs_path, "glm_json.zip"), "w"
+        ) as z:
             for i in jsons:
                 z.write(i)
 
@@ -124,7 +130,6 @@ class GlmPostProcessor:
 
         tmp_dict = {}
         for i in csvs:
-
             prefix = str(i).split(".csv")[0]
             json_path = prefix + ".json"
 

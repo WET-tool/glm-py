@@ -2,9 +2,9 @@ from typing import Union
 from typing import List
 import json
 
+
 class NML:
-    """
-    Generate .nml files.
+    """Generate .nml files.
 
     .nml files store config information required for running a simulation with
     the General Lake Model (GLM). Instances of this class store values that can
@@ -58,7 +58,7 @@ class NML:
         outflows: Union[str, None],
         sediment: Union[str, None],
         ice_snow: Union[str, None],
-        wq_setup: Union[str, None]
+        wq_setup: Union[str, None],
     ):
         self.setup = setup
         self.mixing = mixing
@@ -76,7 +76,7 @@ class NML:
         self.wq_setup = wq_setup
 
     def write_nml(self, nml_file_path: str = "sim.nml"):
-        """ Write a .nml file.
+        """Write a .nml file.
 
         Writes a .nml file to the file path specified in `nml_file_path`.
         The .nml file stores config for a GLM simulation.
@@ -109,8 +109,7 @@ class NML:
         """
 
         def nml_block(block_name, block):
-            """
-            Returns a .nml block string representation.
+            """Returns a .nml block string representation.
 
             Returns a string representation for a particular .nml block.
 
@@ -133,8 +132,7 @@ class NML:
             return f"&{block_name}\n{block}\n/\n"
 
         def nml_output():
-            """
-            Returns a string representation of the .nml file.
+            """Returns a string representation of the .nml file.
 
             Constructs a string representation of the .nml file from `nml_block()`.
 
@@ -153,7 +151,10 @@ class NML:
                 (nml_block("morphometry", self.morphometry), self.morphometry),
                 (nml_block("time", self.time), self.time),
                 (nml_block("output", self.output), self.output),
-                (nml_block("init_profiles", self.init_profiles), self.init_profiles),
+                (
+                    nml_block("init_profiles", self.init_profiles),
+                    self.init_profiles,
+                ),
                 (nml_block("meteorology", self.meteorology), self.meteorology),
                 (nml_block("light", self.light), self.light),
                 (nml_block("bird_model", self.bird_model), self.bird_model),
@@ -161,16 +162,20 @@ class NML:
                 (nml_block("outflows", self.outflows), self.outflows),
                 (nml_block("sediment", self.sediment), self.sediment),
                 (nml_block("ice_snow", self.ice_snow), self.ice_snow),
-                (nml_block("wq_setup", self.wq_setup), self.wq_setup)
+                (nml_block("wq_setup", self.wq_setup), self.wq_setup),
             ]
-            return "".join(block_str for block_str, block_val in blocks if block_val is not None)
+            return "".join(
+                block_str
+                for block_str, block_val in blocks
+                if block_val is not None
+            )
 
-        with open(file=nml_file_path, mode='w') as file:
+        with open(file=nml_file_path, mode="w") as file:
             file.write(nml_output())
 
+
 class NMLBase:
-    """
-    Base class for each  NML block class.
+    """Base class for each  NML block class.
 
     Provides the `set_attributes()` method for assigning a dictionary of
     attributes any NML block class.
@@ -207,9 +212,9 @@ class NMLBase:
     ...     }
     ... )
     """
+
     def set_attributes(self, attrs_dict, update: dict):
-        """
-        Set attributes for the NMLSetup class.
+        """Set attributes for the NMLSetup class.
 
         Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
 
@@ -254,8 +259,7 @@ class NMLBase:
 
 
 class NMLSetup(NMLBase):
-    """
-    Define the glm_setup block of a GLM simulation configuration.
+    """Define the glm_setup block of a GLM simulation configuration.
 
     The glm_setup component is used to define the simulations layer details.
     Attributes are set using the `set_attributes()` method and returned as a
@@ -291,8 +295,7 @@ class NMLSetup(NMLBase):
         self.density_model = 1
 
     def __str__(self):
-        """
-        Return the string representation of the NMLSetup object.
+        """Return the string representation of the NMLSetup object.
 
         Returns a formatted string of the NMLSetup configution options and
         values.
@@ -313,17 +316,25 @@ class NMLSetup(NMLBase):
             (f"   sim_name = '{self.sim_name}'", self.sim_name),
             (f"   max_layers = {self.max_layers}", self.max_layers),
             (f"   min_layer_vol = {self.min_layer_vol}", self.min_layer_vol),
-            (f"   min_layer_thick = {self.min_layer_thick}",
-             self.min_layer_thick),
-            (f"   max_layer_thick = {self.max_layer_thick}",
-             self.max_layer_thick),
+            (
+                f"   min_layer_thick = {self.min_layer_thick}",
+                self.min_layer_thick,
+            ),
+            (
+                f"   max_layer_thick = {self.max_layer_thick}",
+                self.max_layer_thick,
+            ),
             (f"   density_model = {self.density_model}", self.density_model),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLMorphometry(NMLBase):
-    """
-    Define the morphometry block of a GLM simulation configuration.
+    """Define the morphometry block of a GLM simulation configuration.
 
     Used to configure the location, depth & hypsographic curve. Attributes are
     set using the `set_attributes()` method and returned as a formatted string
@@ -368,8 +379,7 @@ class NMLMorphometry(NMLBase):
         self.A = None
 
     def __str__(self):
-        """
-        Return the string representation of the NMLMorphometry object.
+        """Return the string representation of the NMLMorphometry object.
 
         Returns a formatted string of the NMLMorphometry configution options and
         values.
@@ -410,14 +420,24 @@ class NMLMorphometry(NMLBase):
             (f"   bsn_len = {self.bsn_len}", self.bsn_len),
             (f"   bsn_wid = {self.bsn_wid}", self.bsn_wid),
             (f"   bsn_vals = {self.bsn_vals}", self.bsn_vals),
-            (f"   H = {', '.join([str(num) for num in self.H]) if self.H else None}", self.H),
-            (f"   A = {', '.join([str(num) for num in self.A]) if self.A else None}", self.A),
+            (
+                f"   H = {', '.join([str(num) for num in self.H]) if self.H else None}",
+                self.H,
+            ),
+            (
+                f"   A = {', '.join([str(num) for num in self.A]) if self.A else None}",
+                self.A,
+            ),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLMixing(NMLBase):
-    """
-    Define the mixing block of a GLM simulation configuration.
+    """Define the mixing block of a GLM simulation configuration.
 
     Used to configure mixing parameters. Attributes are set using the
     `set_attributes()` method and returned as a formatted string using the
@@ -463,8 +483,7 @@ class NMLMixing(NMLBase):
         self.diff = None
 
     def __str__(self):
-        """
-        Return the string representation of the NMLMixing object.
+        """Return the string representation of the NMLMixing object.
 
         Returns a formatted string of the NMLMixing configution options and
         values.
@@ -473,27 +492,36 @@ class NMLMixing(NMLBase):
         -------
         str
             String representation of the NMLMixing object.
-
         """
         params = [
-            (f"   surface_mixing = {self.surface_mixing}",
-             self.surface_mixing),
+            (
+                f"   surface_mixing = {self.surface_mixing}",
+                self.surface_mixing,
+            ),
             (f"   coef_mix_conv = {self.coef_mix_conv}", self.coef_mix_conv),
-            (f"   coef_wind_stir = {self.coef_wind_stir}",
-             self.coef_wind_stir),
-            (f"   coef_mix_shear = {self.coef_mix_shear}",
-             self.coef_mix_shear),
+            (
+                f"   coef_wind_stir = {self.coef_wind_stir}",
+                self.coef_wind_stir,
+            ),
+            (
+                f"   coef_mix_shear = {self.coef_mix_shear}",
+                self.coef_mix_shear,
+            ),
             (f"   coef_mix_turb = {self.coef_mix_turb}", self.coef_mix_turb),
             (f"   coef_mix_KH = {self.coef_mix_KH}", self.coef_mix_KH),
             (f"   deep_mixing = {self.deep_mixing}", self.deep_mixing),
             (f"   coef_mix_hyp = {self.coef_mix_hyp}", self.coef_mix_hyp),
             (f"   diff = {self.diff}", self.diff),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLTime(NMLBase):
-    """
-    Define the time block of a GLM simulation configuration.
+    """Define the time block of a GLM simulation configuration.
 
     Used to configure the simulation period, time step, and time zone.
     Attributes are set using the `set_attributes()` method and returned as a
@@ -529,8 +557,7 @@ class NMLTime(NMLBase):
         self.timezone = None
 
     def __str__(self):
-        """
-        Return the string representation of the NMLTime object.
+        """Return the string representation of the NMLTime object.
 
         Returns a formatted string of the NMLTime configution options and
         values.
@@ -539,7 +566,6 @@ class NMLTime(NMLBase):
         -------
         str
             String representation of the NMLTime object.
-
         """
 
         params = [
@@ -550,11 +576,15 @@ class NMLTime(NMLBase):
             (f"   num_days = {self.num_days}", self.num_days),
             (f"   timezone = {self.timezone}", self.timezone),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLOutput(NMLBase):
-    """
-    Define the output block of a GLM simulation configuration.
+    """Define the output block of a GLM simulation configuration.
 
     Used to configure the netcdf & csv output details. Attributes are set using
     the `set_attributes()` method and returned as a formatted string using the
@@ -601,6 +631,7 @@ class NMLOutput(NMLBase):
     >>> from glmpy import NMLOutput
     >>> output = NMLOutput()
     """
+
     def __init__(self):
         self.out_dir = None
         self.out_fn = None
@@ -618,8 +649,7 @@ class NMLOutput(NMLBase):
         self.csv_ovrflw_fname = None
 
     def __str__(self):
-        """
-        Return the string representation of the NMLOutput object.
+        """Return the string representation of the NMLOutput object.
 
         Returns a formatted string of the NMLOutput configution options and
         values.
@@ -633,31 +663,60 @@ class NMLOutput(NMLBase):
             (f"   out_dir = '{self.out_dir}'", self.out_dir),
             (f"   out_fn = '{self.out_fn}'", self.out_fn),
             (f"   nsave = {self.nsave}", self.nsave),
-            (f"   csv_lake_fname = '{self.csv_lake_fname}'",
-             self.csv_lake_fname),
-            (f"   csv_point_nlevs = {self.csv_point_nlevs}",
-             self.csv_point_nlevs),
-            (f"   csv_point_fname = '{self.csv_point_fname}'",
-             self.csv_point_fname),
-            (f"   csv_point_at = {', '.join([str(num) for num in self.csv_point_at]) if self.csv_point_at else None}", self.csv_point_at),
-            (f"   csv_point_nvars = {self.csv_point_nvars}",
-             self.csv_point_nvars),
-            (f"   csv_point_vars = {', '.join([repr(var) for var in self.csv_point_vars]) if self.csv_point_vars else None}", self.csv_point_vars),
-            (f"   csv_outlet_allinone = {str(self.csv_outlet_allinone)}",
-             self.csv_outlet_allinone),
-            (f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
-             self.csv_outlet_fname),
-            (f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
-             self.csv_outlet_nvars),
-            (f"   csv_outlet_vars = {', '.join([repr(var) for var in self.csv_outlet_vars]) if self.csv_outlet_vars else None}", self.csv_outlet_vars),
-            (f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
-             self.csv_ovrflw_fname),
+            (
+                f"   csv_lake_fname = '{self.csv_lake_fname}'",
+                self.csv_lake_fname,
+            ),
+            (
+                f"   csv_point_nlevs = {self.csv_point_nlevs}",
+                self.csv_point_nlevs,
+            ),
+            (
+                f"   csv_point_fname = '{self.csv_point_fname}'",
+                self.csv_point_fname,
+            ),
+            (
+                f"   csv_point_at = {', '.join([str(num) for num in self.csv_point_at]) if self.csv_point_at else None}",
+                self.csv_point_at,
+            ),
+            (
+                f"   csv_point_nvars = {self.csv_point_nvars}",
+                self.csv_point_nvars,
+            ),
+            (
+                f"   csv_point_vars = {', '.join([repr(var) for var in self.csv_point_vars]) if self.csv_point_vars else None}",
+                self.csv_point_vars,
+            ),
+            (
+                f"   csv_outlet_allinone = {str(self.csv_outlet_allinone)}",
+                self.csv_outlet_allinone,
+            ),
+            (
+                f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
+                self.csv_outlet_fname,
+            ),
+            (
+                f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
+                self.csv_outlet_nvars,
+            ),
+            (
+                f"   csv_outlet_vars = {', '.join([repr(var) for var in self.csv_outlet_vars]) if self.csv_outlet_vars else None}",
+                self.csv_outlet_vars,
+            ),
+            (
+                f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
+                self.csv_ovrflw_fname,
+            ),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLInitProfiles(NMLBase):
-    """
-    Define the initial profiles block of a GLM simulation configuration.
+    """Define the initial profiles block of a GLM simulation configuration.
 
     Used to configure the initial temperature and salinity profiles.
     Attributes are set using the `set_attributes()` method and returned as a
@@ -698,8 +757,7 @@ class NMLInitProfiles(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLInitProfiles object.
+        """Return the string representation of the NMLInitProfiles object.
 
         Returns a formatted string of the NMLInitProfiles configution options
         and values.
@@ -712,15 +770,28 @@ class NMLInitProfiles(NMLBase):
         params = [
             (f"   lake_depth = {self.lake_depth}", self.lake_depth),
             (f"   num_depths = {self.num_depths}", self.num_depths),
-            (f"   the_depths = {', '.join([str(num) for num in self.the_depths]) if self.the_depths else None}", self.the_depths),
-            (f"   the_temps = {', '.join([str(num) for num in self.the_temps]) if self.the_temps else None}", self.the_temps),
-            (f"   the_sals = {', '.join([str(num) for num in self.the_sals]) if self.the_sals else None}", self.the_sals),
+            (
+                f"   the_depths = {', '.join([str(num) for num in self.the_depths]) if self.the_depths else None}",
+                self.the_depths,
+            ),
+            (
+                f"   the_temps = {', '.join([str(num) for num in self.the_temps]) if self.the_temps else None}",
+                self.the_temps,
+            ),
+            (
+                f"   the_sals = {', '.join([str(num) for num in self.the_sals]) if self.the_sals else None}",
+                self.the_sals,
+            ),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLMeteorology(NMLBase):
-    """
-    Define the meteorology block of a GLM simulation configuration.
+    """Define the meteorology block of a GLM simulation configuration.
 
     Used to configure the surface energy balance options, and  local run-off
     parameters. Attributes are set using the `set_attributes()` method and
@@ -770,7 +841,6 @@ class NMLMeteorology(NMLBase):
     >>> from glmpy import NMLMeteorology
     >>> meteorology = NMLMeteorology()
     >>> print(meteorology)
-
     """
 
     def __init__(self):
@@ -793,8 +863,7 @@ class NMLMeteorology(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLMeteorology object.
+        """Return the string representation of the NMLMeteorology object.
 
         Returns a formatted string of the NMLMeteorology configution options
         and values.
@@ -823,11 +892,15 @@ class NMLMeteorology(NMLBase):
             (f"   ch = {self.ch}", self.ch),
             (f"   cd = {self.cd}", self.cd),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLLight(NMLBase):
-    """
-    Define the light block of a GLM simulation configuration.
+    """Define the light block of a GLM simulation configuration.
 
     Used to configure the light settings. Attributes are set using the
     `set_attributes()` method and returned as a formatted string using the
@@ -866,8 +939,7 @@ class NMLLight(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLLight object.
+        """Return the string representation of the NMLLight object.
 
         Returns a formatted string of the NMLLight configution options
         and values.
@@ -881,15 +953,25 @@ class NMLLight(NMLBase):
             (f"   light_mode = {self.light_mode}", self.light_mode),
             (f"   Kw = {self.Kw}", self.Kw),
             (f"   n_bands = {self.n_bands}", self.n_bands),
-            (f"   light_extc = {', '.join([str(num) for num in self.light_extc]) if self.light_extc else None}", self.light_extc),
-            (f"   energy_frac = {', '.join([str(num) for num in self.energy_frac]) if self.energy_frac else None}", self.energy_frac),
+            (
+                f"   light_extc = {', '.join([str(num) for num in self.light_extc]) if self.light_extc else None}",
+                self.light_extc,
+            ),
+            (
+                f"   energy_frac = {', '.join([str(num) for num in self.energy_frac]) if self.energy_frac else None}",
+                self.energy_frac,
+            ),
             (f"   Benthic_Imin = {self.Benthic_Imin}", self.Benthic_Imin),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLBirdModel(NMLBase):
-    """
-    Define the bird model block of a GLM simulation configuration.
+    """Define the bird model block of a GLM simulation configuration.
 
     Used to configure the surface energy balance options, and  local run-off
     parameters. Attributes are set using the `set_attributes()` method and
@@ -927,8 +1009,7 @@ class NMLBirdModel(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLBirdModel object.
+        """Return the string representation of the NMLBirdModel object.
 
         Returns a formatted string of the NMLBirdModel configution options
         and values.
@@ -946,11 +1027,15 @@ class NMLBirdModel(NMLBase):
             (f"   AOD380 = {self.AOD380}", self.AOD380),
             (f"   Albedo = {self.Albedo}", self.Albedo),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLInflows(NMLBase):
-    """
-    Define the inflows block of a GLM simulation configuration.
+    """Define the inflows block of a GLM simulation configuration.
 
     Used to configure the number/type of inflows and inflow files. Attributes
     are set using the `set_attributes()` method and returned as a formatted
@@ -1008,8 +1093,7 @@ class NMLInflows(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLInflows object.
+        """Return the string representation of the NMLInflows object.
 
         Returns a formatted string of the NMLInflows configution options
         and values.
@@ -1021,24 +1105,54 @@ class NMLInflows(NMLBase):
         """
         params = [
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
-            (f"   names_of_strms = {', '.join([repr(var) for var in self.names_of_strms]) if self.names_of_strms else None}", self.names_of_strms),
-            (f"   subm_flag = {', '.join([str(num) for num in self.subm_flag]) if self.subm_flag else None}", self.subm_flag),
-            (f"   strm_hf_angle = {', '.join([str(num) for num in self.strm_hf_angle]) if self.strm_hf_angle else None}", self.strm_hf_angle),
-            (f"   strmbd_slope = {', '.join([str(num) for num in self.strmbd_slope]) if self.strmbd_slope else None}", self.strmbd_slope),
-            (f"   strmbd_drag = {', '.join([str(num) for num in self.strmbd_drag]) if self.strmbd_drag else None}", self.strmbd_drag),
-            (f"   inflow_factor = {', '.join([str(num) for num in self.inflow_factor]) if self.inflow_factor else None}", self.inflow_factor),
-            (f"   inflow_fl = {', '.join([repr(num) for num in self.inflow_fl]) if self.inflow_fl else None}", self.inflow_fl),
+            (
+                f"   names_of_strms = {', '.join([repr(var) for var in self.names_of_strms]) if self.names_of_strms else None}",
+                self.names_of_strms,
+            ),
+            (
+                f"   subm_flag = {', '.join([str(num) for num in self.subm_flag]) if self.subm_flag else None}",
+                self.subm_flag,
+            ),
+            (
+                f"   strm_hf_angle = {', '.join([str(num) for num in self.strm_hf_angle]) if self.strm_hf_angle else None}",
+                self.strm_hf_angle,
+            ),
+            (
+                f"   strmbd_slope = {', '.join([str(num) for num in self.strmbd_slope]) if self.strmbd_slope else None}",
+                self.strmbd_slope,
+            ),
+            (
+                f"   strmbd_drag = {', '.join([str(num) for num in self.strmbd_drag]) if self.strmbd_drag else None}",
+                self.strmbd_drag,
+            ),
+            (
+                f"   inflow_factor = {', '.join([str(num) for num in self.inflow_factor]) if self.inflow_factor else None}",
+                self.inflow_factor,
+            ),
+            (
+                f"   inflow_fl = {', '.join([repr(num) for num in self.inflow_fl]) if self.inflow_fl else None}",
+                self.inflow_fl,
+            ),
             (f"   inflow_varnum = {self.inflow_varnum}", self.inflow_varnum),
-            (f"   inflow_vars = {', '.join([repr(var) for var in self.inflow_vars]) if self.inflow_vars else None}", self.inflow_vars),
-            (f"   coef_inf_entrain = {self.coef_inf_entrain}",
-             self.coef_inf_entrain),
+            (
+                f"   inflow_vars = {', '.join([repr(var) for var in self.inflow_vars]) if self.inflow_vars else None}",
+                self.inflow_vars,
+            ),
+            (
+                f"   coef_inf_entrain = {self.coef_inf_entrain}",
+                self.coef_inf_entrain,
+            ),
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLOutflows(NMLBase):
-    """
-    Define the outflows block of a GLM simulation configuration.
+    """Define the outflows block of a GLM simulation configuration.
 
     Used to configure the number/type of outflows and outflow files. Attributes
     are set using the `set_attributes()` method and returned as a formatted
@@ -1077,6 +1191,7 @@ class NMLOutflows(NMLBase):
     >>> outflows = NMLOutflows()
     >>> print(outflows)
     """
+
     def __init__(self):
         self.num_outlet = None
         self.flt_off_sw = None
@@ -1093,8 +1208,7 @@ class NMLOutflows(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLOutflows object.
+        """Return the string representation of the NMLOutflows object.
 
         Returns a formatted string of the NMLOutflows configution options
         and values.
@@ -1112,18 +1226,26 @@ class NMLOutflows(NMLBase):
             (f"   bsn_len_outl = {self.bsn_len_outl}", self.bsn_len_outl),
             (f"   bsn_wid_outl = {self.bsn_wid_outl}", self.bsn_wid_outl),
             (f"   outflow_fl = '{self.outflow_fl}'", self.outflow_fl),
-            (f"   outflow_factor = {self.outflow_factor}",
-             self.outflow_factor),
-            (f"   outflow_thick_limit = {self.outflow_thick_limit}",
-             self.outflow_thick_limit),
+            (
+                f"   outflow_factor = {self.outflow_factor}",
+                self.outflow_factor,
+            ),
+            (
+                f"   outflow_thick_limit = {self.outflow_thick_limit}",
+                self.outflow_thick_limit,
+            ),
             (f"   seepage = {self.seepage}", self.seepage),
             (f"   seepage_rate = {self.seepage_rate}", self.seepage_rate),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLSediment(NMLBase):
-    """
-    Define the sediment block of a GLM simulation configuration.
+    """Define the sediment block of a GLM simulation configuration.
 
     Used to configure the sediment thermal properties. Attributes are set using
     the `set_attributes()` method and returned as a formatted string using the
@@ -1175,8 +1297,7 @@ class NMLSediment(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLSediment object.
+        """Return the string representation of the NMLSediment object.
 
         Returns a formatted string of the NMLSediment configution options
         and values.
@@ -1187,24 +1308,50 @@ class NMLSediment(NMLBase):
             String representation of the NMLSediment object.
         """
         params = [
-            (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
-             self.sed_heat_Ksoil),
-            (f"   sed_temp_depth = {self.sed_temp_depth}",
-             self.sed_temp_depth),
+            (
+                f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
+                self.sed_heat_Ksoil,
+            ),
+            (
+                f"   sed_temp_depth = {self.sed_temp_depth}",
+                self.sed_temp_depth,
+            ),
             (f"   benthic_mode = {self.benthic_mode}", self.benthic_mode),
             (f"   n_zones = {self.n_zones}", self.n_zones),
-            (f"   zone_heights = {', '.join([str(num) for num in self.zone_heights]) if self.zone_heights else None}", self.zone_heights),
-            (f"   sed_temp_mean = {', '.join([str(num) for num in self.sed_temp_mean]) if self.sed_temp_mean else None}", self.sed_temp_mean),
-            (f"   sed_temp_amplitude = {', '.join([str(num) for num in self.sed_temp_amplitude]) if self.sed_temp_amplitude else None}", self.sed_temp_amplitude),
-            (f"   sed_temp_peak_doy = {', '.join([str(num) for num in self.sed_temp_peak_doy]) if self.sed_temp_peak_doy else None}", self.sed_temp_peak_doy),
-            (f"   sed_reflectivity = {', '.join([str(num) for num in self.sed_reflectivity]) if self.sed_reflectivity else None}", self.sed_reflectivity),
-            (f"   sed_roughness = {', '.join([str(num) for num in self.sed_roughness]) if self.sed_roughness else None}", self.sed_roughness),
+            (
+                f"   zone_heights = {', '.join([str(num) for num in self.zone_heights]) if self.zone_heights else None}",
+                self.zone_heights,
+            ),
+            (
+                f"   sed_temp_mean = {', '.join([str(num) for num in self.sed_temp_mean]) if self.sed_temp_mean else None}",
+                self.sed_temp_mean,
+            ),
+            (
+                f"   sed_temp_amplitude = {', '.join([str(num) for num in self.sed_temp_amplitude]) if self.sed_temp_amplitude else None}",
+                self.sed_temp_amplitude,
+            ),
+            (
+                f"   sed_temp_peak_doy = {', '.join([str(num) for num in self.sed_temp_peak_doy]) if self.sed_temp_peak_doy else None}",
+                self.sed_temp_peak_doy,
+            ),
+            (
+                f"   sed_reflectivity = {', '.join([str(num) for num in self.sed_reflectivity]) if self.sed_reflectivity else None}",
+                self.sed_reflectivity,
+            ),
+            (
+                f"   sed_roughness = {', '.join([str(num) for num in self.sed_roughness]) if self.sed_roughness else None}",
+                self.sed_roughness,
+            ),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLIceSnow(NMLBase):
-    """
-    Define the ice/snow block of a GLM simulation configuration.
+    """Define the ice/snow block of a GLM simulation configuration.
 
     Used to configure the surface energy balance options, and  local run-off
     parameters. Attributes are set using the `set_attributes()` method and
@@ -1226,15 +1373,15 @@ class NMLIceSnow(NMLBase):
     >>> ice_snow = NMLIceSnow()
     >>> print(ice_snow)
     """
+
     def __init__(self):
         self.snow_albedo_factor = None
-        self.snow_rho_max = None,
+        self.snow_rho_max = (None,)
         self.snow_rho_min = None
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLIceSnow object.
+        """Return the string representation of the NMLIceSnow object.
 
         Returns a formatted string of the NMLIceSnow configution options
         and values.
@@ -1245,16 +1392,22 @@ class NMLIceSnow(NMLBase):
             String representation of the NMLIceSnow object.
         """
         params = [
-            (f"   snow_albedo_factor = {self.snow_albedo_factor}",
-             self.snow_albedo_factor),
+            (
+                f"   snow_albedo_factor = {self.snow_albedo_factor}",
+                self.snow_albedo_factor,
+            ),
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
-            (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min)
+            (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )
+
 
 class NMLWQSetup(NMLBase):
-    """
-    Define the water quality setup block of a GLM simulation configuration.
+    """Define the water quality setup block of a GLM simulation configuration.
 
     Used to configure the water quality library selection, solution options,
     and  benthic coupling mode. Attributes are set using the `set_attributes()`
@@ -1299,8 +1452,7 @@ class NMLWQSetup(NMLBase):
         print(getattr(self, key))
 
     def __str__(self):
-        """
-        Return the string representation of the NMLWQSetup object.
+        """Return the string representation of the NMLWQSetup object.
 
         Returns a formatted string of the NMLWQSetup configution options
         and values.
@@ -1315,11 +1467,15 @@ class NMLWQSetup(NMLBase):
             (f"   wq_nml_file = '{self.wq_nml_file}'", self.wq_nml_file),
             (f"   ode_method = {self.ode_method}", self.ode_method),
             (f"   split_factor = {self.split_factor}", self.split_factor),
-            (f"   bioshade_feedback = {self.bioshade_feedback}",
-             self.bioshade_feedback),
+            (
+                f"   bioshade_feedback = {self.bioshade_feedback}",
+                self.bioshade_feedback,
+            ),
             (f"   repair_state = {self.repair_state}", self.repair_state),
-            (f"   mobility_off = {self.mobility_off}", self.mobility_off)
+            (f"   mobility_off = {self.mobility_off}", self.mobility_off),
         ]
-        return "\n".join(param_str for param_str, param_val in params if param_val is not None)
-
-
+        return "\n".join(
+            param_str
+            for param_str, param_val in params
+            if param_val is not None
+        )

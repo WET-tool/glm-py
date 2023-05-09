@@ -1,2 +1,2 @@
-::: glmpy.json-to-nml
+::: glmpy.json
 

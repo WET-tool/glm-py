@@ -16,6 +16,7 @@ pip install "mkdocstrings[python]"==0.21.2
 pip install mkdocs-material==9.1.8
 pip install pre-commit
 pip install flake8
+pip install flake8-docstrings
 pip install black
 pip install "pandas[excel]"==2.0.1
 ```
