@@ -13,7 +13,7 @@ For more information about running GLM please see the model website's <a href="h
 The <a href="https://github.com/AquaticEcoDynamics/glm-aed/tree/main/binaries" target="_blank">GLM model</a> is available as an executable for Linux (Ubuntu), MacOS, and Windows. It is actively developed by the 
 Aquatic EcoDynamics research group at The University of Western Australia.
 
-## Why GlM-py?
+## Why GLM-py?
 
 GLM-py provides a series of classes, functions, and data structures that to support running GLM simulations, preparing model input data and configurations, and processing model outputs. 
 
