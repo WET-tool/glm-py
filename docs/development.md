@@ -29,7 +29,9 @@ mkdocs serve
 
 ## Code style
 
-* Format all code using autopep8
+* Format all code using black (see `./scripts/format.sh`)
+* Manually correct all flake8 errors
+* Use pre-commit to format Python code before git commits
 * Use NumPy style docstrings - [follow NumPy conventions](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
 
 ### Methods / function docstring
