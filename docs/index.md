@@ -13,7 +13,7 @@ For more information about running GLM please see the model website's <a href="h
 The <a href="https://github.com/AquaticEcoDynamics/glm-aed/tree/main/binaries" target="_blank">GLM model</a> is available as an executable for Linux (Ubuntu), MacOS, and Windows. It is actively developed by the 
 Aquatic EcoDynamics research group at The University of Western Australia.
 
-## Why GlM-py?
+## Why GLM-py?
 
 GLM-py provides a series of classes, functions, and data structures that to support running GLM simulations, preparing model input data and configurations, and processing model outputs. 
 
@@ -31,6 +31,6 @@ Take simple user descriptions of lake geometry or dimensions and generate detail
 
 Tools to convert JSON data to `.nml` format data. Useful for handling client requests if GLM is deployed within a web API / REST API.
 
-## Simulations
+### Simulations
 
 Classes to handle running GLM simulations and processing output data into CSV, JSON, or NetCDF files or generating a JSON stream to pass onto clients. 
