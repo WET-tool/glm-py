@@ -21,7 +21,7 @@ Its goal is to make running and deploying GLM in a range of environments easy su
 
 ### NML
 
-Classes to store properties describing GLM simulation input data and configuration and methods that generate `.nml` config files required for running GLM. 
+Classes to store properties describing GLM simulation input data and configuration and methods to generate `.nml` config files required for running GLM. 
 
 ### Dimensions
 
@@ -29,8 +29,8 @@ Take simple user descriptions of lake geometry or dimensions and generate detail
 
 ### JSON
 
-Tools to convert JSON data to `.nml` format data. Useful for handling client requests if GLM is deployed within a web API / REST API.
+Convert JSON data to `.nml` format data. Useful for handling client requests if GLM is deployed within a web API / REST API.
 
 ### Simulations
 
-Classes to handle running GLM simulations and processing output data into CSV, JSON, or NetCDF files or generating a JSON stream to pass onto clients. 
+Run GLM simulations and process output data into CSV, JSON, or NetCDF files or generate a JSON stream to pass onto clients. 

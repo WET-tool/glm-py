@@ -348,8 +348,10 @@ class NMLMorphometry(NMLBase):
         Latitude, positive North.
     longitude : float
         Longitude, positive East.
-    crest_elev : float
+    base_elev: float
         Elevation of the bottom-most point of the lake (m above datum).
+    crest_elev : float
+        Elevation of a weir crest, where overflow begins.
     bsn_len : float
         Length of the lake basin, at crest height (m).
     bsn_wid : float
@@ -371,6 +373,7 @@ class NMLMorphometry(NMLBase):
         self.lake_name = None
         self.latitude = None
         self.longitude = None
+        self.base_elev = None
         self.crest_elev = None
         self.bsn_len = None
         self.bsn_wid = None
@@ -416,6 +419,7 @@ class NMLMorphometry(NMLBase):
             (f"   lake_name = '{self.lake_name}'", self.lake_name),
             (f"   latitude = {self.latitude}", self.latitude),
             (f"   longitude = {self.longitude}", self.longitude),
+            (f"   base_elev = {self.base_elev}", self.base_elev),
             (f"   crest_elev = {self.crest_elev}", self.crest_elev),
             (f"   bsn_len = {self.bsn_len}", self.bsn_len),
             (f"   bsn_wid = {self.bsn_wid}", self.bsn_wid),
