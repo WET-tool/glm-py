@@ -287,12 +287,13 @@ class NMLSetup(NMLBase):
     """
 
     def __init__(self):
-        self.sim_name = None
-        self.max_layers = 500
-        self.min_layer_vol = None
-        self.min_layer_thick = None
-        self.max_layer_thick = None
-        self.density_model = 1
+        self.sim_name: str = 'lake'
+        self.max_layers: Union[int, None] = 500
+        self.min_layer_vol: Union[float, None] = None
+        self.min_layer_thick: Union[float, None] = None
+        self.max_layer_thick: Union[float, None] = None
+        self.density_model: Union[int, None] = 1
+        self.non_avg: bool = True
 
     def __str__(self):
         """Return the string representation of the NMLSetup object.
@@ -325,6 +326,7 @@ class NMLSetup(NMLBase):
                 self.max_layer_thick,
             ),
             (f"   density_model = {self.density_model}", self.density_model),
+            (f"   non_avg = {self.non_avg}", self.non_avg),
         ]
         return "\n".join(
             param_str
