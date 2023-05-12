@@ -1757,48 +1757,61 @@ class NMLSediment(NMLBase):
 
     Attributes
     ----------
-    sed_heat_Ksoil : float
-        Heat conductivity of soil/sediment.
-    sed_temp_depth : float
+    sed_heat_Ksoil : Union[float, None]
+        Heat conductivity of soil/sediment. Default is None.
+    sed_temp_depth : Union[float, None]
         Depth of soil/sediment layer below the lake bottom, used for heat flux
-        calculation.
-    benthic_mode : int
-        Switch to configure which mode of benthic interaction to apply.
-    n_zones : int
-        Number of sediment zones to simulate.
-    zone_heights : float
-        Upper height of zone boundary.
-    sed_temp_mean : float
-        Annual mean sediment temperature.
-    sed_temp_amplitude : float
+        calculation. Default is None.
+    sed_temp_mean : Union[List[float], None]
+        Annual mean sediment temperature. Default is None.
+    sed_temp_amplitude : Union[List[float], None]
         Amplitude of temperature variation experienced in the sediment over one
-        year.
-    sed_temp_peak_doy : int
-        Day of the year where the sediment temperature peaks.
-    sed_reflectivity : float
-        Sediment reflectivity.
-    sed_roughness : float
-        Sediment roughness.
+        year. Default is None.
+    sed_temp_peak_doy : Union[List[int], None]
+        Day of the year where the sediment temperature peaks. Default is None.
+    benthic_mode : Union[int, None]
+        Switch to configure which mode of benthic interaction to apply. Default
+        is None.
+    n_zones : Union[int, None]
+        Number of sediment zones to simulate. Default is 0.
+    zone_heights : Union[List[float], None]
+        Upper height of zone boundary. Default is None.
+    sed_reflectivity : Union[List[float], None]
+        Sediment reflectivity. Default is [0].
+    sed_roughness : Union[List[float], None]
+        Sediment roughness. Default is None.
 
     Examples
     --------
     >>> from glmpy import NMLSediment
     >>> sediment = NMLSediment()
+    >>> my_sediment = {
+    >>>     'sed_heat_Ksoil': 0.0,
+    >>>     'sed_temp_depth': 0.2,
+    >>>     'sed_temp_mean': [5,10,20],
+    >>>     'sed_temp_amplitude': [6,8,10],
+    >>>     'sed_temp_peak_doy': [80, 70, 60],
+    >>>     'benthic_mode': 1,
+    >>>     'n_zones': 3,
+    >>>     'zone_heights': [10., 20., 50.],
+    >>>     'sed_reflectivity': [0.1, 0.01, 0.01],
+    >>>     'sed_roughness': [0.1, 0.01, 0.01]
+    >>> }
+    >>> sediment.set_attributes(my_sediment)
     >>> print(sediment)
     """
 
     def __init__(self):
-        self.sed_heat_Ksoil = None
-        self.sed_temp_depth = None
-        self.benthic_mode = None
-        self.n_zones = None
-        self.zone_heights = None
-        self.sed_temp_mean = None
-        self.sed_temp_amplitude = None
-        self.sed_temp_peak_doy = None
-        self.sed_reflectivity = None
-        self.sed_roughness = None
-        print(getattr(self, key))
+        self.sed_heat_Ksoil: Union[float, None] = None
+        self.sed_temp_depth: Union[float, None] = None
+        self.sed_temp_mean: Union[List[float], None] = None
+        self.sed_temp_amplitude: Union[List[float], None] = None
+        self.sed_temp_peak_doy: Union[List[int], None] = None
+        self.benthic_mode: Union[int, None] = None
+        self.n_zones: Union[int, None] = 0
+        self.zone_heights: Union[List[float], None] = None
+        self.sed_reflectivity: Union[List[float], None] = [0]
+        self.sed_roughness: Union[List[float], None] = None
 
     def __str__(self):
         """Return the string representation of the NMLSediment object.
@@ -1810,42 +1823,42 @@ class NMLSediment(NMLBase):
         -------
         str
             String representation of the NMLSediment object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLSediment
+        >>> sediment = NMLSediment()
+        >>> my_sediment = {
+        >>>     'sed_heat_Ksoil': 0.0,
+        >>>     'sed_temp_depth': 0.2,
+        >>>     'sed_temp_mean': [5,10,20],
+        >>>     'sed_temp_amplitude': [6,8,10],
+        >>>     'sed_temp_peak_doy': [80, 70, 60],
+        >>>     'benthic_mode': 1,
+        >>>     'n_zones': 3,
+        >>>     'zone_heights': [10., 20., 50.],
+        >>>     'sed_reflectivity': [0.1, 0.01, 0.01],
+        >>>     'sed_roughness': [0.1, 0.01, 0.01]
+        >>> }
+        >>> sediment.set_attributes(my_sediment)
+        >>> print(sediment)
         """
         params = [
-            (
-                f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
-                self.sed_heat_Ksoil,
-            ),
-            (
-                f"   sed_temp_depth = {self.sed_temp_depth}",
-                self.sed_temp_depth,
-            ),
+            (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",self.sed_heat_Ksoil,),
+            (f"   sed_temp_depth = {self.sed_temp_depth}", self.sed_temp_depth,),
+            (f"   sed_temp_mean = {self.comma_sep_list(self.sed_temp_mean)}",
+                self.sed_temp_mean,),
+            (f"   sed_temp_amplitude = {self.comma_sep_list(self.sed_temp_amplitude)}",
+                self.sed_temp_amplitude, ),
+            (f"   sed_temp_peak_doy = {self.comma_sep_list(self.sed_temp_peak_doy)}",
+                self.sed_temp_peak_doy, ),
             (f"   benthic_mode = {self.benthic_mode}", self.benthic_mode),
             (f"   n_zones = {self.n_zones}", self.n_zones),
-            (
-                f"   zone_heights = {', '.join([str(num) for num in self.zone_heights]) if self.zone_heights else None}",
-                self.zone_heights,
-            ),
-            (
-                f"   sed_temp_mean = {', '.join([str(num) for num in self.sed_temp_mean]) if self.sed_temp_mean else None}",
-                self.sed_temp_mean,
-            ),
-            (
-                f"   sed_temp_amplitude = {', '.join([str(num) for num in self.sed_temp_amplitude]) if self.sed_temp_amplitude else None}",
-                self.sed_temp_amplitude,
-            ),
-            (
-                f"   sed_temp_peak_doy = {', '.join([str(num) for num in self.sed_temp_peak_doy]) if self.sed_temp_peak_doy else None}",
-                self.sed_temp_peak_doy,
-            ),
-            (
-                f"   sed_reflectivity = {', '.join([str(num) for num in self.sed_reflectivity]) if self.sed_reflectivity else None}",
-                self.sed_reflectivity,
-            ),
-            (
-                f"   sed_roughness = {', '.join([str(num) for num in self.sed_roughness]) if self.sed_roughness else None}",
-                self.sed_roughness,
-            ),
+            (f"   zone_heights = {self.comma_sep_list(self.zone_heights)}",
+                self.zone_heights,),
+            (f"   sed_reflectivity = {self.comma_sep_list(self.sed_reflectivity)}",
+                self.sed_reflectivity,),
+            (f"   sed_roughness = {self.comma_sep_list(self.sed_roughness)}", self.sed_roughness),
         ]
         return "\n".join(
             param_str
