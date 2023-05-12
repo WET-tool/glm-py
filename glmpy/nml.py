@@ -1612,50 +1612,79 @@ class NMLOutflows(NMLBase):
     ----------
     num_outlet : int
         Number of outflows (including withdrawals, outlets or offtakes) to be
-        included in this simulation.
-    flt_off_sw : str
-        Switch to indicate if the outflows are floating offtakes
-        (taking water from near the surface).
-    outlet_type : int
-        Switch to configure approach of each withdrawal.
-    outl_elvs : float
-        Outlet elevations (m)
-    bsn_len_outl : float
-        Basin length at the outlet height(s) (m)
-    bsn_wid_outl : float
-        Basin width at the outlet heights (m)
-    outflow_fl : str
+        included in this simulation. Default is 0.
+    outflow_fl : Union[str, None]
         Filename of the file containing the outflow time-series.
+    time_fmt : Union[str, None]
+        Time format of the 1st column in the outflow_fl. Default is
+        'YYYY-MM-DD hh:mm:ss'.
     outflow_factor : float
-        Scaling factor used as a multiplier for outflows.
-    outflow_thick_limit : float
-        Maximum vertical limit of withdrawal entrainment.
-    seepage : str
-        Switch to enable the seepage of water from the lake bottom.
-    seepage_rate : float
-        Seepage rate of water, or, soil hydraulic conductivity
+        Scaling factor used as a multiplier for outflows. Default is 1.0.
+    outflow_thick_limit : Union[List[float], None]
+        Maximum vertical limit of withdrawal entrainment. Default is None.
+    single_layer_draw : Union[List[bool], None]
+        Switch to only limit withdrawal entrainment and force outflows from
+        layer at the outlet elevation height. Default is [False].
+    flt_off_sw : Union[List[bool], None]
+        Switch to indicate if the outflows are floating offtakes
+        (taking water from near the surface). Default is None.
+    outlet_type : int
+        Switch to configure approach of each withdrawal. Default is 1.
+    outl_elvs : Union[List[float], None]
+        Outlet elevations (m). Default is [0].
+    bsn_len_outl : Union[List[float], None]
+        Basin length at the outlet height(s) (m). Default is None.
+    bsn_wid_outl : Union[List[float], None]
+        Basin width at the outlet heights (m). Default is None.
+    seepage : Union[bool, None]
+        Switch to enable the seepage of water from the lake bottom. Default is
+        False.
+    seepage_rate : Union[float, None]
+        Seepage rate of water, or, soil hydraulic conductivity. Default is 0.0.
+    crest_width : Union[float, None]
+        Width of weir (at crest height) where lake overflows (m). Default is
+        0.0.
+    crest_factor : Union[float, None]
+        Drag coefficient associated with the weir crest, used to compute the
+        overflow discharge rate. Default is 0.0.
 
     Examples
     --------
     >>> from glmpy import NMLOutflows
     >>> outflows = NMLOutflows()
+    >>> my_outflows = {
+    >>>     'num_outlet': 1,
+    >>>     'flt_off_sw': [False],
+    >>>     'outlet_type': 1,
+    >>>     'outl_elvs': [-215.5],
+    >>>     'bsn_len_outl': [18000],
+    >>>     'bsn_wid_outl': [11000],
+    >>>     'outflow_fl': 'bcs/outflow.csv',
+    >>>     'outflow_factor': [1.0],
+    >>>     'seepage': True,
+    >>>     'seepage_rate': 0.01
+    >>> }
+    >>> outflows.set_attributes(my_outflows)
     >>> print(outflows)
     """
 
     def __init__(self):
-        self.num_outlet = None
-        self.flt_off_sw = None
-        self.outlet_type = None
-        self.outl_elvs = None
-        self.bsn_len_outl = None
-        self.bsn_wid_outl = None
-        self.outflow_fl = None
-        self.outflow_factor = None
-        self.outflow_thick_limit = None
-        self.seepage = None
-        self.seepage_rate = None
-
-        print(getattr(self, key))
+        self.num_outlet: int = 0
+        self.outflow_fl: Union[str, None] = None
+        self.flt_off_sw: Union[List[bool], None] = None
+        self.time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
+        self.outflow_factor: List[float]  = [1.0]
+        self.outflow_thick_limit: Union[List[float], None] = None
+        self.single_layer_draw: Union[List[bool], None] = [False]
+        self.flt_off_sw: Union[List[bool], None] = None
+        self.outlet_type: int = 1
+        self.outl_elvs: Union[List[float], None] = [0]
+        self.bsn_len_outl: Union[List[float], None] = None
+        self.bsn_wid_outl: Union[List[float], None] = None
+        self.seepage: Union[bool, None] = False
+        self.seepage_rate: Union[float, None] = 0.0
+        self.crest_width: Union[float, None] = 0.0
+        self.crest_factor: Union[float, None] = 0.0
 
     def __str__(self):
         """Return the string representation of the NMLOutflows object.
@@ -1667,25 +1696,50 @@ class NMLOutflows(NMLBase):
         -------
         str
             String representation of the NMLOutflows object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLOutflows
+        >>> outflows = NMLOutflows()
+        >>> my_outflows = {
+        >>>     'num_outlet': 1,
+        >>>     'flt_off_sw': [False],
+        >>>     'outlet_type': 1,
+        >>>     'outl_elvs': [-215.5],
+        >>>     'bsn_len_outl': [18000],
+        >>>     'bsn_wid_outl': [11000],
+        >>>     'outflow_fl': 'bcs/outflow.csv',
+        >>>     'outflow_factor': [1.0],
+        >>>     'seepage': True,
+        >>>     'seepage_rate': 0.01
+        >>> }
+        >>> outflows.set_attributes(my_outflows)
+        >>> print(outflows)
         """
         params = [
             (f"   num_outlet = {self.num_outlet}", self.num_outlet),
-            (f"   flt_off_sw = {self.flt_off_sw}", self.flt_off_sw),
-            (f"   outlet_type = {self.outlet_type}", self.outlet_type),
-            (f"   outl_elvs = {self.outl_elvs}", self.outl_elvs),
-            (f"   bsn_len_outl = {self.bsn_len_outl}", self.bsn_len_outl),
-            (f"   bsn_wid_outl = {self.bsn_wid_outl}", self.bsn_wid_outl),
             (f"   outflow_fl = '{self.outflow_fl}'", self.outflow_fl),
-            (
-                f"   outflow_factor = {self.outflow_factor}",
-                self.outflow_factor,
-            ),
-            (
-                f"   outflow_thick_limit = {self.outflow_thick_limit}",
-                self.outflow_thick_limit,
-            ),
-            (f"   seepage = {self.seepage}", self.seepage),
+            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
+            (f"   outflow_factor = {self.comma_sep_list(self.outflow_factor)}",
+             self.outflow_factor),
+            (f"   outflow_thick_limit = {self.comma_sep_list(self.outflow_thick_limit)}",
+             self.outflow_thick_limit),
+            (f"   single_layer_draw = {self.comma_sep_list(self.fortran_bool_string(self.single_layer_draw))}",
+             self.single_layer_draw),
+             (f"   flt_off_sw = {self.comma_sep_list(self.fortran_bool_string(self.flt_off_sw))}",
+             self.flt_off_sw),
+            (f"   outlet_type = {self.outlet_type}", self.outlet_type),
+            (f"   outl_elvs = {self.comma_sep_list(self.outl_elvs)}",
+             self.outl_elvs),
+            (f"   bsn_len_outl = {self.comma_sep_list(self.bsn_len_outl)}",
+             self.bsn_len_outl),
+            (f"   bsn_wid_outl = {self.comma_sep_list(self.bsn_wid_outl)}",
+             self.bsn_wid_outl),
+            (f"   seepage = {self.fortran_bool_string(self.seepage)}",
+             self.seepage),
             (f"   seepage_rate = {self.seepage_rate}", self.seepage_rate),
+            (f"   crest_width = {self.crest_width}", self.crest_width),
+            (f"   crest_factor = {self.crest_factor}", self.crest_factor)
         ]
         return "\n".join(
             param_str
