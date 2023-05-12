@@ -336,10 +336,6 @@ class NMLBase:
         else:
             return ', '.join([str(item) for item in list_input]) if list_input else None
 
-
-
-
-
 class NMLSetup(NMLBase):
     """Define the glm_setup block of a GLM simulation configuration.
 
@@ -436,7 +432,6 @@ class NMLSetup(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLMorphometry(NMLBase):
     """Define the morphometry block of a GLM simulation configuration.
@@ -587,7 +582,6 @@ class NMLMorphometry(NMLBase):
             if param_val is not None
         )
 
-
 class NMLMixing(NMLBase):
     """Define the mixing block of a GLM simulation configuration.
 
@@ -697,7 +691,6 @@ class NMLMixing(NMLBase):
             if param_val is not None
         )
 
-
 class NMLTime(NMLBase):
     """Define the time block of a GLM simulation configuration.
 
@@ -786,7 +779,6 @@ class NMLTime(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLOutput(NMLBase):
     """Define the output block of a GLM simulation configuration.
@@ -942,7 +934,6 @@ class NMLOutput(NMLBase):
             if param_val is not None
         )
 
-
 class NMLInitProfiles(NMLBase):
     """Define the initial profiles block of a GLM simulation configuration.
 
@@ -1060,7 +1051,6 @@ class NMLInitProfiles(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLMeteorology(NMLBase):
     """Define the meteorology block of a GLM simulation configuration.
@@ -1277,7 +1267,6 @@ class NMLMeteorology(NMLBase):
             if param_val is not None
         )
 
-
 class NMLLight(NMLBase):
     """Define the light block of a GLM simulation configuration.
 
@@ -1372,7 +1361,6 @@ class NMLLight(NMLBase):
             if param_val is not None
         )
 
-
 class NMLBirdModel(NMLBase):
     """Define the bird model block of a GLM simulation configuration.
 
@@ -1461,7 +1449,6 @@ class NMLBirdModel(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLInflows(NMLBase):
     """Define the inflows block of a GLM simulation configuration.
@@ -1599,7 +1586,6 @@ class NMLInflows(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLOutflows(NMLBase):
     """Define the outflows block of a GLM simulation configuration.
@@ -1747,7 +1733,6 @@ class NMLOutflows(NMLBase):
             if param_val is not None
         )
 
-
 class NMLSediment(NMLBase):
     """Define the sediment block of a GLM simulation configuration.
 
@@ -1866,7 +1851,6 @@ class NMLSediment(NMLBase):
             if param_val is not None
         )
 
-
 class NMLIceSnow(NMLBase):
     """Define the ice/snow block of a GLM simulation configuration.
 
@@ -1878,24 +1862,29 @@ class NMLIceSnow(NMLBase):
     ----------
     snow_albedo_factor : float
         Scaling factor used to as a multiplier to scale the snow/ice albedo
-        estimate.
+        estimate. Default is 1.0.
     snow_rho_max : float
-        Minimum snow density allowable.
+        Minimum snow density allowable. Default is 300.
     snow_rho_min : float
-        Maximum snow density allowable.
+        Maximum snow density allowable. Default is 50.
 
     Examples
     --------
     >>> from glmpy import NMLIceSnow
     >>> ice_snow = NMLIceSnow()
+    >>> my_ice_snow = {
+    >>>        'snow_albedo_factor': 0.0,
+    >>>        'snow_rho_min': 50,
+    >>>        'snow_rho_max': 300
+    >>>    }
+    >>> ice_snow.set_attributes(my_ice_snow)
     >>> print(ice_snow)
     """
 
     def __init__(self):
-        self.snow_albedo_factor = None
-        self.snow_rho_max = (None,)
-        self.snow_rho_min = None
-        print(getattr(self, key))
+        self.snow_albedo_factor: float = 1.0
+        self.snow_rho_max: float = 300
+        self.snow_rho_min: float = 50
 
     def __str__(self):
         """Return the string representation of the NMLIceSnow object.
@@ -1907,12 +1896,22 @@ class NMLIceSnow(NMLBase):
         -------
         str
             String representation of the NMLIceSnow object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLIceSnow
+        >>> ice_snow = NMLIceSnow()
+        >>> my_ice_snow = {
+        >>>        'snow_albedo_factor': 0.0,
+        >>>        'snow_rho_min': 50,
+        >>>        'snow_rho_max': 300
+        >>>    }
+        >>> ice_snow.set_attributes(my_ice_snow)
+        >>> print(ice_snow)
         """
         params = [
-            (
-                f"   snow_albedo_factor = {self.snow_albedo_factor}",
-                self.snow_albedo_factor,
-            ),
+            ( f"   snow_albedo_factor = {self.snow_albedo_factor}",
+             self.snow_albedo_factor,),
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
             (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
         ]
@@ -1921,7 +1920,6 @@ class NMLIceSnow(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
-
 
 class NMLWQSetup(NMLBase):
     """Define the water quality setup block of a GLM simulation configuration.
@@ -1933,40 +1931,48 @@ class NMLWQSetup(NMLBase):
     Attributes
     ----------
     wq_lib : str
-        Water quality model selection.
+        Water quality model selection. Default is 'aed2'.
     wq_nml_file : str
-        Filename of WQ configuration file.
-    ode_method : int
-        Method to use for ODE solution of water quality module.
+        Filename of WQ configuration file. Default is './aed2.nml'.
+    bioshade_feedback : Union[bool, None]
+        Switch to enable Kw to be updated by the WQ model. Default is None.
+    mobility_off : bool
+        Switch to enable settling within the WQ model. Default is False.
+    ode_method : Union[int, None]
+        Method to use for ODE solution of water quality module. Default is
+        None.
     split_factor : float
         Factor weighting implicit vs explicit numerical solution of the WQ
-        model.
-    bioshade_feedback : string
-        Switch to enable Kw to be updated by the WQ model.
-    repair_state : string
-        Switch to correct negative or out of range WQ variables.
-    mobility_off : string
-        Switch to enable settling within the WQ model.
+        model. Default is 1.
+    repair_state : bool
+        Switch to correct negative or out of range WQ variables. Default is
+        True.
 
     Examples
     --------
     >>> from glmpy import NMLWQSetup
     >>> wq_setup = NMLWQSetup()
+    >>> my_wq_setup = {
+    >>>     'wq_lib': 'aed2',
+    >>>     'wq_nml_file': 'aed2/aed2.nml',
+    >>>     'ode_method': 1,
+    >>>     'split_factor': 1,
+    >>>     'bioshade_feedback': True,
+    >>>     'repair_state': True,
+    >>>     'mobility_off': False
+    >>> }
+    >>> wq_setup.set_attributes(my_wq_setup)
     >>> print(wq_setup)
     """
 
     def __init__(self):
-        self.wq_lib = None
-        self.wq_nml_file = None
-        self.wq_lib = None
-        self.wq_nml_file = None
-        self.ode_method = None
-        self.split_factor = None
-        self.bioshade_feedback = None
-        self.repair_state = None
-        self.mobility_off = None
-
-        print(getattr(self, key))
+        self.wq_lib: str = 'aed2'
+        self.wq_nml_file: str = './aed2.nml'
+        self.bioshade_feedback: Union[bool, None] = None
+        self.mobility_off: bool = False
+        self.ode_method: Union[int, None] = None
+        self.split_factor: float = 1.0
+        self.repair_state: bool = True
 
     def __str__(self):
         """Return the string representation of the NMLWQSetup object.
@@ -1978,18 +1984,35 @@ class NMLWQSetup(NMLBase):
         -------
         str
             String representation of the NMLWQSetup object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLWQSetup
+        >>> wq_setup = NMLWQSetup()
+        >>> my_wq_setup = {
+        >>>     'wq_lib': 'aed2',
+        >>>     'wq_nml_file': 'aed2/aed2.nml',
+        >>>     'ode_method': 1,
+        >>>     'split_factor': 1,
+        >>>     'bioshade_feedback': True,
+        >>>     'repair_state': True,
+        >>>     'mobility_off': False
+        >>> }
+        >>> wq_setup.set_attributes(my_wq_setup)
+        >>> print(wq_setup)
         """
         params = [
             (f"   wq_lib = '{self.wq_lib}'", self.wq_lib),
             (f"   wq_nml_file = '{self.wq_nml_file}'", self.wq_nml_file),
+            (f"   bioshade_feedback = {self.fortran_bool_string(self.bioshade_feedback)}",
+             self.bioshade_feedback),
+            (f"   mobility_off = {self.fortran_bool_string(self.mobility_off)}",
+             self.mobility_off),
             (f"   ode_method = {self.ode_method}", self.ode_method),
             (f"   split_factor = {self.split_factor}", self.split_factor),
-            (
-                f"   bioshade_feedback = {self.bioshade_feedback}",
-                self.bioshade_feedback,
-            ),
-            (f"   repair_state = {self.repair_state}", self.repair_state),
-            (f"   mobility_off = {self.mobility_off}", self.mobility_off),
+            (f"   repair_state = {self.fortran_bool_string(self.repair_state)}",
+             self.repair_state),
+
         ]
         return "\n".join(
             param_str
