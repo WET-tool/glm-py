@@ -1,7 +1,4 @@
-from typing import Union
-from typing import List
-import json
-
+from typing import Union, List
 
 class NML:
     """Generate .nml files.
@@ -258,32 +255,50 @@ class NMLBase:
             setattr(self, key, value)
 
     @staticmethod
-    def fortran_bool_string(bool_input: Union[bool, None]):
-        """Convert a Python boolean to a Fortran boolean string.
+    def fortran_bool_string(bool_input: Union[bool, List[bool], None]) -> Union[str, List[Union[str, None]], None]:
+        """Python boolean to Fortran boolean string.
+
+        Convert a Python boolean or a list of Python booleans to a Fortran
+        boolean string or a list of Fortran boolean strings.
 
         Parameters
         ----------
-        bool_input : bool
-            A Python boolean.
+        bool_input : Union[bool, List[bool], None]
+            A Python boolean or a list of Python booleans.
 
         Returns
         -------
-        str
-            A Fortran boolean string.
+        Union[str, List[Union[str, None]], None]
+            A Fortran boolean string or a list of Fortran boolean strings.
 
         Examples
         --------
-        >>> from glmpy import NMLBase
-        >>> NMLBase.fortran_bool_string(True)
+        >>> fortran_bool_string(True)
         '.true.'
+        >>> fortran_bool_string([True, False])
+        ['.true.', '.false.']
         """
-
-        return ".true." if bool_input else ".false." if bool_input is not None else None
-
+        if isinstance(bool_input, List):
+            result: List[Union[str, None]] = []
+            for item in bool_input:
+                if item is True:
+                    result.append(".true.")
+                elif item is False:
+                    result.append(".false.")
+                else:
+                    result.append(None)
+            return result
+        else:
+            if bool_input is True:
+                return ".true."
+            elif bool_input is False:
+                return ".false."
+            else:
+                return None
 
     @staticmethod
     def comma_sep_list(
-        list_input: Union[list, None],
+        list_input: Union[List[int], List[float], List[str], List[bool], None],
         inverted_commas: bool = False
         ):
         """Convert a Python list to a NML formatted  comma separated string.
@@ -1273,34 +1288,47 @@ class NMLLight(NMLBase):
     Attributes
     ----------
     light_mode : int
-        Switch to configure the approach to light penetration.
-    Kw : float
-        Light extinction coefficient.
-    n_bands : int
-        Number of light bandwidths to simulate.
-    light_extc : float
-        Comma-separated list of light extinction coefficients for each waveband.
-    energy_frac : float
+        Switch to configure the approach to light penetration. Default is 1.
+    Kw : Union[float, None]
+        Light extinction coefficient. Default is None
+    Kw_file : Union[str, None]
+        Name of file with Kw time-series included. Default is None.
+    n_bands : Union[int, None]
+        Number of light bandwidths to simulate. Default is 4.
+    light_extc : Union[List[float], None]
+        Comma-separated list of light extinction coefficients for each
+        waveband. Default is None.
+    energy_frac : Union[List[float], None]
         Comma-separated list of energy fraction captured by each waveband.
-    Benthic_Imin : float
-        Critical fraction of incident light reaching the benthos.
+        Default is None.
+    Benthic_Imin : Union[float, None]
+        Critical fraction of incident light reaching the benthos. Default is
+        None.
 
     Examples
     --------
     >>> from glmpy import NMLLight
     >>> light = NMLLight()
+    >>> my_light = {
+    >>>     'light_mode': 0,
+    >>>     'Kw': 0.57,
+    >>>     'n_bands': 4,
+    >>>     'light_extc': [1.0, 0.5, 2.0, 4.0],
+    >>>     'energy_frac': [0.51, 0.45, 0.035, 0.005],
+    >>>     'Benthic_Imin': 10
+    >>> }
+    >>> light.set_attributes(my_light)
     >>> print(light)
     """
 
     def __init__(self):
-        self.light_mode = None
-        self.Kw = None
-        self.n_bands = None
-        self.light_extc = None
-        self.energy_frac = None
-        self.Benthic_Imin = None
-
-        print(getattr(self, key))
+        self.light_mode: int = 1
+        self.Kw: Union[float, None] = None
+        self.Kw_file: Union[str, None] = None
+        self.n_bands: Union[int, None] = 4
+        self.light_extc: Union[List[float], None] = None
+        self.energy_frac: Union[List[float], None] = None
+        self.Benthic_Imin: Union[float, None] = None
 
     def __str__(self):
         """Return the string representation of the NMLLight object.
@@ -1312,19 +1340,30 @@ class NMLLight(NMLBase):
         -------
         str
             String representation of the NMLLight object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLLight
+        >>> light = NMLLight()
+        >>> my_light = {
+        >>>     'light_mode': 0,
+        >>>     'Kw': 0.57,
+        >>>     'n_bands': 4,
+        >>>     'light_extc': [1.0, 0.5, 2.0, 4.0],
+        >>>     'energy_frac': [0.51, 0.45, 0.035, 0.005],
+        >>>     'Benthic_Imin': 10
+        >>> }
+        >>> light.set_attributes(my_light)
+        >>> print(light)
         """
         params = [
             (f"   light_mode = {self.light_mode}", self.light_mode),
             (f"   Kw = {self.Kw}", self.Kw),
             (f"   n_bands = {self.n_bands}", self.n_bands),
-            (
-                f"   light_extc = {', '.join([str(num) for num in self.light_extc]) if self.light_extc else None}",
-                self.light_extc,
-            ),
-            (
-                f"   energy_frac = {', '.join([str(num) for num in self.energy_frac]) if self.energy_frac else None}",
-                self.energy_frac,
-            ),
+            (f"   light_extc = {self.comma_sep_list(self.light_extc)}",
+             self.light_extc),
+            (f"   energy_frac = {self.comma_sep_list(self.energy_frac)}",
+             self.energy_frac,),
             (f"   Benthic_Imin = {self.Benthic_Imin}", self.Benthic_Imin),
         ]
         return "\n".join(
@@ -1343,34 +1382,45 @@ class NMLBirdModel(NMLBase):
 
     Attributes
     ----------
-    AP : float
-        Atmospheric pressure (hPa).
-    Oz : float
-        Ozone concentration (atm-cm).
-    WatVap : float
-        Total Precipitable water vapor (atm-cm).
-    AOD500 : float
-        Dimensionless Aerosol Optical Depth at wavelength 500 nm.
-    AOD380 : float
-        Dimensionless Aerosol Optical Depth at wavelength 380 nm.
-    Albedo : float
+    AP : Union[float, None]
+        Atmospheric pressure (hPa). Default is None.
+    Oz : Union[float, None]
+        Ozone concentration (atm-cm). Default is None.
+    WatVap : Union[float, None]
+        Total Precipitable water vapor (atm-cm). Default is None.
+    AOD500 : Union[float, None]
+        Dimensionless Aerosol Optical Depth at wavelength 500 nm. Default is
+        None.
+    AOD380 : Union[float, None]
+        Dimensionless Aerosol Optical Depth at wavelength 380 nm. Default is
+        None.
+    Albedo : Union[float, None]
         Albedo of the surface used for Bird Model insolation calculation.
+        Default is 0.2.
 
     Examples
     --------
     >>> from glmpy import NMLBirdModel
-    >>> bird = NMLBirdModel()
-    >>> print(bird)
+    >>> bird_model = NMLBirdModel()
+    >>> my_bird_model = {
+    >>>     'AP': 973,
+    >>>     'Oz': 0.279,
+    >>>     'WatVap': 1.1,
+    >>>     'AOD500': 0.033,
+    >>>     'AOD380': 0.038,
+    >>>     'Albedo': 0.2
+    >>> }
+    >>> bird_model.set_attributes(my_bird_model)
+    >>> print(bird_model)
     """
 
     def __init__(self):
-        self.AP = None
-        self.Oz = None
-        self.WatVap = None
-        self.AOD500 = None
-        self.AOD380 = None
-        self.Albedo = None
-        print(getattr(self, key))
+        self.AP: Union[float, None]= None
+        self.Oz: Union[float, None]= None
+        self.WatVap: Union[float, None]= None
+        self.AOD500: Union[float, None]= None
+        self.AOD380: Union[float, None]= None
+        self.Albedo: Union[float, None]= 0.2
 
     def __str__(self):
         """Return the string representation of the NMLBirdModel object.
@@ -1382,6 +1432,21 @@ class NMLBirdModel(NMLBase):
         -------
         str
             String representation of the NMLBirdModel object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLBirdModel
+        >>> bird_model = NMLBirdModel()
+        >>> my_bird_model = {
+        >>>     'AP': 973,
+        >>>     'Oz': 0.279,
+        >>>     'WatVap': 1.1,
+        >>>     'AOD500': 0.033,
+        >>>     'AOD380': 0.038,
+        >>>     'Albedo': 0.2
+        >>> }
+        >>> bird_model.set_attributes(my_bird_model)
+        >>> print(bird_model)
         """
         params = [
             (f"   AP = {self.AP}", self.AP),
@@ -1408,53 +1473,72 @@ class NMLInflows(NMLBase):
     Attributes
     ----------
     num_inflows : int
-        Number of inflows to be simulated in this simulation.
-    names_of_strms : str
+        Number of inflows to be simulated in this simulation. Default is 0.
+    names_of_strms : Union[List[str], None]
         Names of each inflow.
-    subm_flag : str
+    subm_flag : Union[List[bool], None]
         Switch indicating if the inflow I is entering as a submerged input.
-    strm_hf_angle : float
+        Default is [False].
+    strm_hf_angle : Union[List[float], None]
         Angle describing the width of an inflow river channel ("half angle").
-    strmbd_slope : float
-        Slope of the streambed / river thalweg for each river (degrees)
-    strmbd_drag : float
+        Default is None.
+    strmbd_slope : Union[List[float], None]
+        Slope of the streambed / river thalweg for each river (degrees).
+        Default is None.
+    strmbd_drag : Union[List[float], None]
         Drag coefficient of the river inflow thalweg, to calculate entrainment
-        during insertion
-    inflow_factor : float
+        during insertion. Default is None.
+    coef_inf_entrain : Union[List[float], None]
+        Default is None.
+    inflow_factor : Union[List[float], None]
         Scaling factor that can be applied to adjust the provided input data.
-    inflow_fl : str
-        Filename(s) of the inflow CSV boundary condition files.
+        Default is 1.0.
+    inflow_fl : Union[List[str], None]
+        Filename(s) of the inflow CSV boundary condition files. Default is None.
     inflow_varnum : int
         Number of variables being listed in the columns of inflow_fl
-        (comma-separated list)
-    inflow_vars : str
-        Names of the variables in the inflow_fl
-    coef_inf_entrain : float
-    time_fmt : str
-        Time format of the 1st column in the inflow_fl
+        (comma-separated list). Default is 0.
+    inflow_vars : Union[List[str], None]
+        Names of the variables in the inflow_fl. Default is None.
+    time_fmt : Union[str, None]
+        Time format of the 1st column in the inflow_fl. Default is
+        'YYYY-MM-DD hh:mm:ss'.
 
     Examples
     --------
     >>> from glmpy import NMLInflows
     >>> inflows = NMLInflows()
+    >>> my_inflows = {
+    >>>     'num_inflows': 6,
+    >>>     'names_of_strms': ['Inflow1','Inflow2','Inflow3','Inflow4','Inflow5','Inflow6'],
+    >>>     'subm_flag': [False, False, False, True, False, False],
+    >>>     'strm_hf_angle': [85.0, 85.0, 85.0, 85.0, 85.0, 85.0],
+    >>>     'strmbd_slope': [4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
+    >>>     'strmbd_drag': [0.0160, 0.0160, 0.0160, 0.0160, 0.0160, 0.0160],
+    >>>     'inflow_factor': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    >>>     'inflow_fl': ['bcs/inflow_1.csv', 'bcs/inflow_2.csv', 'bcs/inflow_3.csv', 'bcs/inflow_4.csv', 'bcs/inflow_5.csv', 'bcs/inflow_6.csv'],
+    >>>     'inflow_varnum': 3,
+    >>>     'inflow_vars': ['FLOW','TEMP','SALT'],
+    >>>     'coef_inf_entrain': [0.0],
+    >>>     'time_fmt': 'YYYY-MM-DD hh:mm:ss'
+    >>> }
+    >>> inflows.set_attributes(my_inflows)
     >>> print(inflows)
     """
 
     def __init__(self):
-        self.num_inflows = None
-        self.names_of_strms = None
-        self.subm_flag = None
-        self.strm_hf_angle = None
-        self.strmbd_slope = None
-        self.strmbd_drag = None
-        self.inflow_factor = None
-        self.inflow_fl = None
-        self.inflow_varnum = None
-        self.inflow_vars = None
-        self.inflow_vars = None
-        self.coef_inf_entrain = None
-        self.time_fmt = None
-        print(getattr(self, key))
+        self.num_inflows: int = 0
+        self.names_of_strms: Union[List[str], None] = None
+        self.subm_flag: Union[List[bool], None] = [False]
+        self.strm_hf_angle: Union[List[float], None] = None
+        self.strmbd_slope: Union[List[float], None] = None
+        self.strmbd_drag: Union[List[float], None] = None
+        self.coef_inf_entrain: Union[List[float], None] = None
+        self.inflow_factor: Union[List[float], None] = 1.0
+        self.inflow_fl: Union[List[str], None] = None
+        self.inflow_varnum: int = 0
+        self.inflow_vars: Union[List[str], None] = None
+        self.time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
 
     def __str__(self):
         """Return the string representation of the NMLInflows object.
@@ -1466,47 +1550,49 @@ class NMLInflows(NMLBase):
         -------
         str
             String representation of the NMLInflows object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLInflows
+        >>> inflows = NMLInflows()
+        >>> my_inflows = {
+        >>>     'num_inflows': 6,
+        >>>     'names_of_strms': ['Inflow1','Inflow2','Inflow3','Inflow4','Inflow5','Inflow6'],
+        >>>     'subm_flag': [False, False, False, True, False, False],
+        >>>     'strm_hf_angle': [85.0, 85.0, 85.0, 85.0, 85.0, 85.0],
+        >>>     'strmbd_slope': [4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
+        >>>     'strmbd_drag': [0.0160, 0.0160, 0.0160, 0.0160, 0.0160, 0.0160],
+        >>>     'inflow_factor': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        >>>     'inflow_fl': ['bcs/inflow_1.csv', 'bcs/inflow_2.csv', 'bcs/inflow_3.csv', 'bcs/inflow_4.csv', 'bcs/inflow_5.csv', 'bcs/inflow_6.csv'],
+        >>>     'inflow_varnum': 3,
+        >>>     'inflow_vars': ['FLOW','TEMP','SALT'],
+        >>>     'coef_inf_entrain': [0.0],
+        >>>     'time_fmt': 'YYYY-MM-DD hh:mm:ss'
+        >>> }
+        >>> inflows.set_attributes(my_inflows)
+        >>> print(inflows)
         """
         params = [
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
-            (
-                f"   names_of_strms = {', '.join([repr(var) for var in self.names_of_strms]) if self.names_of_strms else None}",
-                self.names_of_strms,
-            ),
-            (
-                f"   subm_flag = {', '.join([str(num) for num in self.subm_flag]) if self.subm_flag else None}",
-                self.subm_flag,
-            ),
-            (
-                f"   strm_hf_angle = {', '.join([str(num) for num in self.strm_hf_angle]) if self.strm_hf_angle else None}",
-                self.strm_hf_angle,
-            ),
-            (
-                f"   strmbd_slope = {', '.join([str(num) for num in self.strmbd_slope]) if self.strmbd_slope else None}",
-                self.strmbd_slope,
-            ),
-            (
-                f"   strmbd_drag = {', '.join([str(num) for num in self.strmbd_drag]) if self.strmbd_drag else None}",
-                self.strmbd_drag,
-            ),
-            (
-                f"   inflow_factor = {', '.join([str(num) for num in self.inflow_factor]) if self.inflow_factor else None}",
-                self.inflow_factor,
-            ),
-            (
-                f"   inflow_fl = {', '.join([repr(num) for num in self.inflow_fl]) if self.inflow_fl else None}",
-                self.inflow_fl,
-            ),
+            (f"   names_of_strms = {self.comma_sep_list(self.names_of_strms, True)}",
+             self.names_of_strms),
+            (f"   subm_flag = {self.comma_sep_list(self.fortran_bool_string(self.subm_flag))}",self.subm_flag),
+            (f"   strm_hf_angle = {self.comma_sep_list(self.strm_hf_angle)}",
+             self.strm_hf_angle),
+            (f"   strmbd_slope = {self.comma_sep_list(self.strmbd_slope)}",
+             self.strmbd_slope),
+            (f"   strmbd_drag = {self.comma_sep_list(self.strmbd_drag)}",
+             self.strmbd_drag),
+            (f"   coef_inf_entrain = {self.comma_sep_list(self.coef_inf_entrain)}",
+             self.coef_inf_entrain),
+            (f"   inflow_factor = {self.comma_sep_list(self.inflow_factor)}",
+             self.inflow_factor),
+            (f"   inflow_fl = {self.comma_sep_list(self.inflow_fl, True)}",
+             self.inflow_fl),
             (f"   inflow_varnum = {self.inflow_varnum}", self.inflow_varnum),
-            (
-                f"   inflow_vars = {', '.join([repr(var) for var in self.inflow_vars]) if self.inflow_vars else None}",
-                self.inflow_vars,
-            ),
-            (
-                f"   coef_inf_entrain = {self.coef_inf_entrain}",
-                self.coef_inf_entrain,
-            ),
-            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
+            (f"   inflow_vars = {self.comma_sep_list(self.inflow_vars, True)}",
+             self.inflow_vars),
+            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt)
         ]
         return "\n".join(
             param_str
