@@ -258,7 +258,7 @@ class NMLBase:
             setattr(self, key, value)
 
     @staticmethod
-    def fortran_bool_string(bool_input: bool):
+    def fortran_bool_string(bool_input: Union[bool, None]):
         """Convert a Python boolean to a Fortran boolean string.
 
         Parameters
@@ -277,16 +277,26 @@ class NMLBase:
         >>> NMLBase.fortran_bool_string(True)
         '.true.'
         """
-        return '.true.' if bool_input else '.false.'
+
+        return ".true." if bool_input else ".false." if bool_input is not None else None
+
 
     @staticmethod
-    def comma_sep_list(list_input: Union[list, None]):
+    def comma_sep_list(
+        list_input: Union[list, None],
+        inverted_commas: bool = False
+        ):
         """Convert a Python list to a NML formatted  comma separated string.
+
+        If the list_input is None, None is returned. If inverted_commas is True,
+        the list items are returned as strings with inverted commas.
 
         Parameters
         ----------
         list_input : list
             A list of values.
+        inverted_commas : bool
+            If True, the list items are returned as strings with inverted commas.
 
         Returns
         -------
@@ -297,10 +307,22 @@ class NMLBase:
         Examples
         --------
         >>> from glmpy import NMLBase
-        >>> NMLBase.comma_sep_list([1, 2, 3])
+        >>> NMLBase.comma_sep_list([1, 2, 3], inverted_commas = False)
         '1, 2, 3'
+        >>> NMLBase.comma_sep_list([1, 2, 3], inverted_commas=True)
+        "'1', '2', '3'"
+        >>> NMLBase.comma_sep_list(['a', 'b', 'c'], inverted_commas=True)
+        "'a', 'b', 'c'"
+        >>> comma_sep_list(['a', 'b', 'c'], inverted_commas=False)
+        'a, b, c'
         """
-        return ', '.join([str(num) for num in list_input]) if list_input else None
+        if inverted_commas:
+            return ', '.join([repr(str(item)) for item in list_input]) if list_input else None
+        else:
+            return ', '.join([str(item) for item in list_input]) if list_input else None
+
+
+
 
 
 class NMLSetup(NMLBase):
@@ -761,60 +783,83 @@ class NMLOutput(NMLBase):
     Attributes
     ----------
     out_dir : str
-        Directory to write the output files.
+        Directory to write the output files. Default is './'.
     out_fn : str
-        Filename of the main NetCDF output file.
+        Filename of the main NetCDF output file. Default is 'output'.
     nsave : int
-        Frequency to write to the NetCDF and CSV point files.
+        Frequency to write to the NetCDF and CSV point files. Default is 1.
     csv_lake_fname : str
-        Filename for the daily summary file.
+        Filename for the daily summary file. Default is 'lake'.
     csv_point_nlevs : float
-        Number of specific level/depth csv files to be created.
+        Number of specific level/depth csv files to be created. Default is 0.0.
     csv_point_fname : str
-        Name to be appended to specified depth CSV files.
-    csv_point_frombot : float
+        Name to be appended to specified depth CSV files. Default is 'WQ_'.
+    csv_point_frombot : Union[List[float], None]
         Comma separated list identify whether each output point listed in
         csv_point_at is relative to the bottom (ie heights) or the surface
-        (ie depths).
-    csv_point_at : float
-        Height or Depth of points to output at (comma separated list).
-    csv_point_nvars : int
-        Number of variables to output into the csv files.
-    csv_point_vars : str
-        Comma separated list of variable names.
-    csv_outlet_allinone : string
-        Switch to create an optional outlet file combining all outlets.
-    csv_outlet_fname : str
-        Name to be appended to each of the outlet CSV files.
+        (ie depths). Default is None.
+    csv_point_at : Union[List[float], None]
+        Height or Depth of points to output at (comma separated list). Default
+        is None.
+    csv_point_nvars : Union[int, None]
+        Number of variables to output into the csv files. Default is None.
+    csv_point_vars : Union[List[str], None]
+        Comma separated list of variable names. Default is None.
+    csv_outlet_allinone : bool
+        Switch to create an optional outlet file combining all outlets. Default
+        is False.
+    csv_outlet_fname : Union[str, None]
+        Name to be appended to each of the outlet CSV files. Default is None.
     csv_outlet_nvars : int
-        Number of variables to be written into the outlet file(s).
-    csv_outlet_vars : str
+        Number of variables to be written into the outlet file(s). Default is
+        0.
+    csv_outlet_vars : Union[str, None]
         Comma separated list of variable names to be included in the output
-        file(s)
-    csv_ovrflw_fname : str
-        Filename to be used for recording the overflow details.
+        file(s). Default is None.
+    csv_ovrflw_fname : Union[str, None]
+        Filename to be used for recording the overflow details. Default is
+        None.
 
     Examples
     --------
     >>> from glmpy import NMLOutput
     >>> output = NMLOutput()
+    >>> my_output = {
+    >>>     'out_dir': 'output',
+    >>>     'out_fn': 'output',
+    >>>     'nsave': 6,
+    >>>     'csv_lake_fname': 'lake',
+    >>>     'csv_point_nlevs': 2.0,
+    >>>     'csv_point_fname': 'WQ_',
+    >>>     'csv_point_at': [5, 30],
+    >>>     'csv_point_nvars': 7,
+    >>>     'csv_point_vars': ['temp', 'salt', 'OXY_oxy', 'SIL_rsi', 'NIT_amm', 'NIT_nit', 'PHS_frp'],
+    >>>     'csv_outlet_allinone': False,
+    >>>     'csv_outlet_fname': 'outlet_',
+    >>>     'csv_outlet_nvars': 4,
+    >>>     'csv_outlet_vars': ['flow', 'temp', 'salt', 'OXY_oxy'],
+    >>>     'csv_ovrflw_fname': 'overflow'
+    >>> }
+    >>> output.set_attributes(my_output)
+    >>> print(output)
     """
 
     def __init__(self):
-        self.out_dir = None
-        self.out_fn = None
-        self.nsave = None
-        self.csv_lake_fname = None
-        self.csv_point_nlevs = None
-        self.csv_point_fname = None
-        self.csv_point_at = None
-        self.csv_point_nvars = None
-        self.csv_point_vars = None
-        self.csv_outlet_allinone = None
-        self.csv_outlet_fname = None
-        self.csv_outlet_nvars = None
-        self.csv_outlet_vars = None
-        self.csv_ovrflw_fname = None
+        self.out_dir: str = './'
+        self.out_fn: str = 'output'
+        self.nsave: int = 1
+        self.csv_lake_fname: str = 'lake'
+        self.csv_point_nlevs: float = 0.0
+        self.csv_point_fname: str = 'WQ_'
+        self.csv_point_frombot: Union[List[float], None] = None
+        self.csv_point_at: Union[List[float], None] = None
+        self.csv_point_nvars: Union[int, None] = None
+        self.csv_point_vars: Union[List[str], None] = None
+        self.csv_outlet_allinone: bool = False
+        self.csv_outlet_fname: Union[str, None] = None
+        self.csv_outlet_nvars: int = 0
+        self.csv_outlet_vars: Union[List[str], None] = None
+        self.csv_ovrflw_fname: Union[str, None] = None
 
     def __str__(self):
         """Return the string representation of the NMLOutput object.
@@ -826,55 +871,55 @@ class NMLOutput(NMLBase):
         -------
         str
             String representation of the NMLOutput object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLOutput
+        >>> output = NMLOutput()
+        >>> my_output = {
+        >>>     'out_dir': 'output',
+        >>>     'out_fn': 'output',
+        >>>     'nsave': 6,
+        >>>     'csv_lake_fname': 'lake',
+        >>>     'csv_point_nlevs': 2.0,
+        >>>     'csv_point_fname': 'WQ_',
+        >>>     'csv_point_at': [5, 30],
+        >>>     'csv_point_nvars': 7,
+        >>>     'csv_point_vars': ['temp', 'salt', 'OXY_oxy', 'SIL_rsi', 'NIT_amm', 'NIT_nit', 'PHS_frp'],
+        >>>     'csv_outlet_allinone': False,
+        >>>     'csv_outlet_fname': 'outlet_',
+        >>>     'csv_outlet_nvars': 4,
+        >>>     'csv_outlet_vars': ['flow', 'temp', 'salt', 'OXY_oxy'],
+        >>>     'csv_ovrflw_fname': 'overflow'
+        >>> }
+        >>> output.set_attributes(my_output)
+        >>> print(output)
         """
         params = [
             (f"   out_dir = '{self.out_dir}'", self.out_dir),
             (f"   out_fn = '{self.out_fn}'", self.out_fn),
             (f"   nsave = {self.nsave}", self.nsave),
-            (
-                f"   csv_lake_fname = '{self.csv_lake_fname}'",
-                self.csv_lake_fname,
-            ),
-            (
-                f"   csv_point_nlevs = {self.csv_point_nlevs}",
-                self.csv_point_nlevs,
-            ),
-            (
-                f"   csv_point_fname = '{self.csv_point_fname}'",
-                self.csv_point_fname,
-            ),
-            (
-                f"   csv_point_at = {', '.join([str(num) for num in self.csv_point_at]) if self.csv_point_at else None}",
-                self.csv_point_at,
-            ),
-            (
-                f"   csv_point_nvars = {self.csv_point_nvars}",
-                self.csv_point_nvars,
-            ),
-            (
-                f"   csv_point_vars = {', '.join([repr(var) for var in self.csv_point_vars]) if self.csv_point_vars else None}",
-                self.csv_point_vars,
-            ),
-            (
-                f"   csv_outlet_allinone = {str(self.csv_outlet_allinone)}",
-                self.csv_outlet_allinone,
-            ),
-            (
-                f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
-                self.csv_outlet_fname,
-            ),
-            (
-                f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
-                self.csv_outlet_nvars,
-            ),
-            (
-                f"   csv_outlet_vars = {', '.join([repr(var) for var in self.csv_outlet_vars]) if self.csv_outlet_vars else None}",
-                self.csv_outlet_vars,
-            ),
-            (
-                f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
-                self.csv_ovrflw_fname,
-            ),
+            (f"   csv_lake_fname = '{self.csv_lake_fname}'",
+             self.csv_lake_fname,),
+            (f"   csv_point_nlevs = {self.csv_point_nlevs}",
+             self.csv_point_nlevs,),
+            (f"   csv_point_fname = '{self.csv_point_fname}'",
+             self.csv_point_fname),
+            (f"   csv_point_frombot = {self.comma_sep_list(self.csv_point_frombot)}",
+             self.csv_point_frombot),
+            (f"   csv_point_at = {self.comma_sep_list(self.csv_point_at)}",
+             self.csv_point_at),
+            (f"   csv_point_nvars = {self.csv_point_nvars}",self.csv_point_nvars),
+            (f"   csv_point_vars = {self.comma_sep_list(self.csv_point_vars, True)}",
+             self.csv_point_vars),
+            (f"   csv_outlet_allinone = {self.fortran_bool_string(self.csv_outlet_allinone)}",
+             self.csv_outlet_allinone),
+            (f"   csv_outlet_fname = '{self.csv_outlet_fname}'", self.csv_outlet_fname),
+            (f"   csv_outlet_nvars = {self.csv_outlet_nvars}",self.csv_outlet_nvars),
+            (f"   csv_outlet_vars = {self.comma_sep_list(self.csv_outlet_vars, True)}",
+             self.csv_outlet_vars),
+            (f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
+             self.csv_ovrflw_fname),
         ]
         return "\n".join(
             param_str
@@ -892,37 +937,60 @@ class NMLInitProfiles(NMLBase):
 
     Attributes
     ----------
-    lake_depth : float
-        Initial lake height/depth (m).
-    num_depths : int
-        Number of depths provided for initial profiles.
-    the_depths : list[float]
-        The depths of the initial profile points (m).
-    the_temps : list[float]
-        The temperature (C) at each of the initial profile points.
-    the_sals : list[float]
-        The salinity (ppt) at each of the initial profile points.
-    num_wq_vars : int
+    lake_depth : Union[float, None]
+        Initial lake height/depth (m). Default is NOne.
+    num_depths : Union[int, None]
+        Number of depths provided for initial profiles. Default is None.
+    the_depths : Union[List[float], None]
+        The depths of the initial profile points (m). Default is None.
+    the_temps : Union[List[float], None]
+        The temperature (C) at each of the initial profile points. Default is
+        None.
+    the_sals : Union[List[float], None]
+        The salinity (ppt) at each of the initial profile points. Default is
+        None.
+    num_wq_vars : Union[int, None]
         Number of non GLM (ie FABM or AED2) variables to be initialised.
-    wq_names : list[str]
+        Default is 0.
+    wq_names : Union[List[str], None]
         Names of non GLM (ie FABM or AED2) variables to be initialised.
-    wq_init_vals : float
-        Array of WQ variable initial data (rows = vars; cols = depths)
+        Default is None.
+    wq_init_vals : Union[List[str], None]
+        Array of WQ variable initial data (rows = vars; cols = depths).
+        Default is [0.0].
 
     Examples
     --------
     >>> from glmpy import NMLSetup
     >>> init_profiles = NMLInitProfiles()
+    >>> my_init_profile = {
+    >>>     "lake_depth": 43,
+    >>>     "num_depths": 3,
+    >>>     "the_depths": [1, 20, 40],
+    >>>     "the_temps": [18.0, 18.0, 18.0],
+    >>>     "the_sals": [0.5, 0.5, 0.5],
+    >>>     "num_wq_vars": 6,
+    >>>     "wq_names": ["OGM_don", "OGM_pon", "OGM_dop", "OGM_pop", "OGM_doc", "OGM_poc"],
+    >>>     "wq_init_vals": [1.1, 1.2, 1.3, 1.2, 1.3,
+    >>>                     2.1, 2.2, 2.3, 1.2, 1.3,
+    >>>                     3.1, 3.2, 3.3, 1.2, 1.3,
+    >>>                     4.1, 4.2, 4.3, 1.2, 1.3,
+    >>>                     5.1, 5.2, 5.3, 1.2, 1.3,
+    >>>                     6.1, 6.2, 6.3, 1.2, 1.3]
+    >>> }
+    >>> init_profile.set_attributes(my_init_profile)
+    >>> print(init_profile)
     """
 
     def __init__(self):
-        self.lake_depth = None
-        self.num_depths = None
-        self.the_depths = None
-        self.the_temps = None
-        self.the_sals = None
-
-        print(getattr(self, key))
+        self.lake_depth: Union[float, None] = None
+        self.num_depths: Union[int, None] = None
+        self.the_depths: Union[List[float], None] = None
+        self.the_temps: Union[List[float], None] = None
+        self.the_sals: Union[List[float], None] = None
+        self.num_wq_vars: Union[int, None] = 0
+        self.wq_names: Union[List[str], None] = None
+        self.wq_init_vals: Union[List[float], None] = [0.0]
 
     def __str__(self):
         """Return the string representation of the NMLInitProfiles object.
@@ -934,22 +1002,43 @@ class NMLInitProfiles(NMLBase):
         -------
         str
             String representation of the NMLInitProfiles object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLSetup
+        >>> init_profiles = NMLInitProfiles()
+        >>> my_init_profile = {
+        >>>     "lake_depth": 43,
+        >>>     "num_depths": 3,
+        >>>     "the_depths": [1, 20, 40],
+        >>>     "the_temps": [18.0, 18.0, 18.0],
+        >>>     "the_sals": [0.5, 0.5, 0.5],
+        >>>     "num_wq_vars": 6,
+        >>>     "wq_names": ["OGM_don", "OGM_pon", "OGM_dop", "OGM_pop", "OGM_doc", "OGM_poc"],
+        >>>     "wq_init_vals": [1.1, 1.2, 1.3, 1.2, 1.3,
+        >>>                     2.1, 2.2, 2.3, 1.2, 1.3,
+        >>>                     3.1, 3.2, 3.3, 1.2, 1.3,
+        >>>                     4.1, 4.2, 4.3, 1.2, 1.3,
+        >>>                     5.1, 5.2, 5.3, 1.2, 1.3,
+        >>>                     6.1, 6.2, 6.3, 1.2, 1.3]
+        >>> }
+        >>> init_profile.set_attributes(my_init_profile)
+        >>> print(init_profile)
         """
         params = [
             (f"   lake_depth = {self.lake_depth}", self.lake_depth),
             (f"   num_depths = {self.num_depths}", self.num_depths),
-            (
-                f"   the_depths = {', '.join([str(num) for num in self.the_depths]) if self.the_depths else None}",
-                self.the_depths,
-            ),
-            (
-                f"   the_temps = {', '.join([str(num) for num in self.the_temps]) if self.the_temps else None}",
-                self.the_temps,
-            ),
-            (
-                f"   the_sals = {', '.join([str(num) for num in self.the_sals]) if self.the_sals else None}",
-                self.the_sals,
-            ),
+            (f"   the_depths = {self.comma_sep_list(self.the_depths)}",
+             self.the_depths),
+            (f"   the_temps = {self.comma_sep_list(self.the_temps)}",
+             self.the_temps),
+            (f"   the_sals = {self.comma_sep_list(self.the_sals)}",
+             self.the_sals),
+            (f"   num_wq_vars = {self.num_wq_vars}", self.num_wq_vars),
+            (f"   wq_names = {self.comma_sep_list(self.wq_names, True)}",
+                self.wq_names),
+            (f"   wq_init_vals = {self.comma_sep_list(self.wq_init_vals)}",
+                self.wq_init_vals),
         ]
         return "\n".join(
             param_str
@@ -967,68 +1056,134 @@ class NMLMeteorology(NMLBase):
 
     Attributes
     ----------
-    met_sw : str
-        Switch to enable the surface heating module
-    lw_type : str
-        Switch to configure which input approach is being used for
-        longwave/cloud data in the meteo_fl.
-    rain_sw : str
-        Switch to configure rainfall input concentrations.
-    atm_stab : int
-        Switch to configure which approach to atmospheric stability is used.
-    fetch_mode : int
-        Switch to configure which wind-sheltering/fetch option to use.
-    rad_mode : int
-        Switch to configure which incoming radiation option to use.
-    albedo_mode : int
-        Switch to configure which albedo calculation option is used.
-    cloud_mode : int
-        Switch to configure which atmospheric emmissivity calculation
-        option is used.
+    met_sw : bool
+        Switch to enable the surface heating module. Default is True.
+    meteo_fl : Union[str, None]
+        Filename of the meterological file. Default is None.
     subdaily : bool
         Switch to indicate the meteorological data is provided with sub-daily
-        resolution, at an interval equivalent to Δt
-    meteo_fl : str
-        Filename of the meterological file.
-    wind_factor : float
-        Scaling factor to adjust the windspeed data provided in the meteo_fl
-    lw_factor : float
+        resolution, at an interval equivalent to Δt. Default is None.
+    time_fmt : str
+        Time format of the 1st column in the inflow_fl. For example,
+        'YYYY-MM-DD hh:mm:ss'. Default is None.
+    rad_mode : Union[int, None]
+        Switch to configure which incoming radiation option to use. Default is
+        None.
+    albedo_mode : Union[int, None]
+        Switch to configure which albedo calculation option is used. Default is
+        None.
+    sw_factor : Union[float, None]
+        Scaling factor to adjust the shortwave radiation data provided
+        in the meteo_fl. Default is None.
+    lw_type : Union[str, None]
+        Switch to configure which input approach is being used for
+        longwave/cloud data in the meteo_fl. Default is None.
+    cloud_mode : Union[int, None]
+        Switch to configure which atmospheric emmissivity calculation
+        option is used. Default is None.
+    lw_factor : Union[float, None]
         Scaling factor to adjust the longwave (or cloud) data provided in the
-        meteo_fl
-    lw_offset : float
-        !!!!! Not sure what this is for - can't find it in the docs
-    ce : float
-        Bulk aerodynamic transfer coefficient for latent heat flux.
-    ch : float
-        Bulk aerodynamic transfer coefficient for sensible heat flux.
-    cd : float
-        Bulk aerodynamic transfer coefficient for momentum.
+        meteo_fl. Default is None.
+    atm_stab : Union[int, None]
+        Switch to configure which approach to atmospheric stability is used.
+        Default is None.
+    rh_factor : Union[float, None]
+        Scaling factor to adjust the relative humidity data provided in the
+        meteo_fl. Default is None.
+    at_factor : Union[float, None]
+        Scaling factor to adjust the air temperature data provided in the
+        meteo_fl. Default is None.
+    ce : Union[float, None]
+        Bulk aerodynamic transfer coefficient for latent heat flux. Default is
+        0.0013.
+    ch : Union[float, None]
+        Bulk aerodynamic transfer coefficient for sensible heat flux. Default
+        is 0.0013.
+    rain_sw : Union[bool, None]
+        Switch to configure rainfall input concentrations. Default is None.
+    rain_factor : Union[float, None]
+        Scaling factor to adjust the rainfall data provided in the meteo_fl.
+        Default is None.
+    catchrain : Union[bool, None]
+        Switch that configures runoff from exposed banks of lake area. Default
+        is None.
+    rain_threshold : Union[float, None]
+        Daily rainfall amount (m) required before runoff from exposed banks
+        occurs. Default is None.
+    runoff_coef : Union[float, None]
+        Conversion fraction of infiltration excess rainfall to runoff in
+        exposed lake banks. Default is None.
+    cd :
+        Bulk aerodynamic transfer coefficient for momentum. Default is 0.0013.
+    wind_factor : Union[float, None]
+        Scaling factor to adjust the windspeed data provided in the meteo_fl.
+        Default is None.
+    fetch_mode : int
+        Switch to configure which wind-sheltering/fetch option to use. Default
+        is 0.
+    num_dir : Union[int, None]
+        Number of wind direction reference points being read in. Default is
+        None.
+    wind_dir : Union[float, None]
+        Wind direction reference points (degrees) being read in. Default is
+        None.
+    fetch_scale : Union[float, None]
+        Direction specific wind-sheltering scaling factors. Default is None.
 
     Examples
     --------
     >>> from glmpy import NMLMeteorology
     >>> meteorology = NMLMeteorology()
+    >>> my_meteorology = {
+    >>>     'met_sw': True,
+    >>>     'lw_type': 'LW_IN',
+    >>>     'rain_sw': False,
+    >>>     'atm_stab': 0,
+    >>>     'fetch_mode': 0,
+    >>>     'rad_mode': 1,
+    >>>     'albedo_mode': 1,
+    >>>     'cloud_mode': 4,
+    >>>     'subdaily': True,
+    >>>     'meteo_fl': 'bcs/met_hourly.csv',
+    >>>     'wind_factor': 0.9,
+    >>>     'ce': 0.0013,
+    >>>     'ch': 0.0013,
+    >>>     'cd': 0.0013,
+    >>>     'catchrain': True,
+    >>>     'rain_threshold': 0.001,
+    >>>     'runoff_coeff': 0.0,
+    >>> }
+    >>> meteorology.set_attributes(my_meteorology)
     >>> print(meteorology)
     """
 
     def __init__(self):
-        self.met_sw = None
-        self.lw_type = None
-        self.rain_sw = None
-        self.atm_stab = None
-        self.fetch_mode = None
-        self.rad_mode = None
-        self.albedo_mode = None
-        self.cloud_mode = None
-        self.subdaily = None
-        self.meteo_fl = None
-        self.wind_factor = None
-        self.lw_factor = None
-        self.lw_offset = None
-        self.ce = None
-        self.ch = None
-        self.cd = None
-        print(getattr(self, key))
+        self.met_sw: bool = True
+        self.meteo_fl: Union[str, None] = None
+        self.subdaily: Union[bool, None] = None
+        self.time_fmt: Union[str, None] = None
+        self.rad_mode: Union[int, None] = None
+        self.albedo_mode: Union[int, None] = None
+        self.sw_factor: Union[float, None] = None
+        self.lw_type: Union[str, None] = None
+        self.cloud_mode: Union[int, None] = None
+        self.lw_factor: Union[float, None] = None
+        self.atm_stab: Union[int, None] = None
+        self.rh_factor: Union[float, None] = None
+        self.at_factor: Union[float, None] = None
+        self.ce: Union[float, None] = 0.0013
+        self.ch: Union[float, None] = 0.0013
+        self.rain_sw: Union[bool, None] = None
+        self.rain_factor: Union[float, None] = None
+        self.catchrain: Union[bool, None] = None
+        self.rain_threshold: Union[float, None] = None
+        self.runoff_coeff: Union[float, None] = None
+        self.cd: Union[float, None] = 0.0013
+        self.wind_factor: Union[float, None] = None
+        self.fetch_mode: int = 0
+        self.num_dir: Union[int, None] = None
+        self.wind_dir: Union[float, None] = None
+        self.fetch_scale: Union[float, None] = None
 
     def __str__(self):
         """Return the string representation of the NMLMeteorology object.
@@ -1040,25 +1195,66 @@ class NMLMeteorology(NMLBase):
         -------
         str
             String representation of the NMLMeteorology object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLMeteorology
+        >>> meteorology = NMLMeteorology()
+        >>> my_meteorology = {
+        >>>     'met_sw': True,
+        >>>     'lw_type': 'LW_IN',
+        >>>     'rain_sw': False,
+        >>>     'atm_stab': 0,
+        >>>     'fetch_mode': 0,
+        >>>     'rad_mode': 1,
+        >>>     'albedo_mode': 1,
+        >>>     'cloud_mode': 4,
+        >>>     'subdaily': True,
+        >>>     'meteo_fl': 'bcs/met_hourly.csv',
+        >>>     'wind_factor': 0.9,
+        >>>     'ce': 0.0013,
+        >>>     'ch': 0.0013,
+        >>>     'cd': 0.0013,
+        >>>     'catchrain': True,
+        >>>     'rain_threshold': 0.001,
+        >>>     'runoff_coeff': 0.0,
+        >>> }
+        >>> meteorology.set_attributes(my_meteorology)
+        >>> print(meteorology)
         """
 
         params = [
-            (f"   met_sw = {str(self.met_sw)}", self.met_sw),
-            (f"   lw_type = '{self.lw_type}'", self.lw_type),
-            (f"   rain_sw = {str(self.rain_sw)}", self.rain_sw),
-            (f"   atm_stab = {self.atm_stab}", self.atm_stab),
-            (f"   fetch_mode = {self.fetch_mode}", self.fetch_mode),
+            (f"   met_sw = {self.fortran_bool_string(self.met_sw)}",
+             self.met_sw),
+            (f"   meteo_fl = '{self.meteo_fl}'", self.meteo_fl),
+            (f"   subdaily = {self.fortran_bool_string(self.subdaily)}",
+             self.subdaily),
+            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
             (f"   rad_mode = {self.rad_mode}", self.rad_mode),
             (f"   albedo_mode = {self.albedo_mode}", self.albedo_mode),
+            (f"   sw_factor = {self.sw_factor}", self.sw_factor),
+            (f"   lw_type = '{self.lw_type}'", self.lw_type),
             (f"   cloud_mode = {self.cloud_mode}", self.cloud_mode),
-            (f"   subdaily = {str(self.subdaily)}", self.subdaily),
-            (f"   meteo_fl = '{self.meteo_fl}'", self.meteo_fl),
-            (f"   wind_factor = {self.wind_factor}", self.wind_factor),
             (f"   lw_factor = {self.lw_factor}", self.lw_factor),
-            (f"   lw_offset = {self.lw_offset}", self.lw_offset),
+            (f"   atm_stab = {self.atm_stab}", self.atm_stab),
+            (f"   rh_factor = {self.rh_factor}", self.rh_factor),
+            (f"   at_factor = {self.at_factor}", self.at_factor),
             (f"   ce = {self.ce}", self.ce),
             (f"   ch = {self.ch}", self.ch),
+            (f"   rain_sw = {self.fortran_bool_string(self.rain_sw)}",
+             self.rain_sw),
+            (f"   rain_factor = {self.rain_factor}", self.rain_factor),
+            (f"   catchrain = {self.fortran_bool_string(self.catchrain)}",
+                self.catchrain),
+            (f"   rain_threshold = {self.rain_threshold}",
+                self.rain_threshold),
+            (f"   runoff_coeff = {self.runoff_coeff}", self.runoff_coeff),
             (f"   cd = {self.cd}", self.cd),
+            (f"   wind_factor = {self.wind_factor}", self.wind_factor),
+            (f"   fetch_mode = {self.fetch_mode}", self.fetch_mode),
+            (f"   num_dir = {self.num_dir}", self.num_dir),
+            (f"   wind_dir = {self.wind_dir}", self.wind_dir),
+            (f"   fetch_scale = {self.fetch_scale}", self.fetch_scale),
         ]
         return "\n".join(
             param_str
