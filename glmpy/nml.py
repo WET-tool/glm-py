@@ -213,7 +213,7 @@ class NMLBase:
     ... )
     """
 
-    def set_attributes(self, attrs_dict, update: dict):
+    def set_attributes(self, attrs_dict, update: Union[dict, None] = None):
         """Set attributes for the NMLSetup class.
 
         Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
@@ -257,6 +257,51 @@ class NMLBase:
         for key, value in attrs_dict.items():
             setattr(self, key, value)
 
+    @staticmethod
+    def fortran_bool_string(bool_input: bool):
+        """Convert a Python boolean to a Fortran boolean string.
+
+        Parameters
+        ----------
+        bool_input : bool
+            A Python boolean.
+
+        Returns
+        -------
+        str
+            A Fortran boolean string.
+
+        Examples
+        --------
+        >>> from glmpy import NMLBase
+        >>> NMLBase.fortran_bool_string(True)
+        '.true.'
+        """
+        return '.true.' if bool_input else '.false.'
+
+    @staticmethod
+    def comma_sep_list(list_input: Union[list, None]):
+        """Convert a Python list to a NML formatted  comma separated string.
+
+        Parameters
+        ----------
+        list_input : list
+            A list of values.
+
+        Returns
+        -------
+        str
+            A comma separated string for use in defining a NML block. Returns
+            None if list_input is None.
+
+        Examples
+        --------
+        >>> from glmpy import NMLBase
+        >>> NMLBase.comma_sep_list([1, 2, 3])
+        '1, 2, 3'
+        """
+        return ', '.join([str(num) for num in list_input]) if list_input else None
+
 
 class NMLSetup(NMLBase):
     """Define the glm_setup block of a GLM simulation configuration.
@@ -268,22 +313,37 @@ class NMLSetup(NMLBase):
     Attributes
     ----------
     sim_name : str
-        Title of simulation.
-    max_layers : int
-        Maximum number of layers.
-    min_layer_vol : float
-        Minimum layer volume.
-    min_layer_thick : float
-        Minimum thickness of a layer (m).
-    max_layer_thick : float
-        Maximum thickness of a layer (m).
-    density_model : int
-        Switch to set the density equation.
+        Title of simulation. Default is 'lake'.
+    max_layers : Union[int, None]
+        Maximum number of layers. Default is 500.
+    min_layer_vol : Union[float, None]
+        Minimum layer volume. Default is None.
+    min_layer_thick : Union[float, None]
+        Minimum thickness of a layer (m). Default is None.
+    max_layer_thick : Union[float, None]
+        Maximum thickness of a layer (m). Default is None.
+    density_model : Union[int, None]
+        Switch to set the density equation. Default is 1.
+    non_avg : bool
+        Switch to configure flow boundary condition temporal interpolation.
+        Default is True.
 
     Examples
     --------
     >>> from glmpy import NMLSetup
     >>> setup = NMLSetup()
+    >>> my_setup = {
+    ...     "sim_name": "Example Simulation #1",
+    ...     "max_layers": 500,
+    ...     "min_layer_vol": 0.15,
+    ...     "min_layer_thick": 1.50,
+    ...     "max_layer_thick": 0.025,
+    ...     "density_model": 1,
+    ...     "non_avg": True
+    ... }
+    >>> setup.set_attributes(my_setup)
+    >>> print(setup)
+
     """
 
     def __init__(self):
@@ -310,23 +370,29 @@ class NMLSetup(NMLBase):
         --------
         >>> from glmpy import NMLSetup
         >>> setup = NMLSetup()
-        >>> setup.set_attributes(attributes)
+        >>> my_setup = {
+        ...     "sim_name": "Example Simulation #1",
+        ...     "max_layers": 500,
+        ...     "min_layer_vol": 0.15,
+        ...     "min_layer_thick": 1.50,
+        ...     "max_layer_thick": 0.025,
+        ...     "density_model": 1,
+        ...     "non_avg": True
+        ... }
+        >>> setup.set_attributes(my_setup)
         >>> print(setup)
         """
         params = [
             (f"   sim_name = '{self.sim_name}'", self.sim_name),
             (f"   max_layers = {self.max_layers}", self.max_layers),
             (f"   min_layer_vol = {self.min_layer_vol}", self.min_layer_vol),
-            (
-                f"   min_layer_thick = {self.min_layer_thick}",
-                self.min_layer_thick,
-            ),
-            (
-                f"   max_layer_thick = {self.max_layer_thick}",
-                self.max_layer_thick,
-            ),
+            (f"   min_layer_thick = {self.min_layer_thick}",
+             self.min_layer_thick),
+            (f"   max_layer_thick = {self.max_layer_thick}",
+             self.max_layer_thick),
             (f"   density_model = {self.density_model}", self.density_model),
-            (f"   non_avg = {self.non_avg}", self.non_avg),
+            (f"   non_avg = {self.fortran_bool_string(self.non_avg)}",
+             self.non_avg),
         ]
         return "\n".join(
             param_str
@@ -344,44 +410,79 @@ class NMLMorphometry(NMLBase):
 
     Attributes
     ----------
-    lake_name : str
-        Site name.
+    lake_name : Union[str, None]
+        Site name. Default is None.
     latitude : float
-        Latitude, positive North.
+        Latitude, positive North. Default is 0.0.
     longitude : float
-        Longitude, positive East.
-    base_elev: float
-        Elevation of the bottom-most point of the lake (m above datum).
-    crest_elev : float
-        Elevation of a weir crest, where overflow begins.
-    bsn_len : float
-        Length of the lake basin, at crest height (m).
-    bsn_wid : float
-        Width of the lake basin, at crest height (m).
-    bsn_vals : float
+        Longitude, positive East. Default is 0.0.
+    base_elev: Union[float, None]
+        Elevation of the bottom-most point of the lake (m above datum). Default
+        is None.
+    crest_elev : Union[float, None]
+        Elevation of a weir crest, where overflow begins. Default is None.
+    bsn_len : Union[float, None]
+        Length of the lake basin, at crest height (m). Default is None.
+    bsn_wid : Union[float, None]
+        Width of the lake basin, at crest height (m). Default is None.
+    bsn_vals : Union[float, None]
         Number of points being provided to described the hyposgraphic details.
-    H : list
-        Comma-separated list of lake elevations (m above datum).
-    A : list
-        Comma-separated list of lake areas (m^2).
+        Default is None.
+    H : Union[List[float], None]
+        Comma-separated list of lake elevations (m above datum). Default is
+        None.
+    A : Union[List[float], None]
+        Comma-separated list of lake areas (m^2). Default is None.
 
     Examples
     --------
     >>> from glmpy import NMLMorphometry
     >>> morphometry = NMLMorphometry()
+    >>> my_morphometry = {
+    ...     "lake_name": "Example Lake",
+    ...     "latitude": 32,
+    ...     "longitude": 35,
+    ...     "base_elev": -252.9,
+    ...     "crest_elev": -203.9,
+    ...     "bsn_len": 21000,
+    ...     "bsn_wid": 13000,
+    ...     "bsn_vals": 45,
+    ...     "H": [
+    ...         -252.9, -251.9, -250.9, -249.9, -248.9, -247.9, -246.9,
+    ...         -245.9, -244.9, -243.9, -242.9, -241.9, -240.9, -239.9,
+    ...         -238.9, -237.9, -236.9, -235.9, -234.9, -233.9, -232.9,
+    ...         -231.9, -230.9, -229.9, -228.9, -227.9, -226.9, -225.9,
+    ...         -224.9, -223.9, -222.9, -221.9, -220.9, -219.9, -218.9,
+    ...         -217.9, -216.9, -215.9, -214.9, -213.9, -212.9, -211.9,
+    ...         -208.9, -207.9,  -203.9
+    ...         ],
+    ...     "A": [
+    ...         0, 9250000, 15200000, 17875000, 21975000, 26625000,
+    ...         31700000, 33950000, 38250000, 41100000, 46800000,
+    ...         51675000, 55725000, 60200000, 64675000, 69600000, 74475000,
+    ...         79850000, 85400000, 90975000, 96400000, 102000000,
+    ...         107000000, 113000000, 118000000, 123000000, 128000000,
+    ...         132000000, 136000000, 139000000, 143000000, 146000000,
+    ...         148000000, 150000000, 151000000, 153000000, 155000000,
+    ...         157000000, 158000000, 160000000, 161000000, 162000000,
+    ...         167000000, 170000000, 173000000
+    ...         ]
+    ... }
+    >>> morphometry.set_attributes(my_morphometry)
+    >>> print(morphometry)
     """
 
     def __init__(self):
-        self.lake_name = None
-        self.latitude = None
-        self.longitude = None
-        self.base_elev = None
-        self.crest_elev = None
-        self.bsn_len = None
-        self.bsn_wid = None
-        self.bsn_vals = None
-        self.H = None
-        self.A = None
+        self.lake_name: Union[str, None] = None
+        self.latitude: float = 0.0
+        self.longitude: float = 0.0
+        self.base_elev: Union[float, None] = None
+        self.crest_elev: Union[float, None] = None
+        self.bsn_len: Union[float, None] = None
+        self.bsn_wid: Union[float, None] = None
+        self.bsn_vals: Union[float, None] = None
+        self.H: Union[List[float], None] = None
+        self.A: Union[List[float], None] = None
 
     def __str__(self):
         """Return the string representation of the NMLMorphometry object.
@@ -398,23 +499,37 @@ class NMLMorphometry(NMLBase):
         --------
         >>> from glmpy import NMLMorphometry
         >>> morphometry = NMLMorphometry()
-        >>>  morphometry.set_attributes(
-        ...     attrs_dict={
-        ...         "lake_name": "Example Lake'",
-        ...         "latitude":  32,
-        ...         "longitude": 35,
-        ...         "crest_elev": -203.9,
-        ...         "bsn_len": 21000,
-        ...         "bsn_wid": 13000,
-        ...         "max_layer_thick": 0.1,
-        ...         "density_model": 1
-        ...     },
-        ...     update={
-        ...         "bsn_vals": "3",
-        ...         "H": [-252.9,  -251.9,  -250.9],
-        ...         "A": [0,  9250000,  15200000,],
-        ...     }
-        ... )
+        >>> my_morphometry = {
+        ...     "lake_name": "Example Lake",
+        ...     "latitude": 32,
+        ...     "longitude": 35,
+        ...     "base_elev": -252.9,
+        ...     "crest_elev": -203.9,
+        ...     "bsn_len": 21000,
+        ...     "bsn_wid": 13000,
+        ...     "bsn_vals": 45,
+        ...     "H": [
+        ...         -252.9, -251.9, -250.9, -249.9, -248.9, -247.9, -246.9,
+        ...         -245.9, -244.9, -243.9, -242.9, -241.9, -240.9, -239.9,
+        ...         -238.9, -237.9, -236.9, -235.9, -234.9, -233.9, -232.9,
+        ...         -231.9, -230.9, -229.9, -228.9, -227.9, -226.9, -225.9,
+        ...         -224.9, -223.9, -222.9, -221.9, -220.9, -219.9, -218.9,
+        ...         -217.9, -216.9, -215.9, -214.9, -213.9, -212.9, -211.9,
+        ...         -208.9, -207.9,  -203.9
+        ...         ],
+        ...     "A": [
+        ...         0, 9250000, 15200000, 17875000, 21975000, 26625000,
+        ...         31700000, 33950000, 38250000, 41100000, 46800000,
+        ...         51675000, 55725000, 60200000, 64675000, 69600000, 74475000,
+        ...         79850000, 85400000, 90975000, 96400000, 102000000,
+        ...         107000000, 113000000, 118000000, 123000000, 128000000,
+        ...         132000000, 136000000, 139000000, 143000000, 146000000,
+        ...         148000000, 150000000, 151000000, 153000000, 155000000,
+        ...         157000000, 158000000, 160000000, 161000000, 162000000,
+        ...         167000000, 170000000, 173000000
+        ...         ]
+        ... }
+        >>> morphometry.set_attributes(my_morphometry)
         >>> print(morphometry)
         """
         params = [
@@ -426,14 +541,8 @@ class NMLMorphometry(NMLBase):
             (f"   bsn_len = {self.bsn_len}", self.bsn_len),
             (f"   bsn_wid = {self.bsn_wid}", self.bsn_wid),
             (f"   bsn_vals = {self.bsn_vals}", self.bsn_vals),
-            (
-                f"   H = {', '.join([str(num) for num in self.H]) if self.H else None}",
-                self.H,
-            ),
-            (
-                f"   A = {', '.join([str(num) for num in self.A]) if self.A else None}",
-                self.A,
-            ),
+            (f"   H = {self.comma_sep_list(self.H)}",self.H),
+            (f"   A = {self.comma_sep_list(self.A)}",self.A),
         ]
         return "\n".join(
             param_str
@@ -452,41 +561,55 @@ class NMLMixing(NMLBase):
     Attributes
     ----------
     surface_mixing : int
-        Switch to select the options of the surface mixing model.
-    coef_mix_conv : float
-        Mixing efficiency - convective overturn.
-    coef_wind_stir : float
-        Mixing efficiency - wind stirring.
-    coef_mix_shear : float
-        Mixing efficiency - shear production.
-    coef_mix_turb : float
-        Mixing efficiency - unsteady turbulence effects
-    coef_mix_KH : float
-        Mixing efficiency - Kelvin-Helmholtz billowing.
-    deep_mixing : int
+        Switch to select the options of the surface mixing model. Default is 1.
+    coef_mix_conv : Union[float, None]
+        Mixing efficiency - convective overturn. Default is None.
+    coef_wind_stir : Union[float, None]
+        Mixing efficiency - wind stirring. Default is None.
+    coef_mix_shear : Union[float, None]
+        Mixing efficiency - shear production. Default is None.
+    coef_mix_turb : Union[float, None]
+        Mixing efficiency - unsteady turbulence effects. Default is None.
+    coef_mix_KH : Union[float, None]
+        Mixing efficiency - Kelvin-Helmholtz billowing. Default is None.
+    deep_mixing : Union[int, None]
         Switch to select the options of the deep (hypolimnetic) mixing model
         (0 = no deep mixing, 1 = constant diffusivity, 2 = weinstock model).
-    coef_mix_hyp : float
-        Mixing efficiency - hypolimnetic turbulence.
-    diff : float
-        Background (molecular) diffusivity in the hypolimnion.
+        Default is None.
+    coef_mix_hyp : Union[float, None]
+        Mixing efficiency - hypolimnetic turbulence. Default is None.
+    diff : Union[float, None]
+        Background (molecular) diffusivity in the hypolimnion. Default is None.
 
     Examples
     --------
     >>> from glmpy import NMLMixing
     >>> mixing = NMLMixing()
+    >>> my_mixing = {
+    >>>     "surface_mixing": 1,
+    >>>     "coef_mix_conv": 0.125,
+    >>>     "coef_wind_stir": 0.23,
+    >>>     "coef_mix_shear": 0.2,
+    >>>     "coef_mix_turb": 0.51,
+    >>>     "coef_mix_KH": 0.3,
+    >>>     "deep_mixing": 0.2,
+    >>>     "coef_mix_hyp": 0.5,
+    >>>     "diff": 0.0,
+    >>> }
+    >>> mixing.set_attributes(my_mixing)
+    >>> print(mixing)
     """
 
     def __init__(self):
-        self.surface_mixing = 1
-        self.coef_mix_conv = None
-        self.coef_wind_stir = None
-        self.coef_mix_shear = None
-        self.coef_mix_turb = None
-        self.coef_mix_KH = None
-        self.deep_mixing = None
-        self.coef_mix_hyp = None
-        self.diff = None
+        self.surface_mixing: int  = 1
+        self.coef_mix_conv: Union[float, None] = None
+        self.coef_wind_stir: Union[float, None] = None
+        self.coef_mix_shear: Union[float, None] = None
+        self.coef_mix_turb: Union[float, None] = None
+        self.coef_mix_KH: Union[float, None] = None
+        self.deep_mixing: Union[int, None] = None
+        self.coef_mix_hyp: Union[float, None] = None
+        self.diff: Union[float, None] = None
 
     def __str__(self):
         """Return the string representation of the NMLMixing object.
@@ -498,21 +621,33 @@ class NMLMixing(NMLBase):
         -------
         str
             String representation of the NMLMixing object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLMixing
+        >>> mixing = NMLMixing()
+        >>> my_mixing = {
+        >>>     "surface_mixing": 1,
+        >>>     "coef_mix_conv": 0.125,
+        >>>     "coef_wind_stir": 0.23,
+        >>>     "coef_mix_shear": 0.2,
+        >>>     "coef_mix_turb": 0.51,
+        >>>     "coef_mix_KH": 0.3,
+        >>>     "deep_mixing": 0.2,
+        >>>     "coef_mix_hyp": 0.5,
+        >>>     "diff": 0.0,
+        >>> }
+        >>> mixing.set_attributes(my_mixing)
+        >>> print(mixing)
         """
         params = [
-            (
-                f"   surface_mixing = {self.surface_mixing}",
-                self.surface_mixing,
-            ),
+            (f"   surface_mixing = {self.surface_mixing}",
+             self.surface_mixing),
             (f"   coef_mix_conv = {self.coef_mix_conv}", self.coef_mix_conv),
-            (
-                f"   coef_wind_stir = {self.coef_wind_stir}",
-                self.coef_wind_stir,
-            ),
-            (
-                f"   coef_mix_shear = {self.coef_mix_shear}",
-                self.coef_mix_shear,
-            ),
+            (f"   coef_wind_stir = {self.coef_wind_stir}",
+             self.coef_wind_stir,),
+            (f"   coef_mix_shear = {self.coef_mix_shear}",
+             self.coef_mix_shear,),
             (f"   coef_mix_turb = {self.coef_mix_turb}", self.coef_mix_turb),
             (f"   coef_mix_KH = {self.coef_mix_KH}", self.coef_mix_KH),
             (f"   deep_mixing = {self.deep_mixing}", self.deep_mixing),
@@ -535,32 +670,44 @@ class NMLTime(NMLBase):
 
     Attributes
     ----------
-    timefmt : int
-        Time configuration switch.
-    start : str
-        Start time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'.
-    stop : str
-        End time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'.
+    timefmt : Union[int, None]
+        Time configuration switch. Default is None.
+    start : Union[str, None]
+        Start time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'. Default
+        is None.
+    stop : Union[str, None]
+        End time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'. Default is
+        None.
     dt : float
-        Time step (seconds).
-    num_days : int
-        Number of days to simulate.
+        Time step (seconds). Default is 3600.0.
+    num_days : Union[int, None]
+        Number of days to simulate. Default is None.
     timezone : float
-        UTC time zone.
+        UTC time zone. Default is 0.0.
 
     Examples
     --------
     >>> from glmpy import NMLSetup
     >>> time = NMLTime()
+    >>> my_time = {
+    >>>     "timefmt": 3,
+    >>>     "start": '1997-01-01 00:00:00',
+    >>>     "stop": '1999-01-01 00:00:00',
+    >>>     "dt": 3600.0,
+    >>>     "num_days": 730,
+    >>>     "timezone": 7.0
+    >>> }
+    >>> time.set_attributes(my_time)
+    >>> print(time)
     """
 
     def __init__(self):
-        self.timefmt = None
-        self.start = None
-        self.stop = None
-        self.dt = None
-        self.num_days = None
-        self.timezone = None
+        self.timefmt: Union[int, None] = None
+        self.start: Union[str, None] = None
+        self.stop: Union[int, None] = None
+        self.dt: float = 3600.0
+        self.num_days: Union[int, None] = None
+        self.timezone: float = 0.0
 
     def __str__(self):
         """Return the string representation of the NMLTime object.
@@ -572,6 +719,21 @@ class NMLTime(NMLBase):
         -------
         str
             String representation of the NMLTime object.
+
+        Examples
+        --------
+        >>> from glmpy import NMLSetup
+        >>> time = NMLTime()
+        >>> my_time = {
+        >>>     "timefmt": 3,
+        >>>     "start": '1997-01-01 00:00:00',
+        >>>     "stop": '1999-01-01 00:00:00',
+        >>>     "dt": 3600.0,
+        >>>     "num_days": 730,
+        >>>     "timezone": 7.0
+        >>> }
+        >>> time.set_attributes(my_time)
+        >>> print(time)
         """
 
         params = [
