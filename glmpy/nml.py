@@ -156,8 +156,8 @@ class NML:
                 (nml_block("meteorology", self.meteorology), self.meteorology),
                 (nml_block("light", self.light), self.light),
                 (nml_block("bird_model", self.bird_model), self.bird_model),
-                (nml_block("inflows", self.inflows), self.inflows),
-                (nml_block("outflows", self.outflows), self.outflows),
+                (nml_block("inflow", self.inflows), self.inflows),
+                (nml_block("outflow", self.outflows), self.outflows),
                 (nml_block("sediment", self.sediment), self.sediment),
                 (nml_block("ice_snow", self.ice_snow), self.ice_snow),
                 (nml_block("wq_setup", self.wq_setup), self.wq_setup),
@@ -359,9 +359,9 @@ class NMLSetup(NMLBase):
         Maximum thickness of a layer (m). Default is None.
     density_model : Union[int, None]
         Switch to set the density equation. Default is 1.
-    non_avg : bool
+    non_avg : Union[bool, None]
         Switch to configure flow boundary condition temporal interpolation.
-        Default is True.
+        Default is None.
 
     Examples
     --------
@@ -389,7 +389,7 @@ class NMLSetup(NMLBase):
             min_layer_thick: Union[float, None] = None,
             max_layer_thick: Union[float, None] = None,
             density_model: Union[int, None] = 1,
-            non_avg: bool = True
+            non_avg: Union[bool, None] = None
     ):
         self.sim_name = sim_name
         self.max_layers = max_layers
@@ -530,10 +530,10 @@ class NMLMorphometry(NMLBase):
             A: Union[List[float], None] = None,
     ):
         self.lake_name = lake_name
-        self.latitude = latitude,
-        self.longitude = longitude,
-        self.base_elev = base_elev,
-        self.crest_elev = crest_elev,
+        self.latitude = latitude
+        self.longitude = longitude
+        self.base_elev = base_elev
+        self.crest_elev = crest_elev
         self.bsn_len = bsn_len
         self.bsn_wid = bsn_wid
         self.bsn_vals = bsn_vals
@@ -666,7 +666,8 @@ class NMLMixing(NMLBase):
             coef_mix_KH: Union[float, None] = None,
             deep_mixing: Union[int, None] = None,
             coef_mix_hyp: Union[float, None] = None,
-            diff: Union[float, None] = None):
+            diff: Union[float, None] = None
+    ):
         self.surface_mixing = surface_mixing
         self.coef_mix_conv = coef_mix_conv
         self.coef_wind_stir = coef_wind_stir
@@ -1023,13 +1024,13 @@ class NMLInitProfiles(NMLBase):
         None.
     num_wq_vars : Union[int, None]
         Number of non GLM (ie FABM or AED2) variables to be initialised.
-        Default is 0.
+        Default is None.
     wq_names : Union[List[str], None]
         Names of non GLM (ie FABM or AED2) variables to be initialised.
         Default is None.
     wq_init_vals : Union[List[str], None]
         Array of WQ variable initial data (rows = vars; cols = depths).
-        Default is [0.0].
+        Default is None.
 
     Examples
     --------
@@ -1061,9 +1062,9 @@ class NMLInitProfiles(NMLBase):
             the_depths: Union[List[float], None] = None,
             the_temps: Union[List[float], None] = None,
             the_sals: Union[List[float], None] = None,
-            num_wq_vars: Union[int, None] = 0,
+            num_wq_vars: Union[int, None] = None,
             wq_names: Union[List[str], None] = None,
-            wq_init_vals: Union[List[float], None] = [0.0]
+            wq_init_vals: Union[List[float], None] = None
     ):
         self.lake_depth = lake_depth
         self.num_depths = num_depths
@@ -1233,7 +1234,7 @@ class NMLMeteorology(NMLBase):
     >>>     'cd': 0.0013,
     >>>     'catchrain': True,
     >>>     'rain_threshold': 0.001,
-    >>>     'runoff_coeff': 0.0,
+    >>>     'runoff_coef': 0.0,
     >>> }
     >>> meteorology.set_attributes(my_meteorology)
     >>> print(meteorology)
@@ -1327,7 +1328,7 @@ class NMLMeteorology(NMLBase):
         >>>     'cd': 0.0013,
         >>>     'catchrain': True,
         >>>     'rain_threshold': 0.001,
-        >>>     'runoff_coeff': 0.0,
+        >>>     'runoff_coef': 0.0,
         >>> }
         >>> meteorology.set_attributes(my_meteorology)
         >>> print(meteorology)
@@ -1358,7 +1359,7 @@ class NMLMeteorology(NMLBase):
                 self.catchrain),
             (f"   rain_threshold = {self.rain_threshold}",
                 self.rain_threshold),
-            (f"   runoff_coeff = {self.runoff_coeff}", self.runoff_coeff),
+            (f"   runoff_coef = {self.runoff_coef}", self.runoff_coef),
             (f"   cd = {self.cd}", self.cd),
             (f"   wind_factor = {self.wind_factor}", self.wind_factor),
             (f"   fetch_mode = {self.fetch_mode}", self.fetch_mode),
@@ -1647,7 +1648,7 @@ class NMLInflows(NMLBase):
             strmbd_slope: Union[List[float], None] = None,
             strmbd_drag: Union[List[float], None] = None,
             coef_inf_entrain: Union[List[float], None] = None,
-            inflow_factor: Union[List[float], None] = 1.0,
+            inflow_factor: Union[List[float], None] = [1.0],
             inflow_fl: Union[List[str], None] = None,
             inflow_varnum: int = 0,
             inflow_vars: Union[List[str], None] = None,
