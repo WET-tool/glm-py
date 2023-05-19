@@ -55,7 +55,7 @@ class JSONToNML:
     #     return(str(morphometry))
 
     def get_nml_attributes(
-        self, nml_block, custom_attributes: Union[dict, None]
+        self, nml_block, custom_attributes: Union[dict, None] = None
     ):
         """Reads a GLM configuration block from a json file and returns a
         string.
@@ -74,11 +74,11 @@ class JSONToNML:
             "bird_model", "inflows", "outflows", "sediment", "ice_snow",
             "wq_setup"
 
-        custom_attributes : dict
+        custom_attributes : Union[dict, None]
             A dictionary of custom attributes that will be used to either,
             overwrite attributes read from the json file, or add missing
             attributes. Useful for setting attributes that require a calculation
-            e.g. the volume of a water body.
+            e.g. the volume of a water body. Default is None.
 
         Examples
         --------
@@ -107,7 +107,7 @@ class JSONToNML:
         """
         json_data = self.read_json()
         if nml_block == "glm_setup":
-            glm_setup = NMLGLMSetup()
+            glm_setup = NMLSetup()
             glm_setup.set_attributes(
                 json_data["glm_setup"], custom=custom_attributes
             )

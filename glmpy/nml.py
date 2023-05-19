@@ -1,5 +1,6 @@
 from typing import Union, List
 
+
 class NML:
     """Generate .nml files.
 
@@ -210,7 +211,7 @@ class NMLBase:
     ... )
     """
 
-    def set_attributes(self, attrs_dict, update: Union[dict, None] = None):
+    def set_attributes(self, attrs_dict, custom_attrs: Union[dict, None] = None):
         """Set attributes for the NMLSetup class.
 
         Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
@@ -219,7 +220,7 @@ class NMLBase:
         ----------
         attrs_dict : dict
             A dictionary containing the attribute names as keys and the corresponding values to set.
-        custom : dict
+        custom_attrs : dict
             A dictionary containing custom attribute names and values to update the attrs_dict with.
 
         Returns
@@ -242,15 +243,15 @@ class NMLBase:
         ...         "max_layer_thick": 0.1,
         ...         "density_model": 1
         ...     },
-        ...     update={
+        ...     custom_attrs={
         ...         "bsn_vals": "3",
         ...         "H": [-252.9,  -251.9,  -250.9],
         ...         "A": [0,  9250000,  15200000,],
         ...     }
         ... )
         """
-        if update is not None:
-            attrs_dict.update(update)
+        if custom_attrs is not None:
+            attrs_dict.update(custom_attrs)
         for key, value in attrs_dict.items():
             setattr(self, key, value)
 
@@ -300,7 +301,7 @@ class NMLBase:
     def comma_sep_list(
         list_input: Union[List[int], List[float], List[str], List[bool], None],
         inverted_commas: bool = False
-        ):
+    ):
         """Convert a Python list to a NML formatted  comma separated string.
 
         If the list_input is None, None is returned. If inverted_commas is True,
@@ -335,6 +336,7 @@ class NMLBase:
             return ', '.join([repr(str(item)) for item in list_input]) if list_input else None
         else:
             return ', '.join([str(item) for item in list_input]) if list_input else None
+
 
 class NMLSetup(NMLBase):
     """Define the glm_setup block of a GLM simulation configuration.
@@ -379,14 +381,23 @@ class NMLSetup(NMLBase):
 
     """
 
-    def __init__(self):
-        self.sim_name: str = 'lake'
-        self.max_layers: Union[int, None] = 500
-        self.min_layer_vol: Union[float, None] = None
-        self.min_layer_thick: Union[float, None] = None
-        self.max_layer_thick: Union[float, None] = None
-        self.density_model: Union[int, None] = 1
-        self.non_avg: bool = True
+    def __init__(
+            self,
+            sim_name: str = 'lake',
+            max_layers: Union[int, None] = 500,
+            min_layer_vol: Union[float, None] = None,
+            min_layer_thick: Union[float, None] = None,
+            max_layer_thick: Union[float, None] = None,
+            density_model: Union[int, None] = 1,
+            non_avg: bool = True
+    ):
+        self.sim_name = sim_name
+        self.max_layers = max_layers
+        self.min_layer_vol = min_layer_vol
+        self.min_layer_thick = min_layer_thick
+        self.max_layer_thick = max_layer_thick
+        self.density_model = density_model
+        self.non_avg = non_avg
 
     def __str__(self):
         """Return the string representation of the NMLSetup object.
@@ -432,6 +443,7 @@ class NMLSetup(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLMorphometry(NMLBase):
     """Define the morphometry block of a GLM simulation configuration.
@@ -504,17 +516,29 @@ class NMLMorphometry(NMLBase):
     >>> print(morphometry)
     """
 
-    def __init__(self):
-        self.lake_name: Union[str, None] = None
-        self.latitude: float = 0.0
-        self.longitude: float = 0.0
-        self.base_elev: Union[float, None] = None
-        self.crest_elev: Union[float, None] = None
-        self.bsn_len: Union[float, None] = None
-        self.bsn_wid: Union[float, None] = None
-        self.bsn_vals: Union[float, None] = None
-        self.H: Union[List[float], None] = None
-        self.A: Union[List[float], None] = None
+    def __init__(
+            self,
+            lake_name: Union[str, None] = None,
+            latitude: float = 0.0,
+            longitude: float = 0.0,
+            base_elev: Union[float, None] = None,
+            crest_elev: Union[float, None] = None,
+            bsn_len: Union[float, None] = None,
+            bsn_wid: Union[float, None] = None,
+            bsn_vals: Union[float, None] = None,
+            H: Union[List[float], None] = None,
+            A: Union[List[float], None] = None,
+    ):
+        self.lake_name = lake_name
+        self.latitude = latitude,
+        self.longitude = longitude,
+        self.base_elev = base_elev,
+        self.crest_elev = crest_elev,
+        self.bsn_len = bsn_len
+        self.bsn_wid = bsn_wid
+        self.bsn_vals = bsn_vals
+        self.H = H
+        self.A = A
 
     def __str__(self):
         """Return the string representation of the NMLMorphometry object.
@@ -573,14 +597,15 @@ class NMLMorphometry(NMLBase):
             (f"   bsn_len = {self.bsn_len}", self.bsn_len),
             (f"   bsn_wid = {self.bsn_wid}", self.bsn_wid),
             (f"   bsn_vals = {self.bsn_vals}", self.bsn_vals),
-            (f"   H = {self.comma_sep_list(self.H)}",self.H),
-            (f"   A = {self.comma_sep_list(self.A)}",self.A),
+            (f"   H = {self.comma_sep_list(self.H)}", self.H),
+            (f"   A = {self.comma_sep_list(self.A)}", self.A),
         ]
         return "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLMixing(NMLBase):
     """Define the mixing block of a GLM simulation configuration.
@@ -631,16 +656,26 @@ class NMLMixing(NMLBase):
     >>> print(mixing)
     """
 
-    def __init__(self):
-        self.surface_mixing: int  = 1
-        self.coef_mix_conv: Union[float, None] = None
-        self.coef_wind_stir: Union[float, None] = None
-        self.coef_mix_shear: Union[float, None] = None
-        self.coef_mix_turb: Union[float, None] = None
-        self.coef_mix_KH: Union[float, None] = None
-        self.deep_mixing: Union[int, None] = None
-        self.coef_mix_hyp: Union[float, None] = None
-        self.diff: Union[float, None] = None
+    def __init__(
+            self,
+            surface_mixing: int = 1,
+            coef_mix_conv: Union[float, None] = None,
+            coef_wind_stir: Union[float, None] = None,
+            coef_mix_shear: Union[float, None] = None,
+            coef_mix_turb: Union[float, None] = None,
+            coef_mix_KH: Union[float, None] = None,
+            deep_mixing: Union[int, None] = None,
+            coef_mix_hyp: Union[float, None] = None,
+            diff: Union[float, None] = None):
+        self.surface_mixing = surface_mixing
+        self.coef_mix_conv = coef_mix_conv
+        self.coef_wind_stir = coef_wind_stir
+        self.coef_mix_shear = coef_mix_shear
+        self.coef_mix_turb = coef_mix_turb
+        self.coef_mix_KH = coef_mix_KH
+        self.deep_mixing = deep_mixing
+        self.coef_mix_hyp = coef_mix_hyp
+        self.diff = diff
 
     def __str__(self):
         """Return the string representation of the NMLMixing object.
@@ -691,6 +726,7 @@ class NMLMixing(NMLBase):
             if param_val is not None
         )
 
+
 class NMLTime(NMLBase):
     """Define the time block of a GLM simulation configuration.
 
@@ -731,13 +767,21 @@ class NMLTime(NMLBase):
     >>> print(time)
     """
 
-    def __init__(self):
-        self.timefmt: Union[int, None] = None
-        self.start: Union[str, None] = None
-        self.stop: Union[int, None] = None
-        self.dt: float = 3600.0
-        self.num_days: Union[int, None] = None
-        self.timezone: float = 0.0
+    def __init__(
+            self,
+            timefmt: Union[int, None] = None,
+            start: Union[str, None] = None,
+            stop: Union[int, None] = None,
+            dt: float = 3600.0,
+            num_days: Union[int, None] = None,
+            timezone: float = 0.0
+    ):
+        self.timefmt = timefmt
+        self.start = start
+        self.stop = stop
+        self.dt = dt
+        self.num_days = num_days
+        self.timezone = timezone
 
     def __str__(self):
         """Return the string representation of the NMLTime object.
@@ -779,6 +823,7 @@ class NMLTime(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLOutput(NMLBase):
     """Define the output block of a GLM simulation configuration.
@@ -851,22 +896,39 @@ class NMLOutput(NMLBase):
     >>> print(output)
     """
 
-    def __init__(self):
-        self.out_dir: str = './'
-        self.out_fn: str = 'output'
-        self.nsave: int = 1
-        self.csv_lake_fname: str = 'lake'
-        self.csv_point_nlevs: float = 0.0
-        self.csv_point_fname: str = 'WQ_'
-        self.csv_point_frombot: Union[List[float], None] = None
-        self.csv_point_at: Union[List[float], None] = None
-        self.csv_point_nvars: Union[int, None] = None
-        self.csv_point_vars: Union[List[str], None] = None
-        self.csv_outlet_allinone: bool = False
-        self.csv_outlet_fname: Union[str, None] = None
-        self.csv_outlet_nvars: int = 0
-        self.csv_outlet_vars: Union[List[str], None] = None
-        self.csv_ovrflw_fname: Union[str, None] = None
+    def __init__(
+            self,
+            out_dir: str = './',
+            out_fn: str = 'output',
+            nsave: int = 1,
+            csv_lake_fname: str = 'lake',
+            csv_point_nlevs: float = 0.0,
+            csv_point_fname: str = 'WQ_',
+            csv_point_frombot: Union[List[float], None] = None,
+            csv_point_at: Union[List[float], None] = None,
+            csv_point_nvars: Union[int, None] = None,
+            csv_point_vars: Union[List[str], None] = None,
+            csv_outlet_allinone: bool = False,
+            csv_outlet_fname: Union[str, None] = None,
+            csv_outlet_nvars: int = 0,
+            csv_outlet_vars: Union[List[str], None] = None,
+            csv_ovrflw_fname: Union[str, None] = None
+    ):
+        self.out_dir = out_dir
+        self.out_fn = out_fn
+        self.nsave = nsave
+        self.csv_lake_fname = csv_lake_fname
+        self.csv_point_nlevs = csv_point_nlevs
+        self.csv_point_fname = csv_point_fname
+        self.csv_point_frombot = csv_point_frombot
+        self.csv_point_at = csv_point_at
+        self.csv_point_nvars = csv_point_nvars
+        self.csv_point_vars = csv_point_vars
+        self.csv_outlet_allinone = csv_outlet_allinone
+        self.csv_outlet_fname = csv_outlet_fname
+        self.csv_outlet_nvars = csv_outlet_nvars
+        self.csv_outlet_vars = csv_outlet_vars
+        self.csv_ovrflw_fname = csv_ovrflw_fname
 
     def __str__(self):
         """Return the string representation of the NMLOutput object.
@@ -916,13 +978,16 @@ class NMLOutput(NMLBase):
              self.csv_point_frombot),
             (f"   csv_point_at = {self.comma_sep_list(self.csv_point_at)}",
              self.csv_point_at),
-            (f"   csv_point_nvars = {self.csv_point_nvars}",self.csv_point_nvars),
+            (f"   csv_point_nvars = {self.csv_point_nvars}",
+             self.csv_point_nvars),
             (f"   csv_point_vars = {self.comma_sep_list(self.csv_point_vars, True)}",
              self.csv_point_vars),
             (f"   csv_outlet_allinone = {self.fortran_bool_string(self.csv_outlet_allinone)}",
              self.csv_outlet_allinone),
-            (f"   csv_outlet_fname = '{self.csv_outlet_fname}'", self.csv_outlet_fname),
-            (f"   csv_outlet_nvars = {self.csv_outlet_nvars}",self.csv_outlet_nvars),
+            (f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
+             self.csv_outlet_fname),
+            (f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
+             self.csv_outlet_nvars),
             (f"   csv_outlet_vars = {self.comma_sep_list(self.csv_outlet_vars, True)}",
              self.csv_outlet_vars),
             (f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
@@ -933,6 +998,7 @@ class NMLOutput(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLInitProfiles(NMLBase):
     """Define the initial profiles block of a GLM simulation configuration.
@@ -988,15 +1054,25 @@ class NMLInitProfiles(NMLBase):
     >>> print(init_profile)
     """
 
-    def __init__(self):
-        self.lake_depth: Union[float, None] = None
-        self.num_depths: Union[int, None] = None
-        self.the_depths: Union[List[float], None] = None
-        self.the_temps: Union[List[float], None] = None
-        self.the_sals: Union[List[float], None] = None
-        self.num_wq_vars: Union[int, None] = 0
-        self.wq_names: Union[List[str], None] = None
-        self.wq_init_vals: Union[List[float], None] = [0.0]
+    def __init__(
+            self,
+            lake_depth: Union[float, None] = None,
+            num_depths: Union[int, None] = None,
+            the_depths: Union[List[float], None] = None,
+            the_temps: Union[List[float], None] = None,
+            the_sals: Union[List[float], None] = None,
+            num_wq_vars: Union[int, None] = 0,
+            wq_names: Union[List[str], None] = None,
+            wq_init_vals: Union[List[float], None] = [0.0]
+    ):
+        self.lake_depth = lake_depth
+        self.num_depths = num_depths
+        self.the_depths = the_depths
+        self.the_temps = the_temps
+        self.the_sals = the_sals
+        self.num_wq_vars = num_wq_vars
+        self.wq_names = wq_names
+        self.wq_init_vals = wq_init_vals
 
     def __str__(self):
         """Return the string representation of the NMLInitProfiles object.
@@ -1051,6 +1127,7 @@ class NMLInitProfiles(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLMeteorology(NMLBase):
     """Define the meteorology block of a GLM simulation configuration.
@@ -1162,33 +1239,61 @@ class NMLMeteorology(NMLBase):
     >>> print(meteorology)
     """
 
-    def __init__(self):
-        self.met_sw: bool = True
-        self.meteo_fl: Union[str, None] = None
-        self.subdaily: Union[bool, None] = None
-        self.time_fmt: Union[str, None] = None
-        self.rad_mode: Union[int, None] = None
-        self.albedo_mode: Union[int, None] = None
-        self.sw_factor: Union[float, None] = None
-        self.lw_type: Union[str, None] = None
-        self.cloud_mode: Union[int, None] = None
-        self.lw_factor: Union[float, None] = None
-        self.atm_stab: Union[int, None] = None
-        self.rh_factor: Union[float, None] = None
-        self.at_factor: Union[float, None] = None
-        self.ce: Union[float, None] = 0.0013
-        self.ch: Union[float, None] = 0.0013
-        self.rain_sw: Union[bool, None] = None
-        self.rain_factor: Union[float, None] = None
-        self.catchrain: Union[bool, None] = None
-        self.rain_threshold: Union[float, None] = None
-        self.runoff_coeff: Union[float, None] = None
-        self.cd: Union[float, None] = 0.0013
-        self.wind_factor: Union[float, None] = None
-        self.fetch_mode: int = 0
-        self.num_dir: Union[int, None] = None
-        self.wind_dir: Union[float, None] = None
-        self.fetch_scale: Union[float, None] = None
+    def __init__(
+            self,
+            met_sw: bool = True,
+            meteo_fl: Union[str, None] = None,
+            subdaily: Union[bool, None] = None,
+            time_fmt: Union[str, None] = None,
+            rad_mode: Union[int, None] = None,
+            albedo_mode: Union[int, None] = None,
+            sw_factor: Union[float, None] = None,
+            lw_type: Union[str, None] = None,
+            cloud_mode: Union[int, None] = None,
+            lw_factor: Union[float, None] = None,
+            atm_stab: Union[int, None] = None,
+            rh_factor: Union[float, None] = None,
+            at_factor: Union[float, None] = None,
+            ce: Union[float, None] = 0.0013,
+            ch: Union[float, None] = 0.0013,
+            rain_sw: Union[bool, None] = None,
+            rain_factor: Union[float, None] = None,
+            catchrain: Union[bool, None] = None,
+            rain_threshold: Union[float, None] = None,
+            runoff_coef: Union[float, None] = None,
+            cd: Union[float, None] = 0.0013,
+            wind_factor: Union[float, None] = None,
+            fetch_mode: int = 0,
+            num_dir: Union[int, None] = None,
+            wind_dir: Union[float, None] = None,
+            fetch_scale: Union[float, None] = None
+    ):
+        self.met_sw = met_sw
+        self.meteo_fl = meteo_fl
+        self.subdaily = subdaily
+        self.time_fmt = time_fmt
+        self.rad_mode = rad_mode
+        self.albedo_mode = albedo_mode
+        self.sw_factor = sw_factor
+        self.lw_type = lw_type
+        self.cloud_mode = cloud_mode
+        self.lw_factor = lw_factor
+        self.atm_stab = atm_stab
+        self.rh_factor = rh_factor
+        self.at_factor = at_factor
+        self.ce = ce
+        self.ch = ch
+        self.rain_sw = rain_sw
+        self.rain_factor = rain_factor
+        self.catchrain = catchrain
+        self.rain_threshold = rain_threshold
+        self.runoff_coef = runoff_coef
+        self.cd = cd
+        self.wind_factor = wind_factor
+        self.fetch_mode = fetch_mode
+        self.num_dir = num_dir
+        self.wind_dir = wind_dir
+        self.fetch_scale = fetch_scale
 
     def __str__(self):
         """Return the string representation of the NMLMeteorology object.
@@ -1267,6 +1372,7 @@ class NMLMeteorology(NMLBase):
             if param_val is not None
         )
 
+
 class NMLLight(NMLBase):
     """Define the light block of a GLM simulation configuration.
 
@@ -1310,14 +1416,23 @@ class NMLLight(NMLBase):
     >>> print(light)
     """
 
-    def __init__(self):
-        self.light_mode: int = 1
-        self.Kw: Union[float, None] = None
-        self.Kw_file: Union[str, None] = None
-        self.n_bands: Union[int, None] = 4
-        self.light_extc: Union[List[float], None] = None
-        self.energy_frac: Union[List[float], None] = None
-        self.Benthic_Imin: Union[float, None] = None
+    def __init__(
+            self,
+            light_mode: int = 1,
+            Kw: Union[float, None] = None,
+            Kw_file: Union[str, None] = None,
+            n_bands: Union[int, None] = 4,
+            light_extc: Union[List[float], None] = None,
+            energy_frac: Union[List[float], None] = None,
+            Benthic_Imin: Union[float, None] = None,
+    ):
+        self.light_mode = light_mode
+        self.Kw = Kw
+        self.Kw_file = Kw_file
+        self.n_bands = n_bands
+        self.light_extc = light_extc
+        self.energy_frac = energy_frac
+        self.Benthic_Imin = Benthic_Imin
 
     def __str__(self):
         """Return the string representation of the NMLLight object.
@@ -1361,6 +1476,7 @@ class NMLLight(NMLBase):
             if param_val is not None
         )
 
+
 class NMLBirdModel(NMLBase):
     """Define the bird model block of a GLM simulation configuration.
 
@@ -1402,13 +1518,21 @@ class NMLBirdModel(NMLBase):
     >>> print(bird_model)
     """
 
-    def __init__(self):
-        self.AP: Union[float, None]= None
-        self.Oz: Union[float, None]= None
-        self.WatVap: Union[float, None]= None
-        self.AOD500: Union[float, None]= None
-        self.AOD380: Union[float, None]= None
-        self.Albedo: Union[float, None]= 0.2
+    def __init__(
+            self,
+            AP: Union[float, None] = None,
+            Oz: Union[float, None] = None,
+            WatVap: Union[float, None] = None,
+            AOD500: Union[float, None] = None,
+            AOD380: Union[float, None] = None,
+            Albedo: Union[float, None] = 0.2
+    ):
+        self.AP = AP
+        self.Oz = Oz
+        self.WatVap = WatVap
+        self.AOD500 = AOD500
+        self.AOD380 = AOD380
+        self.Albedo = Albedo
 
     def __str__(self):
         """Return the string representation of the NMLBirdModel object.
@@ -1449,6 +1573,7 @@ class NMLBirdModel(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLInflows(NMLBase):
     """Define the inflows block of a GLM simulation configuration.
@@ -1513,19 +1638,33 @@ class NMLInflows(NMLBase):
     >>> print(inflows)
     """
 
-    def __init__(self):
-        self.num_inflows: int = 0
-        self.names_of_strms: Union[List[str], None] = None
-        self.subm_flag: Union[List[bool], None] = [False]
-        self.strm_hf_angle: Union[List[float], None] = None
-        self.strmbd_slope: Union[List[float], None] = None
-        self.strmbd_drag: Union[List[float], None] = None
-        self.coef_inf_entrain: Union[List[float], None] = None
-        self.inflow_factor: Union[List[float], None] = 1.0
-        self.inflow_fl: Union[List[str], None] = None
-        self.inflow_varnum: int = 0
-        self.inflow_vars: Union[List[str], None] = None
-        self.time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
+    def __init__(
+            self,
+            num_inflows: int = 0,
+            names_of_strms: Union[List[str], None] = None,
+            subm_flag: Union[List[bool], None] = [False],
+            strm_hf_angle: Union[List[float], None] = None,
+            strmbd_slope: Union[List[float], None] = None,
+            strmbd_drag: Union[List[float], None] = None,
+            coef_inf_entrain: Union[List[float], None] = None,
+            inflow_factor: Union[List[float], None] = 1.0,
+            inflow_fl: Union[List[str], None] = None,
+            inflow_varnum: int = 0,
+            inflow_vars: Union[List[str], None] = None,
+            time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
+    ):
+        self.num_inflows = num_inflows
+        self.names_of_strms = names_of_strms
+        self.subm_flag = subm_flag
+        self.strm_hf_angle = strm_hf_angle
+        self.strmbd_slope = strmbd_slope
+        self.strmbd_drag = strmbd_drag
+        self.coef_inf_entrain = coef_inf_entrain
+        self.inflow_factor = inflow_factor
+        self.inflow_fl = inflow_fl
+        self.inflow_varnum = inflow_varnum
+        self.inflow_vars = inflow_vars
+        self.time_fmt = time_fmt
 
     def __str__(self):
         """Return the string representation of the NMLInflows object.
@@ -1563,7 +1702,7 @@ class NMLInflows(NMLBase):
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
             (f"   names_of_strms = {self.comma_sep_list(self.names_of_strms, True)}",
              self.names_of_strms),
-            (f"   subm_flag = {self.comma_sep_list(self.fortran_bool_string(self.subm_flag))}",self.subm_flag),
+            (f"   subm_flag = {self.comma_sep_list(self.fortran_bool_string(self.subm_flag))}", self.subm_flag),
             (f"   strm_hf_angle = {self.comma_sep_list(self.strm_hf_angle)}",
              self.strm_hf_angle),
             (f"   strmbd_slope = {self.comma_sep_list(self.strmbd_slope)}",
@@ -1586,6 +1725,7 @@ class NMLInflows(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLOutflows(NMLBase):
     """Define the outflows block of a GLM simulation configuration.
@@ -1654,23 +1794,39 @@ class NMLOutflows(NMLBase):
     >>> print(outflows)
     """
 
-    def __init__(self):
-        self.num_outlet: int = 0
-        self.outflow_fl: Union[str, None] = None
-        self.flt_off_sw: Union[List[bool], None] = None
-        self.time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
-        self.outflow_factor: List[float]  = [1.0]
-        self.outflow_thick_limit: Union[List[float], None] = None
-        self.single_layer_draw: Union[List[bool], None] = [False]
-        self.flt_off_sw: Union[List[bool], None] = None
-        self.outlet_type: int = 1
-        self.outl_elvs: Union[List[float], None] = [0]
-        self.bsn_len_outl: Union[List[float], None] = None
-        self.bsn_wid_outl: Union[List[float], None] = None
-        self.seepage: Union[bool, None] = False
-        self.seepage_rate: Union[float, None] = 0.0
-        self.crest_width: Union[float, None] = 0.0
-        self.crest_factor: Union[float, None] = 0.0
+    def __init__(
+            self,
+            num_outlet: int = 0,
+            outflow_fl: Union[str, None] = None,
+            time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss',
+            outflow_factor: List[float] = [1.0],
+            outflow_thick_limit: Union[List[float], None] = None,
+            single_layer_draw: Union[List[bool], None] = [False],
+            flt_off_sw: Union[List[bool], None] = None,
+            outlet_type: int = 1,
+            outl_elvs: Union[List[float], None] = [0],
+            bsn_len_outl: Union[List[float], None] = None,
+            bsn_wid_outl: Union[List[float], None] = None,
+            seepage: Union[bool, None] = False,
+            seepage_rate: Union[float, None] = 0.0,
+            crest_width: Union[float, None] = 0.0,
+            crest_factor: Union[float, None] = 0.0
+    ):
+        self.num_outlet = num_outlet
+        self.outflow_fl = outflow_fl
+        self.time_fmt = time_fmt
+        self.outflow_factor = outflow_factor
+        self.outflow_thick_limit = outflow_thick_limit
+        self.single_layer_draw = single_layer_draw
+        self.flt_off_sw = flt_off_sw
+        self.outlet_type = outlet_type
+        self.outl_elvs = outl_elvs
+        self.bsn_len_outl = bsn_len_outl
+        self.bsn_wid_outl = bsn_wid_outl
+        self.seepage = seepage
+        self.seepage_rate = seepage_rate
+        self.crest_width = crest_width
+        self.crest_factor = crest_factor
 
     def __str__(self):
         """Return the string representation of the NMLOutflows object.
@@ -1712,7 +1868,7 @@ class NMLOutflows(NMLBase):
              self.outflow_thick_limit),
             (f"   single_layer_draw = {self.comma_sep_list(self.fortran_bool_string(self.single_layer_draw))}",
              self.single_layer_draw),
-             (f"   flt_off_sw = {self.comma_sep_list(self.fortran_bool_string(self.flt_off_sw))}",
+            (f"   flt_off_sw = {self.comma_sep_list(self.fortran_bool_string(self.flt_off_sw))}",
              self.flt_off_sw),
             (f"   outlet_type = {self.outlet_type}", self.outlet_type),
             (f"   outl_elvs = {self.comma_sep_list(self.outl_elvs)}",
@@ -1732,6 +1888,7 @@ class NMLOutflows(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLSediment(NMLBase):
     """Define the sediment block of a GLM simulation configuration.
@@ -1786,17 +1943,29 @@ class NMLSediment(NMLBase):
     >>> print(sediment)
     """
 
-    def __init__(self):
-        self.sed_heat_Ksoil: Union[float, None] = None
-        self.sed_temp_depth: Union[float, None] = None
-        self.sed_temp_mean: Union[List[float], None] = None
-        self.sed_temp_amplitude: Union[List[float], None] = None
-        self.sed_temp_peak_doy: Union[List[int], None] = None
-        self.benthic_mode: Union[int, None] = None
-        self.n_zones: Union[int, None] = 0
-        self.zone_heights: Union[List[float], None] = None
-        self.sed_reflectivity: Union[List[float], None] = [0]
-        self.sed_roughness: Union[List[float], None] = None
+    def __init__(
+            self,
+            sed_heat_Ksoil: Union[float, None] = None,
+            sed_temp_depth: Union[float, None] = None,
+            sed_temp_mean: Union[List[float], None] = None,
+            sed_temp_amplitude: Union[List[float], None] = None,
+            sed_temp_peak_doy: Union[List[int], None] = None,
+            benthic_mode: Union[int, None] = None,
+            n_zones: Union[int, None] = 0,
+            zone_heights: Union[List[float], None] = None,
+            sed_reflectivity: Union[List[float], None] = [0],
+            sed_roughness: Union[List[float], None] = None
+    ):
+        self.sed_heat_Ksoil = sed_heat_Ksoil
+        self.sed_temp_depth = sed_temp_depth
+        self.sed_temp_mean = sed_temp_mean
+        self.sed_temp_amplitude = sed_temp_amplitude
+        self.sed_temp_peak_doy = sed_temp_peak_doy
+        self.benthic_mode = benthic_mode
+        self.n_zones = n_zones
+        self.zone_heights = zone_heights
+        self.sed_reflectivity = sed_reflectivity
+        self.sed_roughness = sed_roughness
 
     def __str__(self):
         """Return the string representation of the NMLSediment object.
@@ -1829,8 +1998,10 @@ class NMLSediment(NMLBase):
         >>> print(sediment)
         """
         params = [
-            (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",self.sed_heat_Ksoil,),
-            (f"   sed_temp_depth = {self.sed_temp_depth}", self.sed_temp_depth,),
+            (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
+             self.sed_heat_Ksoil,),
+            (f"   sed_temp_depth = {self.sed_temp_depth}",
+             self.sed_temp_depth,),
             (f"   sed_temp_mean = {self.comma_sep_list(self.sed_temp_mean)}",
                 self.sed_temp_mean,),
             (f"   sed_temp_amplitude = {self.comma_sep_list(self.sed_temp_amplitude)}",
@@ -1843,13 +2014,15 @@ class NMLSediment(NMLBase):
                 self.zone_heights,),
             (f"   sed_reflectivity = {self.comma_sep_list(self.sed_reflectivity)}",
                 self.sed_reflectivity,),
-            (f"   sed_roughness = {self.comma_sep_list(self.sed_roughness)}", self.sed_roughness),
+            (f"   sed_roughness = {self.comma_sep_list(self.sed_roughness)}",
+             self.sed_roughness),
         ]
         return "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLIceSnow(NMLBase):
     """Define the ice/snow block of a GLM simulation configuration.
@@ -1881,10 +2054,15 @@ class NMLIceSnow(NMLBase):
     >>> print(ice_snow)
     """
 
-    def __init__(self):
-        self.snow_albedo_factor: float = 1.0
-        self.snow_rho_max: float = 300
-        self.snow_rho_min: float = 50
+    def __init__(
+            self,
+            snow_albedo_factor: float = 1.0,
+            snow_rho_max: float = 300,
+            snow_rho_min: float = 50
+    ):
+        self.snow_albedo_factor = snow_albedo_factor
+        self.snow_rho_max = snow_rho_max
+        self.snow_rho_min = snow_rho_min
 
     def __str__(self):
         """Return the string representation of the NMLIceSnow object.
@@ -1910,7 +2088,7 @@ class NMLIceSnow(NMLBase):
         >>> print(ice_snow)
         """
         params = [
-            ( f"   snow_albedo_factor = {self.snow_albedo_factor}",
+            (f"   snow_albedo_factor = {self.snow_albedo_factor}",
              self.snow_albedo_factor,),
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
             (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
@@ -1920,6 +2098,7 @@ class NMLIceSnow(NMLBase):
             for param_str, param_val in params
             if param_val is not None
         )
+
 
 class NMLWQSetup(NMLBase):
     """Define the water quality setup block of a GLM simulation configuration.
@@ -1965,14 +2144,23 @@ class NMLWQSetup(NMLBase):
     >>> print(wq_setup)
     """
 
-    def __init__(self):
-        self.wq_lib: str = 'aed2'
-        self.wq_nml_file: str = './aed2.nml'
-        self.bioshade_feedback: Union[bool, None] = None
-        self.mobility_off: bool = False
-        self.ode_method: Union[int, None] = None
-        self.split_factor: float = 1.0
-        self.repair_state: bool = True
+    def __init__(
+            self,
+            wq_lib: str = 'aed2',
+            wq_nml_file: str = './aed2.nml',
+            bioshade_feedback: Union[bool, None] = None,
+            mobility_off: bool = False,
+            ode_method: Union[int, None] = None,
+            split_factor: float = 1.0,
+            repair_state: bool = True
+    ):
+        self.wq_lib = wq_lib
+        self.wq_nml_file = wq_nml_file
+        self.bioshade_feedback = bioshade_feedback
+        self.mobility_off = mobility_off
+        self.ode_method = ode_method
+        self.split_factor = split_factor
+        self.repair_state = repair_state
 
     def __str__(self):
         """Return the string representation of the NMLWQSetup object.
