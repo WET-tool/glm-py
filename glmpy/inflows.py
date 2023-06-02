@@ -6,10 +6,9 @@ class CatchmentInflows:
     """
     Calculates the catchment inflows for the GLM model.
 
-    The `CatchmentInflows` class reads the GLM meteorological data from a CSV
-    file, calculates inflows (m^3) using the provided catchment area and runoff
-    coefficient, and writes the inflows to a CSV file. The data can be
-    optionally resampled from hourly to daily timestep before writing.
+    The `CatchmentInflows` class reads the GLM meteorological data to calculate
+    inflows (m^3/day) using the provided catchment area and runoff
+    coefficient/threshold. Inflows can then be written to a CSV file.
 
     Attributes
     ----------
@@ -23,7 +22,8 @@ class CatchmentInflows:
             Dataframe of meteorological data. Required if `input_type` is
             'dataframe'.
         precip_col : str
-            Name of the column in the CSV file containing precipitation data.
+            Name of the column in the CSV file containing precipitation data in
+            m/day.
         catchment_area : float
             Area of the catchment in square meters.
         runoff_coef : Union[float, None]
@@ -31,7 +31,7 @@ class CatchmentInflows:
             will result in runoff. Either `runoff_coef` or `runoff_threshold`
             must be provided.
         runoff_threshold : Union[float, None]
-            Runoff threshold for the catchment. The amount of rainfall in mm to
+            Runoff threshold for the catchment. The amount of rainfall in m to
             generate runoff. Either `runoff_coef` or `runoff_threshold` must be
             provided.
         date_time_col : str
@@ -131,6 +131,7 @@ class CatchmentInflows:
             if not isinstance(self.runoff_threshold, (int, float)):
                 raise ValueError(
                     "runoff_threshold must be numeric.")
+            self.runoff_threshold / 1000
             inflow_data = (precip_data - self.runoff_threshold) * \
                 self.catchment_area
             inflow_data[inflow_data < 0] = 0
@@ -139,7 +140,7 @@ class CatchmentInflows:
             "time": pd.to_datetime(
                 met_data[self.date_time_col], format=self.date_time_format
             ),
-            "flow": inflow_data
+            "flow": inflow_data/86400
         })
 
         self.catchment_inflows.set_index("time", inplace=True)
@@ -147,7 +148,7 @@ class CatchmentInflows:
     def write_inflows(
         self,
         path_to_inflow_csv: str,
-        resample_daily: bool = False,
+        resample_daily: bool = True,
     ):
         """
         Writes the inflow data to a CSV file.
@@ -161,7 +162,7 @@ class CatchmentInflows:
                 Path to the output CSV file.
             resample_daily : bool
                 If True, resample the inflow data from hourly to daily
-                timestep. Defaults to False.
+                timestep. Defaults to True.
 
         Examples
         --------
