@@ -7,7 +7,7 @@ class CatchmentInflows:
     Calculates the catchment inflows for the GLM model.
 
     The `CatchmentInflows` class reads the GLM meteorological data to calculate
-    inflows (m^3/day) using the provided catchment area and runoff
+    inflows (m^3/s) using the provided catchment area and runoff
     coefficient/threshold. Inflows can then be written to a CSV file.
 
     Attributes
@@ -85,7 +85,6 @@ class CatchmentInflows:
         date_time_format: str = "%Y-%m-%d %H:%M"
     ):
         self.input_type = input_type
-        self.met_data = met_data
         self.path_to_met_csv = path_to_met_csv
         self.precip_col = precip_col
         self.catchment_area = catchment_area
@@ -99,20 +98,27 @@ class CatchmentInflows:
                 raise ValueError(
                     "path_to_met_csv cannot be None when input_type is 'file'."
                 )
-            met_data = pd.read_csv(path_to_met_csv)
+            self.met_data = pd.read_csv(path_to_met_csv)
         elif self.input_type == 'dataframe':
             if met_data is None:
                 raise ValueError(
                     "met_data cannot be None when input_type is 'dataframe'.")
-            met_data = met_data
+            self.met_data = met_data
         else:
             raise ValueError(
                 "Invalid input_type. Must be 'file' or 'dataframe'.")
 
-        if self.precip_col not in met_data.columns:
+        if not isinstance(self.catchment_area, (int, float)):
+            raise ValueError(
+                "catchment_area must be numeric.")
+
+        if self.catchment_area < 0:
+            raise ValueError("catchment_area must be positive.")
+
+        if self.precip_col not in self.met_data.columns:
             raise ValueError(f"{self.precip_col} not in met_data columns.")
 
-        precip_data = met_data[self.precip_col].astype(float)
+        precip_data = self.met_data[self.precip_col].astype(float)
 
         if self.runoff_coef is None and self.runoff_threshold is None:
             raise ValueError(
@@ -127,6 +133,8 @@ class CatchmentInflows:
                 raise ValueError(
                     "runoff_coef must be numeric.")
             inflow_data = precip_data * self.catchment_area * self.runoff_coef
+            inflow_data[inflow_data < 0] = 0
+            inflow_data = inflow_data/86400
         else:
             if not isinstance(self.runoff_threshold, (int, float)):
                 raise ValueError(
@@ -135,34 +143,31 @@ class CatchmentInflows:
             inflow_data = (precip_data - self.runoff_threshold) * \
                 self.catchment_area
             inflow_data[inflow_data < 0] = 0
+            inflow_data = inflow_data/86400
 
         self.catchment_inflows = pd.DataFrame({
             "time": pd.to_datetime(
-                met_data[self.date_time_col], format=self.date_time_format
+                self.met_data[self.date_time_col], format=self.date_time_format
             ),
-            "flow": inflow_data/86400
+            "flow": inflow_data
         })
 
         self.catchment_inflows.set_index("time", inplace=True)
 
     def write_inflows(
         self,
-        path_to_inflow_csv: str,
-        resample_daily: bool = True,
+        path_to_inflow_csv: str
     ):
         """
         Writes the inflow data to a CSV file.
 
-        The inflow data can be optionally resampled from hourly to daily
-        timestep before writing.
+        The inflow data is resampled to a daily timestep before writing to
+        file.
 
         Parameters
         ----------
             path_to_inflow_csv : str
                 Path to the output CSV file.
-            resample_daily : bool
-                If True, resample the inflow data from hourly to daily
-                timestep. Defaults to True.
 
         Examples
         --------
@@ -184,10 +189,7 @@ class CatchmentInflows:
         ...     date_time_col = 'Date',
         ...     date_time_format= '%Y-%m-%d %H:%M:%S'
         ... )
-        >>> inflows.write_inflows("runoff.csv", resample_daily = True)
+        >>> inflows.write_inflows("runoff.csv")
         """
-        if resample_daily is False:
-            self.catchment_inflows.to_csv(path_to_inflow_csv)
-        else:
-            self.catchment_inflows = self.catchment_inflows.resample("D").sum()
-            self.catchment_inflows.to_csv(path_to_inflow_csv)
+        self.catchment_inflows = self.catchment_inflows.resample("D").sum()
+        self.catchment_inflows.to_csv(path_to_inflow_csv)
