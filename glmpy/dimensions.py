@@ -30,7 +30,11 @@ class SimpleTruncatedPyramidWaterBody:
     """
 
     def __init__(
-        self, height: float, surface_width, surface_length, side_slope=3
+        self,
+        height: float,
+        surface_width: float,
+        surface_length: float,
+        side_slope: float = 3
     ):
         try:
             self.height = float(height)
