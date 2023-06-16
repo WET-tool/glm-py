@@ -3,6 +3,7 @@ site_name: GLM-py
 theme:
     name: material
     logo: 'img/glm-icon2.png'
+    custom_dir: custom_theme/
 
 extra_css:
     - css/extra.css
@@ -23,6 +24,8 @@ extra:
 
 nav:
   - glm-py: index.md
+  - How To: how-to.md
+  - Tutorials: tutorials.md
   - API Reference:
     - NML: nml.md
     - Dimensions: dimensions.md
