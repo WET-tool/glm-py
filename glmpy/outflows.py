@@ -50,6 +50,11 @@ class Outflows:
                 "start_date and end_date must be in valid 'YYYY-MM-DD' format."
             )
 
+        if datetime.strptime(self.start_date, "%Y-%m-%d") > datetime.strptime(self.end_date, "%Y-%m-%d"):
+            raise ValueError(
+                "start_date must be before end_date."
+            )
+
         if self.base_flow < 0:
             raise ValueError(
                 "base_flow must be positive."
@@ -194,6 +199,11 @@ class Outflows:
         if self.outflow_volume < 0:
             raise ValueError(
                 "outflow_volume must be positive."
+            )
+
+        if datetime.strptime(self.outflow_start_date, "%Y-%m-%d") > datetime.strptime(self.outflow_end_date, "%Y-%m-%d"):
+            raise ValueError(
+                "outflow_start_date must be before outflow_end_date."
             )
 
         if not (self.start_date <= self.outflow_start_date <= self.outflow_end_date <= self.end_date):
