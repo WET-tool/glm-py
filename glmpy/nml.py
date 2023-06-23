@@ -1652,7 +1652,7 @@ class NMLInflows(NMLBase):
             inflow_fl: Union[List[str], None] = None,
             inflow_varnum: int = 0,
             inflow_vars: Union[List[str], None] = None,
-            time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss'
+            time_fmt: Union[str, None] = None  # 'YYYY-MM-DD hh:mm:ss'
     ):
         self.num_inflows = num_inflows
         self.names_of_strms = names_of_strms
@@ -1755,8 +1755,8 @@ class NMLOutflows(NMLBase):
     flt_off_sw : Union[List[bool], None]
         Switch to indicate if the outflows are floating offtakes
         (taking water from near the surface). Default is None.
-    outlet_type : int
-        Switch to configure approach of each withdrawal. Default is 1.
+    outlet_type : Union[List[int], None]
+        Switch to configure approach of each withdrawal. Default is None.
     outl_elvs : Union[List[float], None]
         Outlet elevations (m). Default is [0].
     bsn_len_outl : Union[List[float], None]
@@ -1799,19 +1799,19 @@ class NMLOutflows(NMLBase):
             self,
             num_outlet: int = 0,
             outflow_fl: Union[str, None] = None,
-            time_fmt: Union[str, None] = 'YYYY-MM-DD hh:mm:ss',
+            time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss',
             outflow_factor: List[float] = [1.0],
             outflow_thick_limit: Union[List[float], None] = None,
-            single_layer_draw: Union[List[bool], None] = [False],
+            single_layer_draw: Union[List[bool], None] = None,
             flt_off_sw: Union[List[bool], None] = None,
-            outlet_type: int = 1,
-            outl_elvs: Union[List[float], None] = [0],
+            outlet_type: Union[List[int], None] = None,
+            outl_elvs: Union[List[float], None] = None,  # [0],
             bsn_len_outl: Union[List[float], None] = None,
             bsn_wid_outl: Union[List[float], None] = None,
-            seepage: Union[bool, None] = False,
-            seepage_rate: Union[float, None] = 0.0,
-            crest_width: Union[float, None] = 0.0,
-            crest_factor: Union[float, None] = 0.0
+            seepage: Union[bool, None] = None,  # False,
+            seepage_rate: Union[float, None] = None,  # 0.0,
+            crest_width: Union[float, None] = None,  # 0.0,
+            crest_factor: Union[float, None] = None,  # 0.0
     ):
         self.num_outlet = num_outlet
         self.outflow_fl = outflow_fl
