@@ -31,3 +31,5 @@ nav:
     - Dimensions: dimensions.md
     - JSON: json-to-nml.md
     - Simulations: simulation.md
+    - Inflows: inflows.md
+    - Outflows: outflows.md

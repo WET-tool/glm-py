@@ -12,32 +12,32 @@ class CatchmentInflows:
 
     Attributes
     ----------
-        input_type : str
-            Type of input data. Must be 'file' or 'dataframe'. Defaults to
-            'file'.
-        path_to_met_csv : Union[str, None]
-            Path to the CSV file containing the meteorological data. Required
-            if `input_type` is 'file'.
-        met_data : Union[pd.DataFrame, None]
-            Dataframe of meteorological data. Required if `input_type` is
-            'dataframe'.
-        precip_col : str
-            Name of the column in the CSV file containing precipitation data in
-            m/day.
-        catchment_area : float
-            Area of the catchment in square meters.
-        runoff_coef : Union[float, None]
-            Runoff coefficient for the catchment. The fraction of rainfall that
-            will result in runoff. Either `runoff_coef` or `runoff_threshold`
-            must be provided.
-        runoff_threshold : Union[float, None]
-            Runoff threshold for the catchment. The amount of rainfall in m to
-            generate runoff. Either `runoff_coef` or `runoff_threshold` must be
-            provided.
-        date_time_col : str
-            Name of the column in the CSV file containing datetime data.
-        date_time_format : str
-            Format of the datetime data. Defaults to '%Y-%m-%d %H:%M'.
+    input_type : str
+        Type of input data. Must be 'file' or 'dataframe'. Defaults to
+        'file'.
+    path_to_met_csv : Union[str, None]
+        Path to the CSV file containing the meteorological data. Required
+        if `input_type` is 'file'.
+    met_data : Union[pd.DataFrame, None]
+        Dataframe of meteorological data. Required if `input_type` is
+        'dataframe'.
+    precip_col : str
+        Name of the column in the CSV file containing precipitation data in
+        m/day.
+    catchment_area : float
+        Area of the catchment in square meters.
+    runoff_coef : Union[float, None]
+        Runoff coefficient for the catchment. The fraction of rainfall that
+        will result in runoff. Either `runoff_coef` or `runoff_threshold`
+        must be provided.
+    runoff_threshold : Union[float, None]
+        Runoff threshold for the catchment. The amount of rainfall in m to
+        generate runoff. Either `runoff_coef` or `runoff_threshold` must be
+        provided.
+    date_time_col : str
+        Name of the column in the CSV file containing datetime data.
+    date_time_format : str
+        Format of the datetime data. Defaults to '%Y-%m-%d %H:%M'.
 
     Examples
     --------
@@ -166,8 +166,8 @@ class CatchmentInflows:
 
         Parameters
         ----------
-            path_to_inflow_csv : str
-                Path to the output CSV file.
+        path_to_inflow_csv : str
+            Path to the output CSV file.
 
         Examples
         --------

@@ -14,14 +14,14 @@ class Outflows:
 
     Attributes
     ----------
-        start_date : str
-            Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-            format.
-        end_date : str
-            End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-            format.
-        base_flow : float
-            Base flow of the outflow timeseries in ??? units. Defaults to 0.0.
+    start_date : str
+        Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
+        format.
+    end_date : str
+        End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
+        format.
+    base_flow : float
+        Base flow of the outflow timeseries in ??? units. Defaults to 0.0.
 
     Examples
     --------
@@ -91,8 +91,8 @@ class Outflows:
 
         Parameters
         ----------
-            outflows_dict : dict[str, float]
-                Dictionary with dates as keys and outflow volumes as values.
+        outflows_dict : dict[str, float]
+            Dictionary with dates as keys and outflow volumes as values.
 
         Examples
         --------
@@ -162,14 +162,14 @@ class Outflows:
 
         Parameters
         ----------
-            outflow_start_date : str
-                Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-                format.
-            outflow_end_date : str
-                End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-                format.
-            outflow_volume : float
-                Outflow volume between the start date and end date in ??? units.
+        outflow_start_date : str
+            Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
+            format.
+        outflow_end_date : str
+            End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
+            format.
+        outflow_volume : float
+            Outflow volume between the start date and end date in ??? units.
 
         Examples
         --------
@@ -248,9 +248,9 @@ class Outflows:
 
         Parameters
         ----------
-            path_to_outflows_csv : str
-                Path to the csv file to which the outflow timeseries will be
-                written.
+        path_to_outflows_csv : str
+            Path to the csv file to which the outflow timeseries will be
+            written.
 
         Examples
         --------
