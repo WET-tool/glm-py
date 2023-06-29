@@ -76,7 +76,8 @@ For simple water bodies, `glmpy` provides some classes to conveniently calculate
 
 The [`SimpleTruncatedPyramidWaterBody`](dimensions.md#glmpy.dimensions.SimpleTruncatedPyramidWaterBody) class can be used for pyramidal water bodies with a rectangular base:
 
-![Graphical representation of the SimpleTruncatedPyramidWaterBody](docs/../img/SimpleTruncatedPyramidWaterBody.png)
+![Graphical representation of the SimpleTruncatedPyramidWaterBody](docs/../img/SimpleTruncatedPyramidWaterBody.png#only-light)
+![Graphical representation of the SimpleTruncatedPyramidWaterBody](docs/../img/SimpleTruncatedPyramidWaterBody-dark.png#only-dark)
 
 ```python
 from glmpy import dimensions

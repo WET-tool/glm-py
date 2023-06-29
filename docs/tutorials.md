@@ -27,7 +27,7 @@ from glmpy import nml
 
 The `nml` module provides a set of methods and classes to work with namelist files (`.nml`), which are used to configure the model parameters of GLM. Each GLM simulation requires a namelist file containing a list of the model parameters and their values. The GLM namelist file is divided into multiple blocks that configure specific aspects of the simulation, e.g., the lake morphometry. The structure of a GLM namelist file is shown below for four of the required blocks (`...` indicates that the block contains more parameters than shown):
 
-```fortran
+```
 &glm_setup
   sim_name = 'GLMSimulation'
   ...
