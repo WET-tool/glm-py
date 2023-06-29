@@ -17,6 +17,11 @@ plugins:
           docstring_style: numpy
           show_source: false
 
+markdown_extensions:
+    - toc:
+        permalink: True
+
+
 extra:
   social:
     - icon: "fontawesome/brands/github"
@@ -24,7 +29,7 @@ extra:
 
 nav:
   - glm-py: index.md
-  - How To: how-to.md
+  - How-to: how-to.md
   - Tutorials: tutorials.md
   - API Reference:
     - NML: nml.md
