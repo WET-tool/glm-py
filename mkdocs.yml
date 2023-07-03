@@ -50,7 +50,9 @@ extra:
 nav:
   - glm-py: index.md
   - How-to: how-to.md
-  - Tutorials: tutorials.md
+  - Tutorials:
+    - Sparkling Lake: sparkling-lake-tutorial.md
+    - Farm Dam: farm-dam-tutorial.md
   - API Reference:
     - NML: nml.md
     - Dimensions: dimensions.md
