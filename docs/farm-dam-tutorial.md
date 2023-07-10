@@ -72,7 +72,7 @@ Here, we have specified the `timefmt` as `2` which configures GLM to accept `sta
 
 ### Dam morphometry
 
-Next, let's define the dam morphometry, i.e., the physical dimensions that capture the shape of the water body. GLM records the morphometry of a water body by a list of height and surface area pairs. The heights are vertical distances from the bottom of the water body to the surface. The surface areas are the horizontal area of the water body at the each height increment. The number of height/surface-area pairs largely depends on how complex the morphometry is. For dams, the morphometry is simple and often resembles an truncated pyramid that has been inverted. Conveniently, `glmpy` provides a `SimpleTruncatedPyramidWaterBody` class in the `dimensions` module to easily calculate the height/surface-area pairs!
+Next, we'll define the dam morphometry, i.e., the physical dimensions that capture the shape of the water body. GLM records the morphometry of a water body by a list of height and surface area pairs. The heights are vertical distances from the bottom of the water body to the surface. Similarly, the surface areas are the horizontal area of the water body at the each height increment. The number of height/surface-area pairs you need to provide largely depends on how complex the morphometry is. For dams, the morphometry is simple. Most farm dams often resembles an truncated pyramid that has been inverted. Conveniently, `glmpy` provides a `SimpleTruncatedPyramidWaterBody` class in the `dimensions` module to easily calculate the height/surface-area pairs!
 
 ```python
 from gplmpy import dimensions
@@ -87,7 +87,7 @@ The `SimpleTruncatedPyramidWaterBody` constructor takes the following arguments:
 ![Graphical representation of the SimpleTruncatedPyramidWaterBody](docs/../img/SimpleTruncatedPyramidWaterBody.png#only-light)
 ![Graphical representation of the SimpleTruncatedPyramidWaterBody](docs/../img/SimpleTruncatedPyramidWaterBody-dark.png#only-dark)
 
-Three of these arguments are known from the information on our map. The `side_slope` is unknown so here we will make an assumption. Farm dams in the WA Wheatbelt are typically constructed with a side slope of 3:1. This means the dam slopes 3 metres vertically for every 1 metre horizontally. Based on this assumption we can now construct the `SimpleTruncatedPyramidWaterBody` object.
+Three of these arguments are known from the information on our map: `height`, `surface_width`, and `surface_length`. The `side_slope` is unknown so here we will make an assumption. Farm dams in the WA Wheatbelt are typically constructed with a side slope of 3:1. This means the dam slopes 3 metres vertically for every 1 metre horizontally. Based on this assumption we can now construct the `SimpleTruncatedPyramidWaterBody` object.
 
 ```python
 dam_morphometry = dimensions.SimpleTruncatedPyramidWaterBody(
@@ -98,7 +98,7 @@ dam_morphometry = dimensions.SimpleTruncatedPyramidWaterBody(
 )
 ```
 
-Calling the  `get_heights()` and `get_surface_areas()` method on the `dam_morphometry` object returns a list of height/surface-area pairs.
+By calling the  `get_heights()` and `get_surface_areas()` method on the `dam_morphometry` object you can return a list of height/surface-area pairs.
 
 ```python
 dam_morphometry.get_heights()
@@ -116,7 +116,7 @@ dam_morphometry.get_surface_areas()
 [2151.111, 2215.111, 2280.0, 2345.774, 2412.444, 2480.0]
 ```
 
-We can now plug this information into the `NMLMorphometry` constructor.
+We now have the morphometry of our dam! Let's use these values as inputs to the `NMLMorphometry` constructor.
 
 ```python
 morphometry = nml.NMLMorphometry(
@@ -129,6 +129,22 @@ morphometry = nml.NMLMorphometry(
     bsn_wid = 40,
     H = dam_morphometry.get_heights(),
     A = dam_morphometry.get_surface_areas()
+)
+```
+
+### Initial profiles
+
+Let's fill up the dam! The `&init_profiles` component of the GLM `.nml` file defines the initial state of water in the dam. We provide the initial water level (`lake_depth`), the water quality variables we want to simulate, and a set of depths where we can set the initialise certain coniditions in the water profile.
+
+In this simulation, we're only interested in the water balance of our farm dam so we'll ignore the water quality variables. Our dam will start with 4 m of water and we'll set two depths at which we well initialise water temperature/salinity. The first depth will be at 1 m and the second at 3 m. We'll set the temperature and salinity at both depths to 18 °C and 0 ppt, respectively.
+
+```python
+init_profiles = nml.NMLInitProfiles(
+    lake_depth = 4,
+    num_depth = 2,
+    the_depths = [1, 3],
+    the_temps = [18.0, 18.0],
+    the_sals = [0.0, 0.0]
 )
 ```
 
