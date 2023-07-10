@@ -1,4 +1,6 @@
 site_name: GLM-py
+repo_url: https://github.com/WET-tool/glm-py
+repo_name: WET-tool/glm-py
 
 theme:
     name: material
@@ -6,14 +8,20 @@ theme:
     custom_dir: custom_theme/
     features:
       - content.code.copy
+      - navigation.tabs
+      - navigation.top
     palette:
     # Palette toggle for light mode
     - scheme: default
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     # Palette toggle for dark mode
     - scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -22,6 +30,7 @@ extra_css:
     - css/extra.css
 
 plugins:
+- search
 - mkdocstrings:
     default_handler: python
     handlers:
@@ -29,6 +38,7 @@ plugins:
         options:
           docstring_style: numpy
           show_source: false
+
 
 markdown_extensions:
   - toc:
@@ -40,6 +50,10 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 extra:
   social:
@@ -47,7 +61,7 @@ extra:
       link: "https://github.com/"
 
 nav:
-  - glm-py: index.md
+  - Home: index.md
   - How-to: how-to.md
   - Tutorials:
     - Sparkling Lake: sparkling-lake-tutorial.md

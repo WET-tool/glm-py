@@ -75,7 +75,7 @@ Here, we have specified the `timefmt` as `2` which configures GLM to accept `sta
 Next, we'll define the dam morphometry, i.e., the physical dimensions that capture the shape of the water body. GLM records the morphometry of a water body by a list of height and surface area pairs. The heights are vertical distances from the bottom of the water body to the surface. Similarly, the surface areas are the horizontal area of the water body at the each height increment. The number of height/surface-area pairs you need to provide largely depends on how complex the morphometry is. For dams, the morphometry is simple. Most farm dams often resembles an truncated pyramid that has been inverted. Conveniently, `glmpy` provides a `SimpleTruncatedPyramidWaterBody` class in the `dimensions` module to easily calculate the height/surface-area pairs!
 
 ```python
-from gplmpy import dimensions
+from glmpy import dimensions
 ```
 The `SimpleTruncatedPyramidWaterBody` constructor takes the following arguments:
 
@@ -116,15 +116,27 @@ dam_morphometry.get_surface_areas()
 [2151.111, 2215.111, 2280.0, 2345.774, 2412.444, 2480.0]
 ```
 
-We now have the morphometry of our dam! Let's use these values as inputs to the `NMLMorphometry` constructor.
+We now have the morphometry of our dam! Let's use these values as inputs to the `NMLMorphometry` constructor. We'll need to set the following arguments:
+
+- `lake_name`: The name of the water body
+- `latitude`: The latitude of the water body
+- `longitude`: The longitude of the water body
+- `base_elev`: The elevation of the bottom of the water body
+- `crest_elev`: The elevation of the top of the water body
+- `bsn_len`: The surface length of the water body in metres
+- `bsn_wid`: The sureface width of the water body in metres
+- `A`: A list of surface areas. We just calculated this!
+- `H`: A list of heights. We just calculated this!
+
+`latitude` and `longitude` are easy, just check the map! What about `base_elev` and `crest_elev`? On this farm in the Wheatbelt we're 332 m above sea level. We'll set the `crest_elev` to `332`, and the `base_elev` to `332 - 5`, i.e., minus the dam depth. `bsn_wid` and `bsn_len` are the surface dimensions of the dam while `A` and `H` are values we calculated from the `dam_morphometry` object.
 
 ```python
 morphometry = nml.NMLMorphometry(
     lake_name = "Farm dam",
     latitude = -32.474,
     longitude = 116.988,
-    base_elev = dam_morphometry.get_heights()[0],
-    crest_elev = dam_morphometry.get_heights()[-1],
+    base_elev = 327,
+    crest_elev = 332,
     bsn_len = 62,
     bsn_wid = 40,
     H = dam_morphometry.get_heights(),
@@ -134,9 +146,9 @@ morphometry = nml.NMLMorphometry(
 
 ### Initial profiles
 
-Let's fill up the dam! The `&init_profiles` component of the GLM `.nml` file defines the initial state of water in the dam. We provide the initial water level (`lake_depth`), the water quality variables we want to simulate, and a set of depths where we can set the initialise certain coniditions in the water profile.
+Let's fill up the dam! The `&init_profiles` component of the GLM `.nml` file defines the initial state of water in the dam. We provide the initial water level (`lake_depth`), the water quality variables we want to simulate, and a set of depths where we can set the initialise certain conditions in the water profile.
 
-In this simulation, we're only interested in the water balance of our farm dam so we'll ignore the water quality variables. Our dam will start with 4 m of water and we'll set two depths at which we well initialise water temperature/salinity. The first depth will be at 1 m and the second at 3 m. We'll set the temperature and salinity at both depths to 18 °C and 0 ppt, respectively.
+In this simulation, we're only interested in the water balance of our farm dam so we'll ignore the water quality variables. Our dam will start with 4 m of water and we'll set two depths at which we we'll initialise water temperature/salinity. The first depth will be at 1 m and the second at 3 m. We'll set the temperature and salinity at both depths to 18 °C and 0 ppt, respectively.
 
 ```python
 init_profiles = nml.NMLInitProfiles(
@@ -150,20 +162,39 @@ init_profiles = nml.NMLInitProfiles(
 
 ### Meteorology
 
-Rainfall data from the Bureau of Meteorology (BoM) is available for the nearby Wheatbelt town of Pingelly is available from the [here](/docs/data/rainfall-farm-dam-tutorial.csv).
+To setup the meteorology component of the `.nml` file we need some nearby data on rainfall and temperature for each day of our simulation. Click [here](/data/dam_tutorial_met_data.csv) to download some pre-prepared data from the Bureau of Meteorology's weather station at the nearby town of Pingelly:
+
+Inspecting the CSV, you'll see daily observations from `2010-01-01 00:00:00` to `2020-12-31 00:00:00`:
+
+|        date         | temperature | rainfall |
+| :-----------------: | :---------: | :------: |
+| 2010-01-01 00:00:00 |    29.5     |   0.0    |
+| 2010-01-02 00:00:00 |    33.4     |   0.0    |
+| 2010-01-03 00:00:00 |    38.6     |   0.0    |
+| 2010-01-04 00:00:00 |    32.2     |   0.0    |
+| 2010-01-05 00:00:00 |    37.2     |   0.0    |
 
 ```python
 meteorology = nml.NMLMeteorology(
-    meteo_fl = 'path/to/rainfall-farm-dam-tutorial.csv',
-    time_fmt = 'YYYY-MM-DD`
+    met_sw = True,
+    meteo_fl = 'path/to/dam_tutorial_met_data.csv',
+    subdaily = False,
+    time_fmt = 'YYYY-MM-DD hh:mm:ss',
+    ???
 )
 ```
 
 ### Catchment inflows
 
+Let's now return to the large catchment mentioned at the beginning of this tutorial. During a rainfall event, this catchment captures additional inputs from beyond the spatial extent of the dam. This can be accounted for by configuring the `&inflows` component of the `.nml`. Catchment inflows are a function of the catchment area, rainfall, and a runoff threshold. The `NMLInflows` class expects a CSV with inflows pre-calculated for each day of the simulation. We'll use some of the additional functionality in `glmpy` to calculate this timeseries.
+
+Start by importing the `inflows` module:
+
 ```python
 from glmpy import inflows
 ```
+
+The `CatchmentInflows` class will calculate daily inflows from the catchment area and our meteorological data. Dam catchments typically start producing runoff when rainfall exceeds 8 mm.
 
 ```python
 inflows = inflows.CatchmentInflows(
