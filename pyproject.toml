@@ -26,3 +26,7 @@ dependencies = [
 Repository = "https://github.com/WET-tool/glm-py"
 
 [project.scripts]
+
+[tool.setuptools.packages.find]
+include = ["glmpy", "glmpy.*"]
+namespaces = false

@@ -35,52 +35,47 @@ class Outflows:
 
     """
 
-    def __init__(
-            self,
-            start_date: str,
-            end_date: str,
-            base_flow: float = 0.0
-    ):
+    def __init__(self, start_date: str, end_date: str, base_flow: float = 0.0):
         self.start_date = start_date
         self.end_date = end_date
         self.base_flow = base_flow
 
-        if not Outflows.vali_date(self.start_date) or not Outflows.vali_date(self.end_date):
+        if not Outflows.vali_date(self.start_date) or not Outflows.vali_date(
+            self.end_date
+        ):
             raise ValueError(
                 "start_date and end_date must be in valid 'YYYY-MM-DD' format."
             )
 
-        if datetime.strptime(self.start_date, "%Y-%m-%d") > datetime.strptime(self.end_date, "%Y-%m-%d"):
-            raise ValueError(
-                "start_date must be before end_date."
-            )
+        if datetime.strptime(self.start_date, "%Y-%m-%d") > datetime.strptime(
+            self.end_date, "%Y-%m-%d"
+        ):
+            raise ValueError("start_date must be before end_date.")
 
         if self.base_flow < 0:
-            raise ValueError(
-                "base_flow must be positive."
-            )
+            raise ValueError("base_flow must be positive.")
 
-        self.outflows = pd.DataFrame({
-            'time': pd.date_range(
-                start=start_date,
-                end=end_date,
-                freq='D'),
-            'flow': base_flow
-        })
+        self.outflows = pd.DataFrame(
+            {
+                "time": pd.date_range(
+                    start=start_date, end=end_date, freq="D"
+                ),
+                "flow": base_flow,
+            }
+        )
 
     @staticmethod
     def vali_date(date_text: str):
         try:
-            if date_text != datetime.strptime(date_text, "%Y-%m-%d").strftime('%Y-%m-%d'):
+            if date_text != datetime.strptime(date_text, "%Y-%m-%d").strftime(
+                "%Y-%m-%d"
+            ):
                 return False
             return True
         except ValueError:
             return False
 
-    def set_discrete_outflows(
-            self,
-            outflows_dict: dict[str, float]
-    ):
+    def set_discrete_outflows(self, outflows_dict: dict[str, float]):
         """
         Set the outflow volume for specific dates.
 
@@ -112,46 +107,47 @@ class Outflows:
         """
 
         if not outflows_dict:
-            raise ValueError(
-                "outflows_dict cannot be empty."
-            )
+            raise ValueError("outflows_dict cannot be empty.")
 
         if not all(Outflows.vali_date(key) for key in outflows_dict.keys()):
             raise ValueError(
                 "outflows_dict keys must be in valid 'YYYY-MM-DD' format."
             )
 
-        if not all(self.start_date <= key <= self.end_date for key in outflows_dict.keys()):
+        if not all(
+            self.start_date <= key <= self.end_date
+            for key in outflows_dict.keys()
+        ):
             raise ValueError(
                 f"outflows_dict keys must be between {self.start_date} and {self.end_date}."
             )
 
         if not all(value >= 0 for value in outflows_dict.values()):
-            raise ValueError(
-                "outflows_dict values must be positive."
-            )
+            raise ValueError("outflows_dict values must be positive.")
 
-        outflows_dict = {pd.to_datetime(
-            time): flow for time, flow in outflows_dict.items()}
+        outflows_dict = {
+            pd.to_datetime(time): flow for time, flow in outflows_dict.items()
+        }
 
         outflows_dict_df = pd.DataFrame(
-            list(outflows_dict.items()), columns=['time', 'flow'])
+            list(outflows_dict.items()), columns=["time", "flow"]
+        )
 
-        outflows_dict_df['time'] = pd.to_datetime(outflows_dict_df['time'])
+        outflows_dict_df["time"] = pd.to_datetime(outflows_dict_df["time"])
 
-        self.outflows.set_index('time', inplace=True)
+        self.outflows.set_index("time", inplace=True)
 
-        outflows_dict_df.set_index('time', inplace=True)
+        outflows_dict_df.set_index("time", inplace=True)
 
         self.outflows.update(outflows_dict_df)
 
         self.outflows.reset_index(inplace=True)
 
     def set_continuous_outflows(
-            self,
-            outflow_start_date: str,
-            outflow_end_date: str,
-            outflow_volume: float
+        self,
+        outflow_start_date: str,
+        outflow_end_date: str,
+        outflow_volume: float,
     ):
         """
         Set the outflow volume between two dates.
@@ -191,30 +187,38 @@ class Outflows:
         self.outflow_end_date = outflow_end_date
         self.outflow_volume = outflow_volume
 
-        if not Outflows.vali_date(self.outflow_start_date) or not Outflows.vali_date(self.outflow_end_date):
+        if not Outflows.vali_date(
+            self.outflow_start_date
+        ) or not Outflows.vali_date(self.outflow_end_date):
             raise ValueError(
                 "outflow_start_date and outflow_end_date must be in valid 'YYYY-MM-DD' format."
             )
 
         if self.outflow_volume < 0:
-            raise ValueError(
-                "outflow_volume must be positive."
-            )
+            raise ValueError("outflow_volume must be positive.")
 
-        if datetime.strptime(self.outflow_start_date, "%Y-%m-%d") > datetime.strptime(self.outflow_end_date, "%Y-%m-%d"):
+        if datetime.strptime(
+            self.outflow_start_date, "%Y-%m-%d"
+        ) > datetime.strptime(self.outflow_end_date, "%Y-%m-%d"):
             raise ValueError(
                 "outflow_start_date must be before outflow_end_date."
             )
 
-        if not (self.start_date <= self.outflow_start_date <= self.outflow_end_date <= self.end_date):
+        if not (
+            self.start_date
+            <= self.outflow_start_date
+            <= self.outflow_end_date
+            <= self.end_date
+        ):
             raise ValueError(
                 f"outflow_start_date and outflow_end_date must be within {self.start_date} and {self.end_date}."
             )
 
-        self.outflows.set_index('time', inplace=True)
+        self.outflows.set_index("time", inplace=True)
 
-        self.outflows.loc[self.outflow_start_date:
-                          self.outflow_end_date] = self.outflow_volume
+        self.outflows.loc[
+            self.outflow_start_date : self.outflow_end_date
+        ] = self.outflow_volume
 
         self.outflows.reset_index(inplace=True)
 
@@ -237,8 +241,8 @@ class Outflows:
         return self.outflows
 
     def write_outflows(
-            self,
-            path_to_outflows_csv: str,
+        self,
+        path_to_outflows_csv: str,
     ):
         """
         Write the outflow timeseries to a csv file.
@@ -265,7 +269,5 @@ class Outflows:
         ... )
         """
         if not isinstance(path_to_outflows_csv, str):
-            raise ValueError(
-                "path_to_outflows_csv must be a string."
-            )
+            raise ValueError("path_to_outflows_csv must be a string.")
         self.outflows.to_csv(path_to_outflows_csv)

@@ -168,7 +168,7 @@ from glmpy import inflows
 
 ### Calculating inflows from catchment runoff
 
-The [`CatchmentInflows`](inflows.md#glmpy.inflows.CatchmentInflows) class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coeffiction/threshold.
+The [`CatchmentInflows`](inflows.md#glmpy.inflows.CatchmentInflows) class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coefficient/threshold.
 
 First, an existing `.csv` file with precipitation data must be available on disk or loaded into a `pandas.DataFrame` object:
 
@@ -183,7 +183,7 @@ met_data = pd.DataFrame({
 met_data.to_csv("met_data.csv")
 ```
 
-Next, the `CatchmentInflows` class can be instantiated with the path to the precipitation data. Provide the column names for the date and precipitation data (`date_time_col` and `precip_col` respectively). The `runoff_coeff` or `runoff_threshold` parameters can be used to set a constant runoff coefficient/threshold for area of the catchment (`catchment_area`):
+Next, the `CatchmentInflows` class can be instantiated with the path to the precipitation data. Provide the column names for the date and precipitation data (`date_time_col` and `precip_col` respectively). The `runoff_coeff` or `runoff_threshold` parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (`catchment_area`):
 
 ```python
 my_inflows = CatchmentInflows(

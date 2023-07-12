@@ -127,7 +127,8 @@ class JSONToNML:
         elif nml_block == "time":
             time = NMLTime()
             time.set_attributes(
-                json_data["time"], custom_attrs=custom_attributes)
+                json_data["time"], custom_attrs=custom_attributes
+            )
             return str(time)
         elif nml_block == "output":
             output = NMLOutput()
@@ -150,7 +151,8 @@ class JSONToNML:
         elif nml_block == "light":
             light = NMLLight()
             light.set_attributes(
-                json_data["light"], custom_attrs=custom_attributes)
+                json_data["light"], custom_attrs=custom_attributes
+            )
             return str(light)
         elif nml_block == "bird_model":
             bird_model = NMLBirdModel()

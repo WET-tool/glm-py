@@ -211,7 +211,9 @@ class NMLBase:
     ... )
     """
 
-    def set_attributes(self, attrs_dict, custom_attrs: Union[dict, None] = None):
+    def set_attributes(
+        self, attrs_dict, custom_attrs: Union[dict, None] = None
+    ):
         """Set attributes for the NMLSetup class.
 
         Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
@@ -256,7 +258,9 @@ class NMLBase:
             setattr(self, key, value)
 
     @staticmethod
-    def fortran_bool_string(bool_input: Union[bool, List[bool], None]) -> Union[str, List[Union[str, None]], None]:
+    def fortran_bool_string(
+        bool_input: Union[bool, List[bool], None]
+    ) -> Union[str, List[Union[str, None]], None]:
         """Python boolean to Fortran boolean string.
 
         Convert a Python boolean or a list of Python booleans to a Fortran
@@ -300,7 +304,7 @@ class NMLBase:
     @staticmethod
     def comma_sep_list(
         list_input: Union[List[int], List[float], List[str], List[bool], None],
-        inverted_commas: bool = False
+        inverted_commas: bool = False,
     ):
         """Convert a Python list to a NML formatted  comma separated string.
 
@@ -333,9 +337,17 @@ class NMLBase:
         'a, b, c'
         """
         if inverted_commas:
-            return ', '.join([repr(str(item)) for item in list_input]) if list_input else None
+            return (
+                ", ".join([repr(str(item)) for item in list_input])
+                if list_input
+                else None
+            )
         else:
-            return ', '.join([str(item) for item in list_input]) if list_input else None
+            return (
+                ", ".join([str(item) for item in list_input])
+                if list_input
+                else None
+            )
 
 
 class NMLSetup(NMLBase):
@@ -382,14 +394,14 @@ class NMLSetup(NMLBase):
     """
 
     def __init__(
-            self,
-            sim_name: str = 'lake',
-            max_layers: Union[int, None] = 500,
-            min_layer_vol: Union[float, None] = None,
-            min_layer_thick: Union[float, None] = None,
-            max_layer_thick: Union[float, None] = None,
-            density_model: Union[int, None] = 1,
-            non_avg: Union[bool, None] = None
+        self,
+        sim_name: str = "lake",
+        max_layers: Union[int, None] = 500,
+        min_layer_vol: Union[float, None] = None,
+        min_layer_thick: Union[float, None] = None,
+        max_layer_thick: Union[float, None] = None,
+        density_model: Union[int, None] = 1,
+        non_avg: Union[bool, None] = None,
     ):
         self.sim_name = sim_name
         self.max_layers = max_layers
@@ -430,13 +442,19 @@ class NMLSetup(NMLBase):
             (f"   sim_name = '{self.sim_name}'", self.sim_name),
             (f"   max_layers = {self.max_layers}", self.max_layers),
             (f"   min_layer_vol = {self.min_layer_vol}", self.min_layer_vol),
-            (f"   min_layer_thick = {self.min_layer_thick}",
-             self.min_layer_thick),
-            (f"   max_layer_thick = {self.max_layer_thick}",
-             self.max_layer_thick),
+            (
+                f"   min_layer_thick = {self.min_layer_thick}",
+                self.min_layer_thick,
+            ),
+            (
+                f"   max_layer_thick = {self.max_layer_thick}",
+                self.max_layer_thick,
+            ),
             (f"   density_model = {self.density_model}", self.density_model),
-            (f"   non_avg = {self.fortran_bool_string(self.non_avg)}",
-             self.non_avg),
+            (
+                f"   non_avg = {self.fortran_bool_string(self.non_avg)}",
+                self.non_avg,
+            ),
         ]
         return "\n".join(
             param_str
@@ -517,17 +535,17 @@ class NMLMorphometry(NMLBase):
     """
 
     def __init__(
-            self,
-            lake_name: Union[str, None] = None,
-            latitude: float = 0.0,
-            longitude: float = 0.0,
-            base_elev: Union[float, None] = None,
-            crest_elev: Union[float, None] = None,
-            bsn_len: Union[float, None] = None,
-            bsn_wid: Union[float, None] = None,
-            bsn_vals: Union[float, None] = None,
-            H: Union[List[float], None] = None,
-            A: Union[List[float], None] = None,
+        self,
+        lake_name: Union[str, None] = None,
+        latitude: float = 0.0,
+        longitude: float = 0.0,
+        base_elev: Union[float, None] = None,
+        crest_elev: Union[float, None] = None,
+        bsn_len: Union[float, None] = None,
+        bsn_wid: Union[float, None] = None,
+        bsn_vals: Union[float, None] = None,
+        H: Union[List[float], None] = None,
+        A: Union[List[float], None] = None,
     ):
         self.lake_name = lake_name
         self.latitude = latitude
@@ -657,16 +675,16 @@ class NMLMixing(NMLBase):
     """
 
     def __init__(
-            self,
-            surface_mixing: int = 1,
-            coef_mix_conv: Union[float, None] = None,
-            coef_wind_stir: Union[float, None] = None,
-            coef_mix_shear: Union[float, None] = None,
-            coef_mix_turb: Union[float, None] = None,
-            coef_mix_KH: Union[float, None] = None,
-            deep_mixing: Union[int, None] = None,
-            coef_mix_hyp: Union[float, None] = None,
-            diff: Union[float, None] = None
+        self,
+        surface_mixing: int = 1,
+        coef_mix_conv: Union[float, None] = None,
+        coef_wind_stir: Union[float, None] = None,
+        coef_mix_shear: Union[float, None] = None,
+        coef_mix_turb: Union[float, None] = None,
+        coef_mix_KH: Union[float, None] = None,
+        deep_mixing: Union[int, None] = None,
+        coef_mix_hyp: Union[float, None] = None,
+        diff: Union[float, None] = None,
     ):
         self.surface_mixing = surface_mixing
         self.coef_mix_conv = coef_mix_conv
@@ -708,13 +726,19 @@ class NMLMixing(NMLBase):
         >>> print(mixing)
         """
         params = [
-            (f"   surface_mixing = {self.surface_mixing}",
-             self.surface_mixing),
+            (
+                f"   surface_mixing = {self.surface_mixing}",
+                self.surface_mixing,
+            ),
             (f"   coef_mix_conv = {self.coef_mix_conv}", self.coef_mix_conv),
-            (f"   coef_wind_stir = {self.coef_wind_stir}",
-             self.coef_wind_stir,),
-            (f"   coef_mix_shear = {self.coef_mix_shear}",
-             self.coef_mix_shear,),
+            (
+                f"   coef_wind_stir = {self.coef_wind_stir}",
+                self.coef_wind_stir,
+            ),
+            (
+                f"   coef_mix_shear = {self.coef_mix_shear}",
+                self.coef_mix_shear,
+            ),
             (f"   coef_mix_turb = {self.coef_mix_turb}", self.coef_mix_turb),
             (f"   coef_mix_KH = {self.coef_mix_KH}", self.coef_mix_KH),
             (f"   deep_mixing = {self.deep_mixing}", self.deep_mixing),
@@ -769,13 +793,13 @@ class NMLTime(NMLBase):
     """
 
     def __init__(
-            self,
-            timefmt: Union[int, None] = None,
-            start: Union[str, None] = None,
-            stop: Union[int, None] = None,
-            dt: float = 3600.0,
-            num_days: Union[int, None] = None,
-            timezone: float = 0.0
+        self,
+        timefmt: Union[int, None] = None,
+        start: Union[str, None] = None,
+        stop: Union[int, None] = None,
+        dt: float = 3600.0,
+        num_days: Union[int, None] = None,
+        timezone: float = 0.0,
     ):
         self.timefmt = timefmt
         self.start = start
@@ -898,22 +922,22 @@ class NMLOutput(NMLBase):
     """
 
     def __init__(
-            self,
-            out_dir: str = './',
-            out_fn: str = 'output',
-            nsave: int = 1,
-            csv_lake_fname: str = 'lake',
-            csv_point_nlevs: float = 0.0,
-            csv_point_fname: str = 'WQ_',
-            csv_point_frombot: Union[List[float], None] = None,
-            csv_point_at: Union[List[float], None] = None,
-            csv_point_nvars: Union[int, None] = None,
-            csv_point_vars: Union[List[str], None] = None,
-            csv_outlet_allinone: bool = False,
-            csv_outlet_fname: Union[str, None] = None,
-            csv_outlet_nvars: int = 0,
-            csv_outlet_vars: Union[List[str], None] = None,
-            csv_ovrflw_fname: Union[str, None] = None
+        self,
+        out_dir: str = "./",
+        out_fn: str = "output",
+        nsave: int = 1,
+        csv_lake_fname: str = "lake",
+        csv_point_nlevs: float = 0.0,
+        csv_point_fname: str = "WQ_",
+        csv_point_frombot: Union[List[float], None] = None,
+        csv_point_at: Union[List[float], None] = None,
+        csv_point_nvars: Union[int, None] = None,
+        csv_point_vars: Union[List[str], None] = None,
+        csv_outlet_allinone: bool = False,
+        csv_outlet_fname: Union[str, None] = None,
+        csv_outlet_nvars: int = 0,
+        csv_outlet_vars: Union[List[str], None] = None,
+        csv_ovrflw_fname: Union[str, None] = None,
     ):
         self.out_dir = out_dir
         self.out_fn = out_fn
@@ -969,30 +993,54 @@ class NMLOutput(NMLBase):
             (f"   out_dir = '{self.out_dir}'", self.out_dir),
             (f"   out_fn = '{self.out_fn}'", self.out_fn),
             (f"   nsave = {self.nsave}", self.nsave),
-            (f"   csv_lake_fname = '{self.csv_lake_fname}'",
-             self.csv_lake_fname,),
-            (f"   csv_point_nlevs = {self.csv_point_nlevs}",
-             self.csv_point_nlevs,),
-            (f"   csv_point_fname = '{self.csv_point_fname}'",
-             self.csv_point_fname),
-            (f"   csv_point_frombot = {self.comma_sep_list(self.csv_point_frombot)}",
-             self.csv_point_frombot),
-            (f"   csv_point_at = {self.comma_sep_list(self.csv_point_at)}",
-             self.csv_point_at),
-            (f"   csv_point_nvars = {self.csv_point_nvars}",
-             self.csv_point_nvars),
-            (f"   csv_point_vars = {self.comma_sep_list(self.csv_point_vars, True)}",
-             self.csv_point_vars),
-            (f"   csv_outlet_allinone = {self.fortran_bool_string(self.csv_outlet_allinone)}",
-             self.csv_outlet_allinone),
-            (f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
-             self.csv_outlet_fname),
-            (f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
-             self.csv_outlet_nvars),
-            (f"   csv_outlet_vars = {self.comma_sep_list(self.csv_outlet_vars, True)}",
-             self.csv_outlet_vars),
-            (f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
-             self.csv_ovrflw_fname),
+            (
+                f"   csv_lake_fname = '{self.csv_lake_fname}'",
+                self.csv_lake_fname,
+            ),
+            (
+                f"   csv_point_nlevs = {self.csv_point_nlevs}",
+                self.csv_point_nlevs,
+            ),
+            (
+                f"   csv_point_fname = '{self.csv_point_fname}'",
+                self.csv_point_fname,
+            ),
+            (
+                f"   csv_point_frombot = {self.comma_sep_list(self.csv_point_frombot)}",
+                self.csv_point_frombot,
+            ),
+            (
+                f"   csv_point_at = {self.comma_sep_list(self.csv_point_at)}",
+                self.csv_point_at,
+            ),
+            (
+                f"   csv_point_nvars = {self.csv_point_nvars}",
+                self.csv_point_nvars,
+            ),
+            (
+                f"   csv_point_vars = {self.comma_sep_list(self.csv_point_vars, True)}",
+                self.csv_point_vars,
+            ),
+            (
+                f"   csv_outlet_allinone = {self.fortran_bool_string(self.csv_outlet_allinone)}",
+                self.csv_outlet_allinone,
+            ),
+            (
+                f"   csv_outlet_fname = '{self.csv_outlet_fname}'",
+                self.csv_outlet_fname,
+            ),
+            (
+                f"   csv_outlet_nvars = {self.csv_outlet_nvars}",
+                self.csv_outlet_nvars,
+            ),
+            (
+                f"   csv_outlet_vars = {self.comma_sep_list(self.csv_outlet_vars, True)}",
+                self.csv_outlet_vars,
+            ),
+            (
+                f"   csv_ovrflw_fname = '{self.csv_ovrflw_fname}'",
+                self.csv_ovrflw_fname,
+            ),
         ]
         return "\n".join(
             param_str
@@ -1056,15 +1104,15 @@ class NMLInitProfiles(NMLBase):
     """
 
     def __init__(
-            self,
-            lake_depth: Union[float, None] = None,
-            num_depths: Union[int, None] = None,
-            the_depths: Union[List[float], None] = None,
-            the_temps: Union[List[float], None] = None,
-            the_sals: Union[List[float], None] = None,
-            num_wq_vars: Union[int, None] = None,
-            wq_names: Union[List[str], None] = None,
-            wq_init_vals: Union[List[float], None] = None
+        self,
+        lake_depth: Union[float, None] = None,
+        num_depths: Union[int, None] = None,
+        the_depths: Union[List[float], None] = None,
+        the_temps: Union[List[float], None] = None,
+        the_sals: Union[List[float], None] = None,
+        num_wq_vars: Union[int, None] = None,
+        wq_names: Union[List[str], None] = None,
+        wq_init_vals: Union[List[float], None] = None,
     ):
         self.lake_depth = lake_depth
         self.num_depths = num_depths
@@ -1111,17 +1159,27 @@ class NMLInitProfiles(NMLBase):
         params = [
             (f"   lake_depth = {self.lake_depth}", self.lake_depth),
             (f"   num_depths = {self.num_depths}", self.num_depths),
-            (f"   the_depths = {self.comma_sep_list(self.the_depths)}",
-             self.the_depths),
-            (f"   the_temps = {self.comma_sep_list(self.the_temps)}",
-             self.the_temps),
-            (f"   the_sals = {self.comma_sep_list(self.the_sals)}",
-             self.the_sals),
+            (
+                f"   the_depths = {self.comma_sep_list(self.the_depths)}",
+                self.the_depths,
+            ),
+            (
+                f"   the_temps = {self.comma_sep_list(self.the_temps)}",
+                self.the_temps,
+            ),
+            (
+                f"   the_sals = {self.comma_sep_list(self.the_sals)}",
+                self.the_sals,
+            ),
             (f"   num_wq_vars = {self.num_wq_vars}", self.num_wq_vars),
-            (f"   wq_names = {self.comma_sep_list(self.wq_names, True)}",
-                self.wq_names),
-            (f"   wq_init_vals = {self.comma_sep_list(self.wq_init_vals)}",
-                self.wq_init_vals),
+            (
+                f"   wq_names = {self.comma_sep_list(self.wq_names, True)}",
+                self.wq_names,
+            ),
+            (
+                f"   wq_init_vals = {self.comma_sep_list(self.wq_init_vals)}",
+                self.wq_init_vals,
+            ),
         ]
         return "\n".join(
             param_str
@@ -1241,33 +1299,33 @@ class NMLMeteorology(NMLBase):
     """
 
     def __init__(
-            self,
-            met_sw: bool = True,
-            meteo_fl: Union[str, None] = None,
-            subdaily: Union[bool, None] = None,
-            time_fmt: Union[str, None] = None,
-            rad_mode: Union[int, None] = None,
-            albedo_mode: Union[int, None] = None,
-            sw_factor: Union[float, None] = None,
-            lw_type: Union[str, None] = None,
-            cloud_mode: Union[int, None] = None,
-            lw_factor: Union[float, None] = None,
-            atm_stab: Union[int, None] = None,
-            rh_factor: Union[float, None] = None,
-            at_factor: Union[float, None] = None,
-            ce: Union[float, None] = 0.0013,
-            ch: Union[float, None] = 0.0013,
-            rain_sw: Union[bool, None] = None,
-            rain_factor: Union[float, None] = None,
-            catchrain: Union[bool, None] = None,
-            rain_threshold: Union[float, None] = None,
-            runoff_coef: Union[float, None] = None,
-            cd: Union[float, None] = 0.0013,
-            wind_factor: Union[float, None] = None,
-            fetch_mode: int = 0,
-            num_dir: Union[int, None] = None,
-            wind_dir: Union[float, None] = None,
-            fetch_scale: Union[float, None] = None
+        self,
+        met_sw: bool = True,
+        meteo_fl: Union[str, None] = None,
+        subdaily: Union[bool, None] = None,
+        time_fmt: Union[str, None] = None,
+        rad_mode: Union[int, None] = None,
+        albedo_mode: Union[int, None] = None,
+        sw_factor: Union[float, None] = None,
+        lw_type: Union[str, None] = None,
+        cloud_mode: Union[int, None] = None,
+        lw_factor: Union[float, None] = None,
+        atm_stab: Union[int, None] = None,
+        rh_factor: Union[float, None] = None,
+        at_factor: Union[float, None] = None,
+        ce: Union[float, None] = 0.0013,
+        ch: Union[float, None] = 0.0013,
+        rain_sw: Union[bool, None] = None,
+        rain_factor: Union[float, None] = None,
+        catchrain: Union[bool, None] = None,
+        rain_threshold: Union[float, None] = None,
+        runoff_coef: Union[float, None] = None,
+        cd: Union[float, None] = 0.0013,
+        wind_factor: Union[float, None] = None,
+        fetch_mode: int = 0,
+        num_dir: Union[int, None] = None,
+        wind_dir: Union[float, None] = None,
+        fetch_scale: Union[float, None] = None,
     ):
         self.met_sw = met_sw
         self.meteo_fl = meteo_fl
@@ -1335,11 +1393,15 @@ class NMLMeteorology(NMLBase):
         """
 
         params = [
-            (f"   met_sw = {self.fortran_bool_string(self.met_sw)}",
-             self.met_sw),
+            (
+                f"   met_sw = {self.fortran_bool_string(self.met_sw)}",
+                self.met_sw,
+            ),
             (f"   meteo_fl = '{self.meteo_fl}'", self.meteo_fl),
-            (f"   subdaily = {self.fortran_bool_string(self.subdaily)}",
-             self.subdaily),
+            (
+                f"   subdaily = {self.fortran_bool_string(self.subdaily)}",
+                self.subdaily,
+            ),
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
             (f"   rad_mode = {self.rad_mode}", self.rad_mode),
             (f"   albedo_mode = {self.albedo_mode}", self.albedo_mode),
@@ -1352,13 +1414,19 @@ class NMLMeteorology(NMLBase):
             (f"   at_factor = {self.at_factor}", self.at_factor),
             (f"   ce = {self.ce}", self.ce),
             (f"   ch = {self.ch}", self.ch),
-            (f"   rain_sw = {self.fortran_bool_string(self.rain_sw)}",
-             self.rain_sw),
+            (
+                f"   rain_sw = {self.fortran_bool_string(self.rain_sw)}",
+                self.rain_sw,
+            ),
             (f"   rain_factor = {self.rain_factor}", self.rain_factor),
-            (f"   catchrain = {self.fortran_bool_string(self.catchrain)}",
-                self.catchrain),
-            (f"   rain_threshold = {self.rain_threshold}",
-                self.rain_threshold),
+            (
+                f"   catchrain = {self.fortran_bool_string(self.catchrain)}",
+                self.catchrain,
+            ),
+            (
+                f"   rain_threshold = {self.rain_threshold}",
+                self.rain_threshold,
+            ),
             (f"   runoff_coef = {self.runoff_coef}", self.runoff_coef),
             (f"   cd = {self.cd}", self.cd),
             (f"   wind_factor = {self.wind_factor}", self.wind_factor),
@@ -1418,14 +1486,14 @@ class NMLLight(NMLBase):
     """
 
     def __init__(
-            self,
-            light_mode: int = 1,
-            Kw: Union[float, None] = None,
-            Kw_file: Union[str, None] = None,
-            n_bands: Union[int, None] = 4,
-            light_extc: Union[List[float], None] = None,
-            energy_frac: Union[List[float], None] = None,
-            Benthic_Imin: Union[float, None] = None,
+        self,
+        light_mode: int = 1,
+        Kw: Union[float, None] = None,
+        Kw_file: Union[str, None] = None,
+        n_bands: Union[int, None] = 4,
+        light_extc: Union[List[float], None] = None,
+        energy_frac: Union[List[float], None] = None,
+        Benthic_Imin: Union[float, None] = None,
     ):
         self.light_mode = light_mode
         self.Kw = Kw
@@ -1465,10 +1533,14 @@ class NMLLight(NMLBase):
             (f"   light_mode = {self.light_mode}", self.light_mode),
             (f"   Kw = {self.Kw}", self.Kw),
             (f"   n_bands = {self.n_bands}", self.n_bands),
-            (f"   light_extc = {self.comma_sep_list(self.light_extc)}",
-             self.light_extc),
-            (f"   energy_frac = {self.comma_sep_list(self.energy_frac)}",
-             self.energy_frac,),
+            (
+                f"   light_extc = {self.comma_sep_list(self.light_extc)}",
+                self.light_extc,
+            ),
+            (
+                f"   energy_frac = {self.comma_sep_list(self.energy_frac)}",
+                self.energy_frac,
+            ),
             (f"   Benthic_Imin = {self.Benthic_Imin}", self.Benthic_Imin),
         ]
         return "\n".join(
@@ -1520,13 +1592,13 @@ class NMLBirdModel(NMLBase):
     """
 
     def __init__(
-            self,
-            AP: Union[float, None] = None,
-            Oz: Union[float, None] = None,
-            WatVap: Union[float, None] = None,
-            AOD500: Union[float, None] = None,
-            AOD380: Union[float, None] = None,
-            Albedo: Union[float, None] = 0.2
+        self,
+        AP: Union[float, None] = None,
+        Oz: Union[float, None] = None,
+        WatVap: Union[float, None] = None,
+        AOD500: Union[float, None] = None,
+        AOD380: Union[float, None] = None,
+        Albedo: Union[float, None] = 0.2,
     ):
         self.AP = AP
         self.Oz = Oz
@@ -1640,19 +1712,19 @@ class NMLInflows(NMLBase):
     """
 
     def __init__(
-            self,
-            num_inflows: int = 0,
-            names_of_strms: Union[List[str], None] = None,
-            subm_flag: Union[List[bool], None] = [False],
-            strm_hf_angle: Union[List[float], None] = None,
-            strmbd_slope: Union[List[float], None] = None,
-            strmbd_drag: Union[List[float], None] = None,
-            coef_inf_entrain: Union[List[float], None] = None,
-            inflow_factor: Union[List[float], None] = [1.0],
-            inflow_fl: Union[List[str], None] = None,
-            inflow_varnum: int = 0,
-            inflow_vars: Union[List[str], None] = None,
-            time_fmt: Union[str, None] = None  # 'YYYY-MM-DD hh:mm:ss'
+        self,
+        num_inflows: int = 0,
+        names_of_strms: Union[List[str], None] = None,
+        subm_flag: Union[List[bool], None] = [False],
+        strm_hf_angle: Union[List[float], None] = None,
+        strmbd_slope: Union[List[float], None] = None,
+        strmbd_drag: Union[List[float], None] = None,
+        coef_inf_entrain: Union[List[float], None] = None,
+        inflow_factor: Union[List[float], None] = [1.0],
+        inflow_fl: Union[List[str], None] = None,
+        inflow_varnum: int = 0,
+        inflow_vars: Union[List[str], None] = None,
+        time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss'
     ):
         self.num_inflows = num_inflows
         self.names_of_strms = names_of_strms
@@ -1701,25 +1773,44 @@ class NMLInflows(NMLBase):
         """
         params = [
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
-            (f"   names_of_strms = {self.comma_sep_list(self.names_of_strms, True)}",
-             self.names_of_strms),
-            (f"   subm_flag = {self.comma_sep_list(self.fortran_bool_string(self.subm_flag))}", self.subm_flag),
-            (f"   strm_hf_angle = {self.comma_sep_list(self.strm_hf_angle)}",
-             self.strm_hf_angle),
-            (f"   strmbd_slope = {self.comma_sep_list(self.strmbd_slope)}",
-             self.strmbd_slope),
-            (f"   strmbd_drag = {self.comma_sep_list(self.strmbd_drag)}",
-             self.strmbd_drag),
-            (f"   coef_inf_entrain = {self.comma_sep_list(self.coef_inf_entrain)}",
-             self.coef_inf_entrain),
-            (f"   inflow_factor = {self.comma_sep_list(self.inflow_factor)}",
-             self.inflow_factor),
-            (f"   inflow_fl = {self.comma_sep_list(self.inflow_fl, True)}",
-             self.inflow_fl),
+            (
+                f"   names_of_strms = {self.comma_sep_list(self.names_of_strms, True)}",
+                self.names_of_strms,
+            ),
+            (
+                f"   subm_flag = {self.comma_sep_list(self.fortran_bool_string(self.subm_flag))}",
+                self.subm_flag,
+            ),
+            (
+                f"   strm_hf_angle = {self.comma_sep_list(self.strm_hf_angle)}",
+                self.strm_hf_angle,
+            ),
+            (
+                f"   strmbd_slope = {self.comma_sep_list(self.strmbd_slope)}",
+                self.strmbd_slope,
+            ),
+            (
+                f"   strmbd_drag = {self.comma_sep_list(self.strmbd_drag)}",
+                self.strmbd_drag,
+            ),
+            (
+                f"   coef_inf_entrain = {self.comma_sep_list(self.coef_inf_entrain)}",
+                self.coef_inf_entrain,
+            ),
+            (
+                f"   inflow_factor = {self.comma_sep_list(self.inflow_factor)}",
+                self.inflow_factor,
+            ),
+            (
+                f"   inflow_fl = {self.comma_sep_list(self.inflow_fl, True)}",
+                self.inflow_fl,
+            ),
             (f"   inflow_varnum = {self.inflow_varnum}", self.inflow_varnum),
-            (f"   inflow_vars = {self.comma_sep_list(self.inflow_vars, True)}",
-             self.inflow_vars),
-            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt)
+            (
+                f"   inflow_vars = {self.comma_sep_list(self.inflow_vars, True)}",
+                self.inflow_vars,
+            ),
+            (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
         ]
         return "\n".join(
             param_str
@@ -1796,22 +1887,22 @@ class NMLOutflows(NMLBase):
     """
 
     def __init__(
-            self,
-            num_outlet: int = 0,
-            outflow_fl: Union[str, None] = None,
-            time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss',
-            outflow_factor: List[float] = [1.0],
-            outflow_thick_limit: Union[List[float], None] = None,
-            single_layer_draw: Union[List[bool], None] = None,
-            flt_off_sw: Union[List[bool], None] = None,
-            outlet_type: Union[List[int], None] = None,
-            outl_elvs: Union[List[float], None] = None,  # [0],
-            bsn_len_outl: Union[List[float], None] = None,
-            bsn_wid_outl: Union[List[float], None] = None,
-            seepage: Union[bool, None] = None,  # False,
-            seepage_rate: Union[float, None] = None,  # 0.0,
-            crest_width: Union[float, None] = None,  # 0.0,
-            crest_factor: Union[float, None] = None,  # 0.0
+        self,
+        num_outlet: int = 0,
+        outflow_fl: Union[str, None] = None,
+        time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss',
+        outflow_factor: List[float] = [1.0],
+        outflow_thick_limit: Union[List[float], None] = None,
+        single_layer_draw: Union[List[bool], None] = None,
+        flt_off_sw: Union[List[bool], None] = None,
+        outlet_type: Union[List[int], None] = None,
+        outl_elvs: Union[List[float], None] = None,  # [0],
+        bsn_len_outl: Union[List[float], None] = None,
+        bsn_wid_outl: Union[List[float], None] = None,
+        seepage: Union[bool, None] = None,  # False,
+        seepage_rate: Union[float, None] = None,  # 0.0,
+        crest_width: Union[float, None] = None,  # 0.0,
+        crest_factor: Union[float, None] = None,  # 0.0
     ):
         self.num_outlet = num_outlet
         self.outflow_fl = outflow_fl
@@ -1863,26 +1954,42 @@ class NMLOutflows(NMLBase):
             (f"   num_outlet = {self.num_outlet}", self.num_outlet),
             (f"   outflow_fl = '{self.outflow_fl}'", self.outflow_fl),
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
-            (f"   outflow_factor = {self.comma_sep_list(self.outflow_factor)}",
-             self.outflow_factor),
-            (f"   outflow_thick_limit = {self.comma_sep_list(self.outflow_thick_limit)}",
-             self.outflow_thick_limit),
-            (f"   single_layer_draw = {self.comma_sep_list(self.fortran_bool_string(self.single_layer_draw))}",
-             self.single_layer_draw),
-            (f"   flt_off_sw = {self.comma_sep_list(self.fortran_bool_string(self.flt_off_sw))}",
-             self.flt_off_sw),
+            (
+                f"   outflow_factor = {self.comma_sep_list(self.outflow_factor)}",
+                self.outflow_factor,
+            ),
+            (
+                f"   outflow_thick_limit = {self.comma_sep_list(self.outflow_thick_limit)}",
+                self.outflow_thick_limit,
+            ),
+            (
+                f"   single_layer_draw = {self.comma_sep_list(self.fortran_bool_string(self.single_layer_draw))}",
+                self.single_layer_draw,
+            ),
+            (
+                f"   flt_off_sw = {self.comma_sep_list(self.fortran_bool_string(self.flt_off_sw))}",
+                self.flt_off_sw,
+            ),
             (f"   outlet_type = {self.outlet_type}", self.outlet_type),
-            (f"   outl_elvs = {self.comma_sep_list(self.outl_elvs)}",
-             self.outl_elvs),
-            (f"   bsn_len_outl = {self.comma_sep_list(self.bsn_len_outl)}",
-             self.bsn_len_outl),
-            (f"   bsn_wid_outl = {self.comma_sep_list(self.bsn_wid_outl)}",
-             self.bsn_wid_outl),
-            (f"   seepage = {self.fortran_bool_string(self.seepage)}",
-             self.seepage),
+            (
+                f"   outl_elvs = {self.comma_sep_list(self.outl_elvs)}",
+                self.outl_elvs,
+            ),
+            (
+                f"   bsn_len_outl = {self.comma_sep_list(self.bsn_len_outl)}",
+                self.bsn_len_outl,
+            ),
+            (
+                f"   bsn_wid_outl = {self.comma_sep_list(self.bsn_wid_outl)}",
+                self.bsn_wid_outl,
+            ),
+            (
+                f"   seepage = {self.fortran_bool_string(self.seepage)}",
+                self.seepage,
+            ),
             (f"   seepage_rate = {self.seepage_rate}", self.seepage_rate),
             (f"   crest_width = {self.crest_width}", self.crest_width),
-            (f"   crest_factor = {self.crest_factor}", self.crest_factor)
+            (f"   crest_factor = {self.crest_factor}", self.crest_factor),
         ]
         return "\n".join(
             param_str
@@ -1945,17 +2052,17 @@ class NMLSediment(NMLBase):
     """
 
     def __init__(
-            self,
-            sed_heat_Ksoil: Union[float, None] = None,
-            sed_temp_depth: Union[float, None] = None,
-            sed_temp_mean: Union[List[float], None] = None,
-            sed_temp_amplitude: Union[List[float], None] = None,
-            sed_temp_peak_doy: Union[List[int], None] = None,
-            benthic_mode: Union[int, None] = None,
-            n_zones: Union[int, None] = 0,
-            zone_heights: Union[List[float], None] = None,
-            sed_reflectivity: Union[List[float], None] = [0],
-            sed_roughness: Union[List[float], None] = None
+        self,
+        sed_heat_Ksoil: Union[float, None] = None,
+        sed_temp_depth: Union[float, None] = None,
+        sed_temp_mean: Union[List[float], None] = None,
+        sed_temp_amplitude: Union[List[float], None] = None,
+        sed_temp_peak_doy: Union[List[int], None] = None,
+        benthic_mode: Union[int, None] = None,
+        n_zones: Union[int, None] = 0,
+        zone_heights: Union[List[float], None] = None,
+        sed_reflectivity: Union[List[float], None] = [0],
+        sed_roughness: Union[List[float], None] = None,
     ):
         self.sed_heat_Ksoil = sed_heat_Ksoil
         self.sed_temp_depth = sed_temp_depth
@@ -1999,24 +2106,40 @@ class NMLSediment(NMLBase):
         >>> print(sediment)
         """
         params = [
-            (f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
-             self.sed_heat_Ksoil,),
-            (f"   sed_temp_depth = {self.sed_temp_depth}",
-             self.sed_temp_depth,),
-            (f"   sed_temp_mean = {self.comma_sep_list(self.sed_temp_mean)}",
-                self.sed_temp_mean,),
-            (f"   sed_temp_amplitude = {self.comma_sep_list(self.sed_temp_amplitude)}",
-                self.sed_temp_amplitude, ),
-            (f"   sed_temp_peak_doy = {self.comma_sep_list(self.sed_temp_peak_doy)}",
-                self.sed_temp_peak_doy, ),
+            (
+                f"   sed_heat_Ksoil = {self.sed_heat_Ksoil}",
+                self.sed_heat_Ksoil,
+            ),
+            (
+                f"   sed_temp_depth = {self.sed_temp_depth}",
+                self.sed_temp_depth,
+            ),
+            (
+                f"   sed_temp_mean = {self.comma_sep_list(self.sed_temp_mean)}",
+                self.sed_temp_mean,
+            ),
+            (
+                f"   sed_temp_amplitude = {self.comma_sep_list(self.sed_temp_amplitude)}",
+                self.sed_temp_amplitude,
+            ),
+            (
+                f"   sed_temp_peak_doy = {self.comma_sep_list(self.sed_temp_peak_doy)}",
+                self.sed_temp_peak_doy,
+            ),
             (f"   benthic_mode = {self.benthic_mode}", self.benthic_mode),
             (f"   n_zones = {self.n_zones}", self.n_zones),
-            (f"   zone_heights = {self.comma_sep_list(self.zone_heights)}",
-                self.zone_heights,),
-            (f"   sed_reflectivity = {self.comma_sep_list(self.sed_reflectivity)}",
-                self.sed_reflectivity,),
-            (f"   sed_roughness = {self.comma_sep_list(self.sed_roughness)}",
-             self.sed_roughness),
+            (
+                f"   zone_heights = {self.comma_sep_list(self.zone_heights)}",
+                self.zone_heights,
+            ),
+            (
+                f"   sed_reflectivity = {self.comma_sep_list(self.sed_reflectivity)}",
+                self.sed_reflectivity,
+            ),
+            (
+                f"   sed_roughness = {self.comma_sep_list(self.sed_roughness)}",
+                self.sed_roughness,
+            ),
         ]
         return "\n".join(
             param_str
@@ -2056,10 +2179,10 @@ class NMLIceSnow(NMLBase):
     """
 
     def __init__(
-            self,
-            snow_albedo_factor: float = 1.0,
-            snow_rho_max: float = 300,
-            snow_rho_min: float = 50
+        self,
+        snow_albedo_factor: float = 1.0,
+        snow_rho_max: float = 300,
+        snow_rho_min: float = 50,
     ):
         self.snow_albedo_factor = snow_albedo_factor
         self.snow_rho_max = snow_rho_max
@@ -2089,8 +2212,10 @@ class NMLIceSnow(NMLBase):
         >>> print(ice_snow)
         """
         params = [
-            (f"   snow_albedo_factor = {self.snow_albedo_factor}",
-             self.snow_albedo_factor,),
+            (
+                f"   snow_albedo_factor = {self.snow_albedo_factor}",
+                self.snow_albedo_factor,
+            ),
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
             (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
         ]
@@ -2146,14 +2271,14 @@ class NMLWQSetup(NMLBase):
     """
 
     def __init__(
-            self,
-            wq_lib: str = 'aed2',
-            wq_nml_file: str = './aed2.nml',
-            bioshade_feedback: Union[bool, None] = None,
-            mobility_off: bool = False,
-            ode_method: Union[int, None] = None,
-            split_factor: float = 1.0,
-            repair_state: bool = True
+        self,
+        wq_lib: str = "aed2",
+        wq_nml_file: str = "./aed2.nml",
+        bioshade_feedback: Union[bool, None] = None,
+        mobility_off: bool = False,
+        ode_method: Union[int, None] = None,
+        split_factor: float = 1.0,
+        repair_state: bool = True,
     ):
         self.wq_lib = wq_lib
         self.wq_nml_file = wq_nml_file
@@ -2193,15 +2318,20 @@ class NMLWQSetup(NMLBase):
         params = [
             (f"   wq_lib = '{self.wq_lib}'", self.wq_lib),
             (f"   wq_nml_file = '{self.wq_nml_file}'", self.wq_nml_file),
-            (f"   bioshade_feedback = {self.fortran_bool_string(self.bioshade_feedback)}",
-             self.bioshade_feedback),
-            (f"   mobility_off = {self.fortran_bool_string(self.mobility_off)}",
-             self.mobility_off),
+            (
+                f"   bioshade_feedback = {self.fortran_bool_string(self.bioshade_feedback)}",
+                self.bioshade_feedback,
+            ),
+            (
+                f"   mobility_off = {self.fortran_bool_string(self.mobility_off)}",
+                self.mobility_off,
+            ),
             (f"   ode_method = {self.ode_method}", self.ode_method),
             (f"   split_factor = {self.split_factor}", self.split_factor),
-            (f"   repair_state = {self.fortran_bool_string(self.repair_state)}",
-             self.repair_state),
-
+            (
+                f"   repair_state = {self.fortran_bool_string(self.repair_state)}",
+                self.repair_state,
+            ),
         ]
         return "\n".join(
             param_str

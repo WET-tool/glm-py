@@ -79,10 +79,10 @@ class CatchmentInflows:
         date_time_col: str,
         runoff_coef: Union[float, None] = None,
         runoff_threshold: Union[float, None] = None,
-        input_type: str = 'file',
+        input_type: str = "file",
         path_to_met_csv: Union[str, None] = None,
         met_data: Union[pd.DataFrame, None] = None,
-        date_time_format: str = "%Y-%m-%d %H:%M"
+        date_time_format: str = "%Y-%m-%d %H:%M",
     ):
         self.input_type = input_type
         self.path_to_met_csv = path_to_met_csv
@@ -93,24 +93,25 @@ class CatchmentInflows:
         self.date_time_col = date_time_col
         self.date_time_format = date_time_format
 
-        if self.input_type == 'file':
+        if self.input_type == "file":
             if path_to_met_csv is None:
                 raise ValueError(
                     "path_to_met_csv cannot be None when input_type is 'file'."
                 )
             self.met_data = pd.read_csv(path_to_met_csv)
-        elif self.input_type == 'dataframe':
+        elif self.input_type == "dataframe":
             if met_data is None:
                 raise ValueError(
-                    "met_data cannot be None when input_type is 'dataframe'.")
+                    "met_data cannot be None when input_type is 'dataframe'."
+                )
             self.met_data = met_data
         else:
             raise ValueError(
-                "Invalid input_type. Must be 'file' or 'dataframe'.")
+                "Invalid input_type. Must be 'file' or 'dataframe'."
+            )
 
         if not isinstance(self.catchment_area, (int, float)):
-            raise ValueError(
-                "catchment_area must be numeric.")
+            raise ValueError("catchment_area must be numeric.")
 
         if self.catchment_area < 0:
             raise ValueError("catchment_area must be positive.")
@@ -122,42 +123,43 @@ class CatchmentInflows:
 
         if self.runoff_coef is None and self.runoff_threshold is None:
             raise ValueError(
-                "Either runoff_coef or runoff_threshold must be provided.")
+                "Either runoff_coef or runoff_threshold must be provided."
+            )
 
         if self.runoff_coef is not None and self.runoff_threshold is not None:
             raise ValueError(
-                "Only one of runoff_coef or runoff_threshold can be provided.")
+                "Only one of runoff_coef or runoff_threshold can be provided."
+            )
 
         if self.runoff_coef is not None:
             if not isinstance(self.runoff_coef, (int, float)):
-                raise ValueError(
-                    "runoff_coef must be numeric.")
+                raise ValueError("runoff_coef must be numeric.")
             inflow_data = precip_data * self.catchment_area * self.runoff_coef
             inflow_data[inflow_data < 0] = 0
-            inflow_data = inflow_data/86400
+            inflow_data = inflow_data / 86400
         else:
             if not isinstance(self.runoff_threshold, (int, float)):
-                raise ValueError(
-                    "runoff_threshold must be numeric.")
+                raise ValueError("runoff_threshold must be numeric.")
             self.runoff_threshold / 1000
-            inflow_data = (precip_data - self.runoff_threshold) * \
-                self.catchment_area
+            inflow_data = (
+                precip_data - self.runoff_threshold
+            ) * self.catchment_area
             inflow_data[inflow_data < 0] = 0
-            inflow_data = inflow_data/86400
+            inflow_data = inflow_data / 86400
 
-        self.catchment_inflows = pd.DataFrame({
-            "time": pd.to_datetime(
-                self.met_data[self.date_time_col], format=self.date_time_format
-            ),
-            "flow": inflow_data
-        })
+        self.catchment_inflows = pd.DataFrame(
+            {
+                "time": pd.to_datetime(
+                    self.met_data[self.date_time_col],
+                    format=self.date_time_format,
+                ),
+                "flow": inflow_data,
+            }
+        )
 
         self.catchment_inflows.set_index("time", inplace=True)
 
-    def write_inflows(
-        self,
-        path_to_inflow_csv: str
-    ):
+    def write_inflows(self, path_to_inflow_csv: str):
         """
         Writes the inflow data to a CSV file.
 

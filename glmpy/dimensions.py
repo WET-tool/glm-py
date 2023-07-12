@@ -34,7 +34,7 @@ class SimpleTruncatedPyramidWaterBody:
         height: float,
         surface_width: float,
         surface_length: float,
-        side_slope: float = 3
+        side_slope: float = 3,
     ):
         try:
             self.height = float(height)

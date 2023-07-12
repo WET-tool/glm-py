@@ -19,6 +19,7 @@ pip install flake8
 pip install flake8-docstrings
 pip install black
 pip install "pandas[excel]"==2.0.1
+pip install --upgrade build
 ```
 
 Build the docs (from the package root): 
