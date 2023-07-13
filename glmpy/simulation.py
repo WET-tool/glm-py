@@ -1,7 +1,8 @@
-import zipfile
-import os
 import json
+import os
 import shutil
+import zipfile
+
 import pandas as pd
 
 
@@ -37,8 +38,8 @@ class GlmSim:
 
         Returns
         -------
-        str     File path to directory with input files
-        required for a GLM simulation.
+        str     File path to directory with input files required for a GLM
+            simulation.
         """
         if self.fast_api:
             if os.path.isdir(self.inputs_dir):
@@ -66,9 +67,10 @@ class GlmSim:
         Parameters
         ----------
         inputs_dir : str
-        File path to directory with input files required for a GLM simulation.
+            File path to directory with input files required for a GLM
+            simulation.
         glm_dir : str
-        Path to location of GLM binary.
+            Path to location of GLM binary.
         """
         if self.fast_api:
             nml_file = str(os.path.join(inputs_dir, "glm3.nml"))

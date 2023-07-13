@@ -180,7 +180,7 @@ met_data = pd.DataFrame({
         freq='H'),
     'Rain': 10
 })
-met_data.to_csv("met_data.csv")
+met_data.to_csv('met_data.csv')
 ```
 
 Next, the `CatchmentInflows` class can be instantiated with the path to the precipitation data. Provide the column names for the date and precipitation data (`date_time_col` and `precip_col` respectively). The `runoff_coeff` or `runoff_threshold` parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (`catchment_area`):
@@ -188,7 +188,7 @@ Next, the `CatchmentInflows` class can be instantiated with the path to the prec
 ```python
 my_inflows = CatchmentInflows(
     input_type = 'file',
-    path_to_met_csv = "met_data.csv",
+    path_to_met_csv = 'met_data.csv',
     catchment_area = 1000,
     runoff_threshold = 10.0,
     precip_col = 'Rain',
@@ -203,7 +203,6 @@ GLM inflows must be recorded at daily timesteps. As catchment inflows are often 
 
 ```python
 my_inflows.write_inflows(
-    path_to_inflow_csv = "runoff.csv",
-    resample_daily = True
+    path_to_inflow_csv = "runoff.csv"
 )
 ```
