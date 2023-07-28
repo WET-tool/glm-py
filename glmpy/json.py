@@ -26,6 +26,13 @@ class JSONToNML:
     """
 
     def __init__(self, json_file: str, nml_file: str = "sim.nml"):
+        if not isinstance(json_file, str):
+            raise TypeError(
+                f"Expected json_file to be a string, but got {type(json_file).__name__}.")
+        if not isinstance(nml_file, str):
+            raise TypeError(
+                f"Expected nml_file to be a string, but got {type(nml_file).__name__}.")
+
         self.json_file = json_file
         self.nml_file = nml_file
 

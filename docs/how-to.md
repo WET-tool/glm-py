@@ -96,6 +96,81 @@ Heights and surface areas can be then returned with the [`get_heights()`](dimens
 my_heights = my_dimensions.get_heights()
 my_surface_areas = my_dimensions.get_surface_areas()
 ```
+## JSON
+
+### Converting JSON to `.nml`
+
+GLM parameters stored in a JSON format can be converted to a `.nml` file with the `JSONToNML` class.
+
+Consider the following JSON file:
+
+```
+{
+  "&glm_setup": {
+    "sim_name": "Sparkling Lake",
+    "max_layers": 500,
+    "min_layer_vol": 0.5,
+    "min_layer_thick": 0.15,
+    "max_layer_thick": 0.5,
+    "density_model": 1,
+    "non_avg": true
+  },
+  "&morphometry": {
+    "lake_name": "Sparkling",
+    "latitude": 46.00881,
+    "longitude": -89.69953,
+    "crest_elev": 320.0,
+    "bsn_len": 901.0385,
+    "bsn_wid": 901.0385,
+    "bsn_vals": 15,
+    "H": [301.712, 303.018285714286, 304.324571428571, 305.630857142857, 306.937142857143, 308.243428571429, 309.549714285714, 310.856, 312.162285714286, 313.468571428571, 314.774857142857, 316.081142857143, 317.387428571429, 318.693714285714, 320, 321],
+    "A": [0, 45545.8263571429, 91091.6527142857, 136637.479071429, 182183.305428571, 227729.131785714, 273274.958142857, 318820.7845, 364366.610857143, 409912.437214286, 455458.263571429, 501004.089928571, 546549.916285714, 592095.742642857, 637641.569, 687641.569]
+  },
+  "&time": {
+    "timefmt": 3,
+    "start": "1980-04-15",
+    "stop": "2012-12-10",
+    "dt": 3600,
+    "timezone": -6,
+    "num_days": 730
+  },
+  "&init_profiles": {
+    "lake_depth": 18.288,
+    "num_depths": 3,
+    "the_depths": [0, 0.2, 18.288],
+    "the_temps": [3, 4, 4],
+    "the_sals": [0, 0, 0],
+    "num_wq_vars": 6,
+    "wq_names": ["OGM_don", "OGM_pon", "OGM_dop", "OGM_pop", "OGM_doc", "OGM_poc"],
+    "wq_init_vals": [1.1, 1.2, 1.3, 1.2, 1.3, 2.1, 2.2, 2.3, 1.2, 1.3, 3.1, 3.2, 3.3, 1.2, 1.3, 4.1, 4.2, 4.3, 1.2, 1.3, 5.1, 5.2, 5.3, 1.2, 1.3, 6.1, 6.2, 6.3, 1.2, 1.3]
+  }
+}
+```
+
+First, import the `JSONToNML` class:
+
+```python
+from glmpy import JSONToNML
+```
+
+Then, create an instance of the `JSONToNML` class with the path to the JSON file:
+
+```python
+json_file = JSONToNML('my_json_file.json')
+```
+
+Finally, use the `get_nml_attributes()` method to get the attributes for each block. This can be applied in the context of the `NML` class to create a `.nml` file:
+
+```python
+nml = nml.NML(
+  setup=json_file.get_nml_attributes("&glm_setup"),
+  morphometry=json_file.get_nml_attributes("&morphometry"),
+  time=json_file.get_nml_attributes("&time"),
+  init_profiles=json_file.get_nml_attributes("&init_profiles")
+)
+
+nml.write_nml(nml_file_path='glm3.nml')
+```
 
 ## Outflows
 
