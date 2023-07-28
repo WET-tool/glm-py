@@ -128,183 +128,54 @@ morphometry = nml.NMLMorphometry(
 
 ### Setting the remaining blocks
 
-There are up to 14 configurable blocks in the GLM namelist file. Dictionary objects have been provided below for the remaning blocks. Using the `set_attributes()` method for each respective class, configure the blocks for `&time`, `&output`, `&init_profiles`, `&meteorology`, `&bird_model`, `&light`, `&inflow`, `&outflow`, `&sediment`.
+There are up to 14 configurable blocks in the GLM namelist file - setting each will take some time! Let's speed up the process by importing a JSON file that contains the parameters for the remaining blocks. We'll use the `JSONToNML` class to extract the relevant parameters from each respective block. Download the JSON file [here](/data/sparkling_lake.json).
 
-#### `&time`
+Import `JSONToNML` from `glmpy` and pass the JSON file to the class:
 
 ```python
-time = nml.NMLTime()
+from glmpy import JSONToNML
 
-time_params = {
-    'timefmt': 3,
-    'start': '1980-04-15',
-    'stop': '2012-12-10',
-    'dt': 3600,
-    'timezone': -6,
-    'num_days': 730
-}
+json_parameters = JSONToNML("sparkling_lake.json")
 ```
 
-#### `&output`
+Let's have a go at extracting parameters for the `&time` block using the `get_nml_attributes()`` method. Unsuprisingly, this block defines the temporal parameters of the simulation. We'll pass in the name of the block as a string as it appears in the JSON file:
 
 ```python
-output = nml.NMLOutput()
-
-output_params = {
-    'out_dir': 'output',
-    'out_fn': 'output',
-    'nsave': 24,
-    'csv_lake_fname': 'lake',
-    'csv_point_nlevs': 0,
-    'csv_point_fname': 'WQ_',
-    'csv_point_at': [17],
-    'csv_point_nvars': 2,
-    'csv_point_vars': ['temp', 'salt', 'OXY_oxy'],
-    'csv_outlet_allinone': False,
-    'csv_outlet_fname': 'outlet_',
-    'csv_outlet_nvars': 3,
-    'csv_outlet_vars': ['flow', 'temp', 'salt', 'OXY_oxy'],
-    'csv_ovrflw_fname': 'overflow'
-}
+time=json_parameters.get_nml_attributes("time")
 ```
 
-#### `&init_profiles`
+Now, print the contents of the `time` object and you'll see we now have the correct NML formmatting for the `&time` block:
 
 ```python
-init_profiles = nml.NMLInitProfiles()
-
-init_profiles_params = {
-    'lake_depth': 18.288,
-    'num_depths': 3,
-    'the_depths': [0, 0.2, 18.288],
-    'the_temps': [3, 4, 4],
-    'the_sals': [0, 0, 0],
-    'num_wq_vars': 6,
-    'wq_names': ['OGM_don', 'OGM_pon', 'OGM_dop', 'OGM_pop', 'OGM_doc', 'OGM_poc'],
-    'wq_init_vals': [1.1, 1.2, 1.3, 1.2, 1.3, 2.1, 2.2, 2.3, 1.2, 1.3, 3.1, 3.2, 3.3, 1.2, 1.3, 4.1, 4.2, 4.3, 1.2, 1.3, 5.1, 5.2, 5.3, 1.2, 1.3, 6.1, 6.2, 6.3, 1.2, 1.3]
-}
+print(time)
 ```
 
-#### `&meteorology`
-
-```python
-meteorology = nml.NMLMeteorology()
-
-meteorology_params = {
-    'met_sw': True,
-    'lw_type': 'LW_IN',
-    'rain_sw': False,
-    'atm_stab': 0,
-    'catchrain': False,
-    'rad_mode': 1,
-    'albedo_mode': 1,
-    'cloud_mode': 4,
-    'fetch_mode': 0,
-    'subdaily': False,
-    'meteo_fl': 'bcs/nldas_driver.csv',
-    'wind_factor': 1,
-    'sw_factor': 1.08,
-    'lw_factor': 1,
-    'at_factor': 1,
-    'rh_factor': 1,
-    'rain_factor': 1,
-    'ce': 0.00132,
-    'ch': 0.0014,
-    'cd': 0.0013,
-    'rain_threshold': 0.01,
-    'runoff_coef': 0.3
-}
+```
+timefmt = 3
+start = '1980-04-15'
+stop = '2012-12-10'
+dt = 3600
+num_days = 730
+timezone = -6
 ```
 
-#### `&bird_model`
+Easy! Let's do the same for the remaining blocks:  `&output`, `&init_profiles`, `&meteorology`, `&bird_model`, `&light`, `&inflow`, `&outflow`, `&sediment`. If you're want to find out more about the parameters for each block, check out the [NML documentation]().
 
 ```python
-bird_model = nml.NMLBirdModel()
-
-bird_model_params = {
-    'AP': 973,
-    'Oz': 0.279,
-    'WatVap': 1.1,
-    'AOD500': 0.033,
-    'AOD380': 0.038,
-    'Albedo': 0.2
-}
-```
-
-#### `&light`
-
-```python
-light = nml.NMLLight()
-
-light_params = {
-    'light_mode': 0,
-    'n_bands': 4,
-    'light_extc': [1.0, 0.5, 2.0, 4.0],
-    'energy_frac': [0.51, 0.45, 0.035, 0.005],
-    'Benthic_Imin': 10,
-    'Kw': 0.331
-}
-```
-
-#### `&inflow`
-
-```python
-inflows = nml.NMLInflows()
-
-inflows_params = {
-    'num_inflows': 0,
-    'names_of_strms': ['Riv1', 'Riv2'],
-    'subm_flag': [False],
-    'strm_hf_angle': [65, 65],
-    'strmbd_slope': [2, 2],
-    'strmbd_drag': [0.016, 0.016],
-    'inflow_factor': [1, 1],
-    'inflow_fl': ['bcs/inflow_1.csv', 'bcs/inflow_2.csv'],
-    'inflow_varnum': 4,
-    'inflow_vars': ['FLOW', 'TEMP', 'SALT', 'OXY_oxy', 'SIL_rsi', 'NIT_amm', 'NIT_nit', 'PHS_frp', 'OGM_don', 'OGM_pon', 'OGM_dop', 'OGM_pop', 'OGM_doc', 'OGM_poc', 'PHY_green', 'PHY_crypto', 'PHY_diatom']
-}
-```
-
-#### `&outflow`
-
-```python
-outflows = nml.NMLOutflows()
-
-outflows_params = {
-    'num_outlet': 0,
-    'flt_off_sw': [False],
-    'outl_elvs': [1],
-    'bsn_len_outl': [5],
-    'bsn_wid_outl': [5],
-    'outflow_fl': 'bcs/outflow.csv',
-    'outflow_factor': [0.8],
-    'crest_width': 100,
-    'crest_factor': 0.61
-}
-```
-
-#### `&sediment`
-
-```python
-sediment = nml.NMLSediment()
-
-sediment_params = {
-    'sed_heat_Ksoil': 2.0,
-    'sed_temp_depth': 0.2,
-    'sed_temp_mean': [4.5, 5, 6],
-    'sed_temp_amplitude': [1, 1, 1],
-    'sed_temp_peak_doy': [242, 242, 242],
-    'benthic_mode': 2,
-    'n_zones': 3,
-    'zone_heights': [10.0, 20.0, 30.0],
-    'sed_reflectivity': [0.1, 0.01, 0.01],
-    'sed_roughness': [0.1, 0.01, 0.01]
-}
+output=json_parameters.get_nml_attributes("&output")
+init_profiles=json_parameters.get_nml_attributes("&init_profiles")
+meteorology=json_parameters.get_nml_attributes("&meteorology")
+light=json_parameters.get_nml_attributes("&light")
+bird_model=json_parameters.get_nml_attributes("&bird_model")
+inflows=json_parameters.get_nml_attributes("&inflows")
+outflows=json_parameters.get_nml_attributes("&outflows")
+sediment=json_parameters.get_nml_attributes("&sediment")
+wq_setup=json_parameters.get_nml_attributes("&wq_setup")
 ```
 
 ### Writing the namelist file
 
-Once all of the blocks have been configured, the namelist file can be compiled and written to disk. First, create an instance of the `NML` class and pass in the configured blocks. Using the `write_nml()` method, the `.nml` can be saved to a specified path.
+Now that we have the parameters for each block, the namelist file can be compiled and written to disk. First, create an instance of the `NML` class and pass in the configured blocks. Using the `write_nml()` method, the `.nml` can be saved to a specified path.
 
 ```python
 nml = nml.NML(
@@ -324,4 +195,6 @@ nml = nml.NML(
 
 nml.write_nml(nml_file_path='glm3.nml')
 ```
+
+
 
