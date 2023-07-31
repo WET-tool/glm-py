@@ -106,29 +106,6 @@ class NML:
         >>> nml.write_nml(nml_file_path="sim.nml")
         """
 
-        def nml_block(block_name, block):
-            """Returns a .nml block string representation.
-
-            Returns a string representation for a particular .nml block.
-
-            Parameters
-            ----------
-            block_name : str
-                the name of the .nml block
-            block : str
-                the string representation of the .nml block
-
-            Returns
-            -------
-            str
-                the string representation of the .nml block
-
-            Examples
-            --------
-            >>> nml_block("morphometry", self.morphometry)
-            """
-            return f"&{block_name}\n{block}\n/\n"
-
         def nml_output():
             """Returns a string representation of the .nml file.
 
@@ -143,28 +120,26 @@ class NML:
             --------
             >>> nml_output()
             """
+
             blocks = [
-                (nml_block("glm_setup", self.setup), self.setup),
-                (nml_block("mixing", self.mixing), self.mixing),
-                (nml_block("morphometry", self.morphometry), self.morphometry),
-                (nml_block("time", self.time), self.time),
-                (nml_block("output", self.output), self.output),
-                (
-                    nml_block("init_profiles", self.init_profiles),
-                    self.init_profiles,
-                ),
-                (nml_block("meteorology", self.meteorology), self.meteorology),
-                (nml_block("light", self.light), self.light),
-                (nml_block("bird_model", self.bird_model), self.bird_model),
-                (nml_block("inflow", self.inflows), self.inflows),
-                (nml_block("outflow", self.outflows), self.outflows),
-                (nml_block("sediment", self.sediment), self.sediment),
-                (nml_block("ice_snow", self.ice_snow), self.ice_snow),
-                (nml_block("wq_setup", self.wq_setup), self.wq_setup),
+                self.setup,
+                self.mixing,
+                self.morphometry,
+                self.time,
+                self.output,
+                self.init_profiles,
+                self.meteorology,
+                self.light,
+                self.bird_model,
+                self.inflows,
+                self.outflows,
+                self.sediment,
+                self.ice_snow,
+                self.wq_setup,
             ]
-            return "".join(
-                block_str
-                for block_str, block_val in blocks
+            return "\n/\n".join(
+                block_val
+                for block_val in blocks
                 if block_val is not None
             )
 
@@ -222,8 +197,6 @@ class NMLBase:
         ----------
         attrs_dict : dict
             A dictionary containing the attribute names as keys and the corresponding values to set.
-        custom_attrs : dict
-            A dictionary containing custom attribute names and values to update the attrs_dict with.
 
         Returns
         -------
@@ -244,16 +217,10 @@ class NMLBase:
         ...         "bsn_wid": 13000,
         ...         "max_layer_thick": 0.1,
         ...         "density_model": 1
-        ...     },
-        ...     custom_attrs={
-        ...         "bsn_vals": "3",
-        ...         "H": [-252.9,  -251.9,  -250.9],
-        ...         "A": [0,  9250000,  15200000,],
         ...     }
         ... )
         """
-        if custom_attrs is not None:
-            attrs_dict.update(custom_attrs)
+
         for key, value in attrs_dict.items():
             setattr(self, key, value)
 
@@ -456,7 +423,7 @@ class NMLSetup(NMLBase):
                 self.non_avg,
             ),
         ]
-        return "\n".join(
+        return "&glm_setup \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -618,7 +585,7 @@ class NMLMorphometry(NMLBase):
             (f"   H = {self.comma_sep_list(self.H)}", self.H),
             (f"   A = {self.comma_sep_list(self.A)}", self.A),
         ]
-        return "\n".join(
+        return "&morphometry \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -745,7 +712,7 @@ class NMLMixing(NMLBase):
             (f"   coef_mix_hyp = {self.coef_mix_hyp}", self.coef_mix_hyp),
             (f"   diff = {self.diff}", self.diff),
         ]
-        return "\n".join(
+        return "&mixing \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -843,7 +810,7 @@ class NMLTime(NMLBase):
             (f"   num_days = {self.num_days}", self.num_days),
             (f"   timezone = {self.timezone}", self.timezone),
         ]
-        return "\n".join(
+        return "&time \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1042,7 +1009,7 @@ class NMLOutput(NMLBase):
                 self.csv_ovrflw_fname,
             ),
         ]
-        return "\n".join(
+        return "&output \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1181,7 +1148,7 @@ class NMLInitProfiles(NMLBase):
                 self.wq_init_vals,
             ),
         ]
-        return "\n".join(
+        return "&init_profiles \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1435,7 +1402,7 @@ class NMLMeteorology(NMLBase):
             (f"   wind_dir = {self.wind_dir}", self.wind_dir),
             (f"   fetch_scale = {self.fetch_scale}", self.fetch_scale),
         ]
-        return "\n".join(
+        return "&meteorology \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1543,7 +1510,7 @@ class NMLLight(NMLBase):
             ),
             (f"   Benthic_Imin = {self.Benthic_Imin}", self.Benthic_Imin),
         ]
-        return "\n".join(
+        return "&light \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1641,7 +1608,7 @@ class NMLBirdModel(NMLBase):
             (f"   AOD380 = {self.AOD380}", self.AOD380),
             (f"   Albedo = {self.Albedo}", self.Albedo),
         ]
-        return "\n".join(
+        return "&bird_model \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1812,7 +1779,7 @@ class NMLInflows(NMLBase):
             ),
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
         ]
-        return "\n".join(
+        return "&inflows \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -1991,7 +1958,7 @@ class NMLOutflows(NMLBase):
             (f"   crest_width = {self.crest_width}", self.crest_width),
             (f"   crest_factor = {self.crest_factor}", self.crest_factor),
         ]
-        return "\n".join(
+        return "&outflows \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -2141,7 +2108,7 @@ class NMLSediment(NMLBase):
                 self.sed_roughness,
             ),
         ]
-        return "\n".join(
+        return "&sediment \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -2219,7 +2186,7 @@ class NMLIceSnow(NMLBase):
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
             (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
         ]
-        return "\n".join(
+        return "&ice_snow \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None
@@ -2333,7 +2300,7 @@ class NMLWQSetup(NMLBase):
                 self.repair_state,
             ),
         ]
-        return "\n".join(
+        return "&wq_setup \n" + "\n".join(
             param_str
             for param_str, param_val in params
             if param_val is not None

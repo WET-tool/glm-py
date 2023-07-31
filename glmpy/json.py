@@ -55,13 +55,28 @@ class JSONToNML:
             json_data = json.load(file)
         return json_data
 
-    # def get_custom_morphometry_attributes(self):
-    #     json_data = self.read_json()
-    #     morphometry = NMLMorphometry()
-    #     morphometry.set_attributes(json_data["morphometry"])
-    #     return(str(morphometry))
+    def get_nml_blocks(self):
+        """Reads a json file of GLM configuration blocks and returns a list of
+        the block names.
 
-    def get_nml_attributes(
+        Parameters
+        ----------
+        None
+
+        Examples
+        --------
+        >>> from glmpy import JSONToNML
+        >>> json_to_nml = JSONToNML("config.json")
+        >>> json_to_nml.get_nml_blocks()
+        """
+        json_data = self.read_json()
+        return list(json_data.keys())
+
+    def get_nml_attributes(self, nml_block):
+        json_data = self.read_json()
+        return (json_data[nml_block])
+
+    def set_nml_attributes(
         self, nml_block, custom_attributes: Union[dict, None] = None
     ):
         """Reads a GLM configuration block from a json file and returns a
