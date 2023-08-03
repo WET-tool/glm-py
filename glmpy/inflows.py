@@ -1,5 +1,6 @@
-import pandas as pd
 from typing import Union
+
+import pandas as pd
 
 
 class CatchmentInflows:
@@ -19,7 +20,7 @@ class CatchmentInflows:
         Path to the CSV file containing the meteorological data. Required
         if `input_type` is 'file'.
     met_data : Union[pd.DataFrame, None]
-        Dataframe of meteorological data. Required if `input_type` is
+        DataFrame of meteorological data. Required if `input_type` is
         'dataframe'.
     precip_col : str
         Name of the column in the CSV file containing precipitation data in
@@ -41,7 +42,7 @@ class CatchmentInflows:
 
     Examples
     --------
-    >>> from glmpy import CatchmentInflows
+    >>> from glmpy import inflows
     >>> met_data = pd.DataFrame({
     ...     'Date': pd.date_range(
     ...         start='1997-01-01',
@@ -49,8 +50,8 @@ class CatchmentInflows:
     ...         freq='H'),
     ...     'Rain': 10
     ... })
-    >>> met_data.to_csv("met_data.csv")
-    >>> inflows = CatchmentInflows(
+    >>> met_data.to_csv('met_data.csv')
+    >>> inflows_data = inflows.CatchmentInflows(
     ...     input_type = 'file',
     ...     path_to_met_csv = 'met_data.csv',
     ...     catchment_area = 1000,
@@ -59,8 +60,8 @@ class CatchmentInflows:
     ...     date_time_col = 'Date',
     ...     date_time_format= '%Y-%m-%d %H:%M:%S'
     ... )
-    >>> inflows.write_inflows("runoff.csv", resample_daily = True)
-    >>> inflows = CatchmentInflows(
+    >>> inflows_data.write_inflows('runoff.csv')
+    >>> inflows_data = inflows.CatchmentInflows(
     ...     input_type = 'dataframe',
     ...     met_data = met_data,
     ...     catchment_area = 1000,
@@ -69,7 +70,7 @@ class CatchmentInflows:
     ...     date_time_col = 'Date',
     ...     date_time_format= '%Y-%m-%d %H:%M:%S'
     ... )
-    >>> inflows.write_inflows("runoff.csv", resample_daily = True)
+    >>> inflows_data.write_inflows('runoff.csv')
     """
 
     def __init__(
@@ -173,7 +174,7 @@ class CatchmentInflows:
 
         Examples
         --------
-        >>> from glmpy import CatchmentInflows
+        >>> from glmpy import inflows
         >>> met_data = pd.DataFrame({
         ...     'Date': pd.date_range(
         ...         start='1997-01-01',
@@ -181,8 +182,8 @@ class CatchmentInflows:
         ...         freq='H'),
         ...     'Rain': 10
         ... })
-        >>> met_data.to_csv("met_data.csv")
-        >>> inflows = CatchmentInflows(
+        >>> met_data.to_csv('met_data.csv')
+        >>> inflows_data = inflows.CatchmentInflows(
         ...     input_type = 'file',
         ...     path_to_met_csv = 'met_data.csv',
         ...     catchment_area = 1000,
@@ -191,7 +192,7 @@ class CatchmentInflows:
         ...     date_time_col = 'Date',
         ...     date_time_format= '%Y-%m-%d %H:%M:%S'
         ... )
-        >>> inflows.write_inflows("runoff.csv")
+        >>> inflows_data.write_inflows('runoff.csv')
         """
         self.catchment_inflows = self.catchment_inflows.resample("D").sum()
         self.catchment_inflows.to_csv(path_to_inflow_csv)

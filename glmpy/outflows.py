@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import pandas as pd
 
 
@@ -105,7 +106,6 @@ class Outflows:
         >>> my_outflows.set_discrete_outflows(outflows_dict = specific_outflows)
         >>> my_outflows.get_outflows()
         """
-
         if not outflows_dict:
             raise ValueError("outflows_dict cannot be empty.")
 
