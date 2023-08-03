@@ -45,6 +45,7 @@ class GlmSim:
             if os.path.isdir(self.inputs_dir):
                 shutil.rmtree(self.inputs_dir)
             os.mkdir(self.inputs_dir)
+            os.mkdir(os.path.join(self.inputs_dir, "bcs"))
 
             for f in self.input_files:
                 if f.filename == "glm3.nml":
@@ -53,7 +54,6 @@ class GlmSim:
                     with open(nml_path, "wb") as f_tmp:
                         f_tmp.write(f.file.read())
                 else:
-                    os.mkdir(os.path.join(self.inputs_dir, "bcs"))
                     bcs_path = os.path.join(self.inputs_dir, "bcs", f.filename)
 
                     with open(bcs_path, "wb") as f_tmp:
