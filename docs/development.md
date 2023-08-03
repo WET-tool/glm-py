@@ -1,26 +1,25 @@
 # Development setup
 
-Notes on setting up a development environment for working with glm-py. 
+## Environment
 
-Create a conda environment:
-
-```
-conda create -n glm-py python=3.10
-```
-
-Install packages for documentation:
+A Docker container can be used to create a development environment. You can either build the Docker image:
 
 ```
-pip install mkdocs==1.4.2
-pip install "mkdocstrings[python]"==0.21.2
-pip install mkdocs-material==9.1.8
-pip install pre-commit
-pip install flake8
-pip install flake8-docstrings
-pip install black
-pip install "pandas[excel]"==2.0.1
-pip install --upgrade build
+docker build -t glmpy-dev .devcontainer
 ```
+Or, you can develop glmpy using a dev container. 
+
+### Code style
+
+Code linting and formatting uses ruff and black. A script to format the glm-met repository can be run: `./scripts/format.sh`. 
+
+pre-commit is used to run ruff and black. 
+
+## Tests
+
+<a href="https://docs.pytest.org/en/7.4.x/" target="_blank">pytest</a> is used for testing glm-met. 
+
+If testing, please add tests under the `tests` directory. If you need test data for running tests, add them as `pytest.fixtures` in `conftest.py`. 
 
 Build the docs (from the package root): 
 
@@ -31,7 +30,7 @@ mkdocs serve
 ## Code style
 
 * Format all code using black (see `./scripts/format.sh`)
-* Manually correct all flake8 errors
+* Manually correct all ruff errors
 * Use pre-commit to format Python code before git commits
 * Use NumPy style docstrings - [follow NumPy conventions](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
 

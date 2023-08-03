@@ -1,4 +1,4 @@
 cd ..
+black --line-length 79 glmpy
 isort glmpy
-black glmpy --line-length=79
-flake8 glmpy
+ruff glmpy
