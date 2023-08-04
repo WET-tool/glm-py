@@ -4,9 +4,10 @@ from typing import Union, List
 class NML:
     """Generate .nml files.
 
-    .nml files store config information required for running a simulation with
-    the General Lake Model (GLM). Instances of this class store values that can
-    be written to .nml files and have methods to write .nml files.
+    `.nml` files store the configuration information required for running a
+    simulation with the General Lake Model (GLM). Instances of this class store
+    values that can be written to .nml files and have methods to write .nml
+    files.
 
     Attributes
     ----------
@@ -19,26 +20,33 @@ class NML:
 
     Examples
     --------
-    >>> from glmpy import NML
-    >>> from glmpy import JSONToNML
-    >>> my_json = JSONToNML("config.json")
-    >>> nml = NML(
-    ...     setup=my_json.get_nml_attributes("setup"),
-    ...     mixing=my_json.get_nml_attributes("mixing"),
-    ...     morphometry=my_json.get_nml_attributes("morphometry"),
-    ...     time=my_json.get_nml_attributes("time"),
-    ...     output=my_json.get_nml_attributes("output"),
-    ...     init_profiles=my_json.get_nml_attributes("init_profiles"),
-    ...     meteorology=my_json.get_nml_attributes("meteorology"),
-    ...     light=my_json.get_nml_attributes("light"),
-    ...     bird_model=my_json.get_nml_attributes("bird_model"),
-    ...     inflows=my_json.get_nml_attributes("inflows"),
-    ...     outflows=my_json.get_nml_attributes("outflows"),
-    ...     sediment=my_json.get_nml_attributes("sediment"),
-    ...     ice_snow=my_json.get_nml_attributes("ice_snow"),
-    ...     wq_setup=my_json.get_nml_attributes("wq_setup")
+    >>> from glmpy import nml
+    >>> from glmpy import json
+    Read a json file of GLM config data:
+    >>> json = JSONToNML("sparkling_lake.json")
+    For each NML block, get the attributes from the json file:
+    >>> setup_dict = json.get_nml_attributes("&glm_setup")
+    >>> morphometry_dict = json.get_nml_attributes("&morphometry")
+    >>> time_dict = json.get_nml_attributes("&time")
+    >>> init_profiles_dict = json.get_nml_attributes("&init_profiles")
+    Initialise an instance of each NML block class and set the attributes:
+    >>> setup = nml.NMLSetup()
+    >>> setup.set_attributes(setup_dict)
+    >>> morphometry=nml.NMLMorphometry()
+    >>> morphometry.set_attributes(morphometry_dict)
+    >>> time=nml.NMLTime()
+    >>> time.set_attributes(time_dict)
+    >>> init_profiles=nml.NMLInitProfiles()
+    >>> init_profiles.set_attributes(init_profiles_dict)
+    Initialise the NML class with the NML block instances:
+    >>> nml = nml.NML(
+    ...     setup=setup,
+    ...     morphometry=morphometry,
+    ...     time=time,
+    ...     init_profiles=init_profiles
     ... )
-    >>> nml.write_nml()
+    Write the .nml file:
+    >>> nml.write_nml(nml_file_path="sparkling.nml")
     """
 
     def __init__(
@@ -77,7 +85,6 @@ class NML:
         """Write a .nml file.
 
         Writes a .nml file to the file path specified in `nml_file_path`.
-        The .nml file stores config for a GLM simulation.
 
         Parameters
         ----------
@@ -86,24 +93,7 @@ class NML:
 
         Examples
         --------
-        >>> from glmpy import NML
-        >>> nml = NML(
-        ...     setup=my_json.get_nml_attributes("setup"),
-        ...     mixing=my_json.get_nml_attributes("mixing"),
-        ...     morphometry=my_json.get_nml_attributes("morphometry"),
-        ...     time=my_json.get_nml_attributes("time"),
-        ...     output=my_json.get_nml_attributes("output"),
-        ...     init_profiles=my_json.get_nml_attributes("init_profiles"),
-        ...     meteorology=my_json.get_nml_attributes("meteorology"),
-        ...     light=my_json.get_nml_attributes("light"),
-        ...     bird_model=my_json.get_nml_attributes("bird_model"),
-        ...     inflows=my_json.get_nml_attributes("inflows"),
-        ...     outflows=my_json.get_nml_attributes("outflows"),
-        ...     sediment=my_json.get_nml_attributes("sediment"),
-        ...     ice_snow=my_json.get_nml_attributes("ice_snow"),
-        ...     wq_setup=my_json.get_nml_attributes("wq_setup")
-        ... )
-        >>> nml.write_nml(nml_file_path="sim.nml")
+        >>> nml.write_nml(nml_file_path="sparkling.nml")
         """
 
         def nml_output():
@@ -122,58 +112,36 @@ class NML:
             """
 
             config_string = ""
+
             if self.setup is not None:
-                config_string += self.setup + "/\n"
+                config_string += str(self.setup) + "\n/\n"
             if self.mixing is not None:
-                config_string += str(self.mixing) + "/\n"
+                config_string += str(self.mixing) + "\n/\n"
             if self.wq_setup is not None:
-                config_string += str(self.wq_setup) + "/\n"
+                config_string += str(self.wq_setup) + "\n/\n"
             if self.morphometry is not None:
-                config_string += str(self.morphometry) + "/\n"
+                config_string += str(self.morphometry) + "\n/\n"
             if self.time is not None:
-                config_string += str(self.time) + "/\n"
+                config_string += str(self.time) + "\n/\n"
             if self.output is not None:
-                config_string += str(self.output) + "/\n"
+                config_string += str(self.output) + "\n/\n"
             if self.init_profiles is not None:
-                config_string += str(self.init_profiles) + "/\n"
+                config_string += str(self.init_profiles) + "\n/\n"
             if self.light is not None:
-                config_string += str(self.light) + "/\n"
+                config_string += str(self.light) + "\n/\n"
             if self.bird_model is not None:
-                config_string += str(self.bird_model) + "/\n"
+                config_string += str(self.bird_model) + "\n/\n"
             if self.sediment is not None:
-                config_string += str(self.sediment) + "/\n"
+                config_string += str(self.sediment) + "\n/\n"
             if self.ice_snow is not None:
-                config_string += str(self.ice_snow) + "/\n"
+                config_string += str(self.ice_snow) + "\n/\n"
             if self.meteorology is not None:
-                config_string += str(self.meteorology) + "/\n"
+                config_string += str(self.meteorology) + "\n/\n"
             if self.inflows is not None:
-                config_string += str(self.inflows) + "/\n"
+                config_string += str(self.inflows) + "\n/\n"
             if self.outflows is not None:
-                config_string += str(self.outflows) + "/\n"
-
-            # if self.output is not None:
-
-            # blocks = [
-            #     str(self.setup),
-            #     str(self.mixing),
-            #     str(self.morphometry),
-            #     str(self.time),
-            #     str(self.output),
-            #     str(self.init_profiles),
-            #     str(self.meteorology),
-            #     str(self.light),
-            #     str(self.bird_model),
-            #     str(self.inflows),
-            #     str(self.outflows),
-            #     str(self.sediment),
-            #     str(self.ice_snow),
-            #     str(self.wq_setup),
-            # ]
-            # return "\n/\n".join(
-            #     block_val
-            #     for block_val in blocks
-            #     if block_val is not None
-            # )
+                config_string += str(self.outflows) + "\n/\n"
+            return config_string
 
         with open(file=nml_file_path, mode="w") as file:
             file.write(nml_output())
@@ -183,24 +151,19 @@ class NMLBase:
     """Base class for each  NML block class.
 
     Provides the `set_attributes()` method for assigning a dictionary of
-    attributes any NML block class.
+    attributes to any NML block class.
 
     Attributes
     ----------
     attrs_dict : dict
         A dictionary containing the GLM configuration options as keys and the
         corresponding values to set.
-    update : dict
-        A dictionary containing GLM configuration options/values to update or
-        add to the `attrs_dict`.
 
     Examples
     --------
     >>> from glmpy import NMLBase
     >>> from glmpy import NMLMorphometry
-    >>> morphometry = NMLMorphometry()
-    >>> morphometry.set_attributes(
-    ...     attrs_dict={
+    >>> morphometry_attrs={
     ...         "lake_name": "Example Lake'",
     ...         "latitude":  32,
     ...         "longitude": 35,
@@ -208,18 +171,17 @@ class NMLBase:
     ...         "bsn_len": 21000,
     ...         "bsn_wid": 13000,
     ...         "max_layer_thick": 0.1,
-    ...         "density_model": 1
-    ...     },
-    ...     update={
+    ...         "density_model": 1,
     ...         "bsn_vals": "3",
     ...         "H": [-252.9,  -251.9,  -250.9],
     ...         "A": [0,  9250000,  15200000,],
-    ...     }
-    ... )
+    ... }
+    >>> morphometry = NMLMorphometry()
+    >>> morphometry.set_attributes(attrs_dict=morphometry_attrs)
     """
 
     def set_attributes(
-        self, attrs_dict, custom_attrs: Union[dict, None] = None
+        self, attrs_dict: dict
     ):
         """Set attributes for the NMLSetup class.
 
@@ -238,9 +200,7 @@ class NMLBase:
         --------
         >>> from glmpy import NMLBase
         >>> from glmpy import NMLMorphometry
-        >>> morphometry = NMLMorphometry()
-        >>> morphometry.set_attributes(
-        ...     attrs_dict={
+        >>> morphometry_attrs={
         ...         "lake_name": "Example Lake'",
         ...         "latitude":  32,
         ...         "longitude": 35,
@@ -248,9 +208,13 @@ class NMLBase:
         ...         "bsn_len": 21000,
         ...         "bsn_wid": 13000,
         ...         "max_layer_thick": 0.1,
-        ...         "density_model": 1
-        ...     }
-        ... )
+        ...         "density_model": 1,
+        ...         "bsn_vals": "3",
+        ...         "H": [-252.9,  -251.9,  -250.9],
+        ...         "A": [0,  9250000,  15200000,],
+        ... }
+        >>> morphometry = NMLMorphometry()
+        >>> morphometry.set_attributes(attrs_dict=morphometry_attrs)
         """
 
         for key, value in attrs_dict.items():
