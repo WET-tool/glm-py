@@ -2,15 +2,25 @@ examples
 
 *.DS_Store
 
-dist
+test-data
 
-build
-
-**/__pycache__
-**__pycache__
+*/__pycache__
+*__pycache__
 *.py[cod]
 
-glm_py.egg-info
+dist
+build
+*.egg-info
+
+
+.ruff_cache
+.pytest_cache
+
+scratch.py
+
 
 scratch.ipynb
 sparkling.nml
+# MkDocs documentation
+site*/
+

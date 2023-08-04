@@ -1,6 +1,6 @@
 {
     "python.analysis.typeCheckingMode": "basic",
-    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Enabled": false,
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
     "editor.rulers": [
@@ -12,7 +12,7 @@
         "--line-length=79"
     ],
     "autoDocstring.docstringFormat": "numpy",
-    "python.linting.pydocstyleEnabled": true,
+    "python.linting.pydocstyleEnabled": false,
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
     },

@@ -1,0 +1,3 @@
+pandas[excel]>=2.0.1
+fastapi[all]==0.88.0
+python-multipart

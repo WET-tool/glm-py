@@ -1,5 +1,0 @@
-[flake8]
-max-line-length = 79
-max-doc-length = 79
-extend-ignore = D107, D102, D101
-docstring-convention = numpy
