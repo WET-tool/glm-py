@@ -121,27 +121,59 @@ class NML:
             >>> nml_output()
             """
 
-            blocks = [
-                self.setup,
-                self.mixing,
-                self.morphometry,
-                self.time,
-                self.output,
-                self.init_profiles,
-                self.meteorology,
-                self.light,
-                self.bird_model,
-                self.inflows,
-                self.outflows,
-                self.sediment,
-                self.ice_snow,
-                self.wq_setup,
-            ]
-            return "\n/\n".join(
-                block_val
-                for block_val in blocks
-                if block_val is not None
-            )
+            config_string = ""
+            if self.setup is not None:
+                config_string += self.setup + "/\n"
+            if self.mixing is not None:
+                config_string += str(self.mixing) + "/\n"
+            if self.wq_setup is not None:
+                config_string += str(self.wq_setup) + "/\n"
+            if self.morphometry is not None:
+                config_string += str(self.morphometry) + "/\n"
+            if self.time is not None:
+                config_string += str(self.time) + "/\n"
+            if self.output is not None:
+                config_string += str(self.output) + "/\n"
+            if self.init_profiles is not None:
+                config_string += str(self.init_profiles) + "/\n"
+            if self.light is not None:
+                config_string += str(self.light) + "/\n"
+            if self.bird_model is not None:
+                config_string += str(self.bird_model) + "/\n"
+            if self.sediment is not None:
+                config_string += str(self.sediment) + "/\n"
+            if self.ice_snow is not None:
+                config_string += str(self.ice_snow) + "/\n"
+            if self.meteorology is not None:
+                config_string += str(self.meteorology) + "/\n"
+            if self.inflows is not None:
+                config_string += str(self.inflows) + "/\n"
+            if self.outflows is not None:
+                config_string += str(self.outflows) + "/\n"
+
+            # if self.output is not None:
+
+            # blocks = [
+            #     str(self.setup),
+            #     str(self.mixing),
+            #     str(self.morphometry),
+            #     str(self.time),
+            #     str(self.output),
+            #     str(self.init_profiles),
+            #     str(self.meteorology),
+            #     str(self.light),
+            #     str(self.bird_model),
+            #     str(self.inflows),
+            #     str(self.outflows),
+            #     str(self.sediment),
+            #     str(self.ice_snow),
+            #     str(self.wq_setup),
+            # ]
+            # return "\n/\n".join(
+            #     block_val
+            #     for block_val in blocks
+            #     if block_val is not None
+            # )
 
         with open(file=nml_file_path, mode="w") as file:
             file.write(nml_output())
