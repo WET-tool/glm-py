@@ -114,33 +114,33 @@ class NML:
             config_string = ""
 
             if self.setup is not None:
-                config_string += str(self.setup) + "\n/\n"
+                config_string += str(self.setup) + "\n"
             if self.mixing is not None:
-                config_string += str(self.mixing) + "\n/\n"
+                config_string += str(self.mixing) + "\n"
             if self.wq_setup is not None:
-                config_string += str(self.wq_setup) + "\n/\n"
+                config_string += str(self.wq_setup) + "\n"
             if self.morphometry is not None:
-                config_string += str(self.morphometry) + "\n/\n"
+                config_string += str(self.morphometry) + "\n"
             if self.time is not None:
-                config_string += str(self.time) + "\n/\n"
+                config_string += str(self.time) + "\n"
             if self.output is not None:
-                config_string += str(self.output) + "\n/\n"
+                config_string += str(self.output) + "\n"
             if self.init_profiles is not None:
-                config_string += str(self.init_profiles) + "\n/\n"
+                config_string += str(self.init_profiles) + "\n"
             if self.light is not None:
-                config_string += str(self.light) + "\n/\n"
+                config_string += str(self.light) + "\n"
             if self.bird_model is not None:
-                config_string += str(self.bird_model) + "\n/\n"
+                config_string += str(self.bird_model) + "\n"
             if self.sediment is not None:
-                config_string += str(self.sediment) + "\n/\n"
+                config_string += str(self.sediment) + "\n"
             if self.ice_snow is not None:
-                config_string += str(self.ice_snow) + "\n/\n"
+                config_string += str(self.ice_snow) + "\n"
             if self.meteorology is not None:
-                config_string += str(self.meteorology) + "\n/\n"
+                config_string += str(self.meteorology) + "\n"
             if self.inflows is not None:
-                config_string += str(self.inflows) + "\n/\n"
+                config_string += str(self.inflows) + "\n"
             if self.outflows is not None:
-                config_string += str(self.outflows) + "\n/\n"
+                config_string += str(self.outflows) + "\n"
             return config_string
 
         with open(file=nml_file_path, mode="w") as file:
@@ -423,7 +423,7 @@ class NMLSetup(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLMorphometry(NMLBase):
@@ -585,7 +585,7 @@ class NMLMorphometry(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLMixing(NMLBase):
@@ -712,7 +712,7 @@ class NMLMixing(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLTime(NMLBase):
@@ -810,7 +810,7 @@ class NMLTime(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLOutput(NMLBase):
@@ -1009,7 +1009,7 @@ class NMLOutput(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLInitProfiles(NMLBase):
@@ -1148,7 +1148,7 @@ class NMLInitProfiles(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLMeteorology(NMLBase):
@@ -1402,7 +1402,7 @@ class NMLMeteorology(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLLight(NMLBase):
@@ -1510,7 +1510,7 @@ class NMLLight(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLBirdModel(NMLBase):
@@ -1608,7 +1608,7 @@ class NMLBirdModel(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLInflows(NMLBase):
@@ -1779,7 +1779,7 @@ class NMLInflows(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLOutflows(NMLBase):
@@ -1958,7 +1958,7 @@ class NMLOutflows(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLSediment(NMLBase):
@@ -2108,7 +2108,7 @@ class NMLSediment(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLIceSnow(NMLBase):
@@ -2186,7 +2186,7 @@ class NMLIceSnow(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
 
 
 class NMLWQSetup(NMLBase):
@@ -2300,4 +2300,4 @@ class NMLWQSetup(NMLBase):
             param_str
             for param_str, param_val in params
             if param_val is not None
-        )
+        ) + "\n/"
