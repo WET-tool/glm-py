@@ -4,10 +4,10 @@ from glmpy.nml import NML
 
 def test_write_nml(tmp_path):
     nml = NML(
-        setup="&glm_setup",
-        morphometry="&morphometry",
-        time="&time",
-        init_profiles="&init_profiles",
+        setup="&glm_setup\n/",
+        morphometry="&morphometry\n/",
+        time="&time\n/",
+        init_profiles="&init_profiles\n/",
     )
     file_path = tmp_path / "test.nml"
     nml.write_nml(file_path)
