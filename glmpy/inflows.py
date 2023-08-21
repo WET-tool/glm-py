@@ -8,7 +8,7 @@ class CatchmentInflows:
     Calculates the catchment inflows for the GLM model.
 
     The `CatchmentInflows` class reads the GLM meteorological data to calculate
-    inflows (m^3/s) using the provided catchment area and runoff
+    inflows (m^3/s) using a provided catchment area and runoff
     coefficient/threshold. Inflows can then be written to a CSV file.
 
     Attributes
@@ -24,7 +24,7 @@ class CatchmentInflows:
         'dataframe'.
     precip_col : str
         Name of the column in the CSV file containing precipitation data in
-        m/day.
+        m/day or m/hour.
     catchment_area : float
         Area of the catchment in square meters.
     runoff_coef : Union[float, None]
@@ -42,30 +42,78 @@ class CatchmentInflows:
 
     Examples
     --------
-    >>> from glmpy import inflows
-    >>> met_data = pd.DataFrame({
-    ...     'Date': pd.date_range(
-    ...         start='1997-01-01',
-    ...         end='2004-12-31',
-    ...         freq='H'),
-    ...     'Rain': 10
+    Daily precipitation with a runoff coefficient:
+    >>> met_data_daily = pd.DataFrame({
+    >>> 'Date': pd.date_range(
+    ...     start='1997-01-01',
+    ...     end='2004-12-31',
+    ...     freq='D'),
+    ... 'Rain': 0.024 #m per day
     ... })
-    >>> met_data.to_csv('met_data.csv')
-    >>> inflows_data = inflows.CatchmentInflows(
-    ...     input_type = 'file',
-    ...     path_to_met_csv = 'met_data.csv',
+    >>> inflows_data = CatchmentInflows(
+    ...     input_type = 'dataframe',
+    ...     met_data = met_data_daily,
     ...     catchment_area = 1000,
     ...     runoff_coef = 0.5,
+    ...     precip_col = 'Rain',
+    ...     date_time_col = 'Date',
+    ...     date_time_format= '%Y-%m-%d'
+    ... )
+    >>> inflows_data.write_inflows('runoff.csv')
+
+    Hourly precipitation with a runoff coefficient:
+    >>> met_data_hourly = pd.DataFrame({
+    >>> 'Date': pd.date_range(
+    ...     start='1997-01-01',
+    ...     end='2004-12-31',
+    ...     freq='H'),
+    ... 'Rain': 0.001 #m per hour
+    ... })
+    >>> met_data_hourly.to_csv('met_data_hourly.csv')
+    >>> inflows_data = CatchmentInflows(
+    ...     input_type = 'file',
+    ...     path_to_met_csv = 'met_data_hourly.csv',
+    ...     catchment_area = 1000,
+    ...     runoff_threshold = 10,
     ...     precip_col = 'Rain',
     ...     date_time_col = 'Date',
     ...     date_time_format= '%Y-%m-%d %H:%M:%S'
     ... )
     >>> inflows_data.write_inflows('runoff.csv')
-    >>> inflows_data = inflows.CatchmentInflows(
+
+    Daily precipitation with a runoff threshold:
+    >>> met_data_daily = pd.DataFrame({
+    ...     'Date': pd.date_range(
+    ...         start='1997-01-01',
+    ...         end='2004-12-31',
+    ...         freq='D'),
+    ...     'Rain': 0.024 #m per day
+    ... })
+    >>> inflows_data = CatchmentInflows(
     ...     input_type = 'dataframe',
-    ...     met_data = met_data,
+    ...     met_data = met_data_daily,
     ...     catchment_area = 1000,
-    ...     runoff_threshold = 10.0,
+    ...     runoff_threshold = 10,
+    ...     precip_col = 'Rain',
+    ...     date_time_col = 'Date',
+    ...     date_time_format= '%Y-%m-%d'
+    ... )
+    >>> inflows_data.write_inflows('runoff.csv')
+
+    Hourly precipitation with a runoff threshold:
+    >>> met_data_hourly = pd.DataFrame({
+    ...     'Date': pd.date_range(
+    ...         start='1997-01-01',
+    ...         end='2004-12-31',
+    ...         freq='H'),
+    ...     'Rain': 0.001 #m per hour
+    ... })
+    >>> met_data_hourly.to_csv('met_data_hourly.csv')
+    >>> inflows_data = CatchmentInflows(
+    ...     input_type = 'file',
+    ...     path_to_met_csv = 'met_data_hourly.csv',
+    ...     catchment_area = 1000,
+    ...     runoff_threshold = 10,
     ...     precip_col = 'Rain',
     ...     date_time_col = 'Date',
     ...     date_time_format= '%Y-%m-%d %H:%M:%S'
@@ -120,7 +168,8 @@ class CatchmentInflows:
         if self.precip_col not in self.met_data.columns:
             raise ValueError(f"{self.precip_col} not in met_data columns.")
 
-        precip_data = self.met_data[self.precip_col].astype(float)
+        if self.date_time_col not in self.met_data.columns:
+            raise ValueError(f"{self.date_time_col} not in met_data columns.")
 
         if self.runoff_coef is None and self.runoff_threshold is None:
             raise ValueError(
@@ -132,32 +181,37 @@ class CatchmentInflows:
                 "Only one of runoff_coef or runoff_threshold can be provided."
             )
 
+        self.met_data[self.date_time_col] = pd.to_datetime(
+            self.met_data[self.date_time_col], format=self.date_time_format
+        )
+        self.met_data.set_index(self.date_time_col, inplace=True)
+
+        time_diff = self.met_data.index[1] - self.met_data.index[0]
+
+        if time_diff == pd.Timedelta(hours=1):
+            self.met_data = self.met_data.resample("D").sum()
+
+        precip_data = self.met_data[self.precip_col].astype(float)
+
         if self.runoff_coef is not None:
             if not isinstance(self.runoff_coef, (int, float)):
                 raise ValueError("runoff_coef must be numeric.")
             inflow_data = precip_data * self.catchment_area * self.runoff_coef
             inflow_data[inflow_data < 0] = 0
-            inflow_data = inflow_data / 86400
         else:
             if not isinstance(self.runoff_threshold, (int, float)):
                 raise ValueError("runoff_threshold must be numeric.")
-            self.runoff_threshold / 1000
+            self.runoff_threshold /= 1000
             inflow_data = (
                 precip_data - self.runoff_threshold
             ) * self.catchment_area
             inflow_data[inflow_data < 0] = 0
-            inflow_data = inflow_data / 86400
+
+        inflow_data = inflow_data / 86400
 
         self.catchment_inflows = pd.DataFrame(
-            {
-                "time": pd.to_datetime(
-                    self.met_data[self.date_time_col],
-                    format=self.date_time_format,
-                ),
-                "flow": inflow_data,
-            }
+            {"time": self.met_data.index, "flow": inflow_data}
         )
-
         self.catchment_inflows.set_index("time", inplace=True)
 
     def write_inflows(self, path_to_inflow_csv: str):
@@ -182,7 +236,7 @@ class CatchmentInflows:
         ...         freq='H'),
         ...     'Rain': 10
         ... })
-        >>> met_data.to_csv('met_data.csv')
+        >>> met_data.to_csv('met_data.csv', index=False)
         >>> inflows_data = inflows.CatchmentInflows(
         ...     input_type = 'file',
         ...     path_to_met_csv = 'met_data.csv',
@@ -194,5 +248,4 @@ class CatchmentInflows:
         ... )
         >>> inflows_data.write_inflows('runoff.csv')
         """
-        self.catchment_inflows = self.catchment_inflows.resample("D").sum()
         self.catchment_inflows.to_csv(path_to_inflow_csv)
