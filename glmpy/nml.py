@@ -4,19 +4,55 @@ from typing import List, Union
 class NML:
     """Generate .nml files.
 
-    `.nml` files store the configuration information required for running a
-    simulation with the General Lake Model (GLM). Instances of this class store
-    values that can be written to .nml files and have methods to write .nml
-    files.
+    `.nml` files contain the parameters required for running a simulation with
+    the General Lake Model (GLM). The `NML` class combines string
+    representations of each component of a `.nml` file, e.g., `&setup`, and
+    `&morphometry`. The file can be saved to disk with the`write_nml()` method.
 
     Attributes
     ----------
     setup : str
-        String representation of the `glm_setup` component of the .nml file
-    mixing : str
-        String representation of the `mixing` component of the .nml file
+        String representation of the `&glm_setup` component of the .nml file.
+        See `NMLSetup`. Required for every GLM simulation.
     morphometry : str
-        String representation of the `morphometry` component of the .nml file
+        String representation of the `&morphometry` component of the .nml file.
+        See `NMLMorphometry`. Required for every GLM simulation.
+    time : str
+        String representation of the `&time` component of the .nml file.
+        See `NMLTime`. Required for every GLM simulation.
+    init_profiles : str
+        String representation of the `&init_profiles` component of the .nml
+        file. See `NMLInitProfiles`. Required for every GLM simulation.
+    mixing : Union[str, None]
+        String representation of the `&mixing` component of the .nml file. See
+        `NMLMixing`. Default is None.
+    output : Union[str, None]
+        String representation of the `&output` component of the .nml file. See
+        `NMLOutput`. Default is None.
+    meteorology : Union[str, None]
+        String representation of the `&meteorology` component of the .nml file.
+        See `NMLMeteorology`. Default is None.
+    light : Union[str, None]
+        String representation of the `&light` component of the .nml file.
+        See `NMLLight`. Default is None.
+    bird_model : Union[str, None]
+        String representation of the `&bird_model` component of the .nml file.
+        See `NMLBirdModel`. Default is None.
+    inflows : Union[str, None]
+        String representation of the `&inflows` component of the .nml file.
+        See `NMLInflows`. Default is None.
+    outflows : Union[str, None]
+        String representation of the `&outflows` component of the .nml file.
+        See `NMLOutflows`. Default is None.
+    sediment : Union[str, None]
+        String representation of the `&sediment` component of the .nml file.
+        See `NMLSediment`. Default is None.
+    ice_snow : Union[str, None]
+        String representation of the `&ice_snow` component of the .nml file.
+        See `NMLIceSnow`. Default is None.
+    wq_setup : Union[str, None]
+        String representation of the `&wq_setup` component of the .nml file.
+        See `NMLWQSetup`. Default is None.
 
     Examples
     --------
@@ -81,15 +117,15 @@ class NML:
         self.ice_snow = ice_snow
         self.wq_setup = wq_setup
 
-    def write_nml(self, nml_file_path: str = "sim.nml"):
+    def write_nml(self, nml_file_path: str = "glm3.nml"):
         """Write a .nml file.
 
-        Writes a .nml file to the file path specified in `nml_file_path`.
+        Write the `NML` instance to file with the .nml extension.
 
         Parameters
         ----------
-        nml_file_path : str, optional
-            file path to save .nml file, by default "sim.nml"
+        nml_file_path : str
+            File path to save .nml file, by default `glm3.nml`.
 
         Examples
         --------
@@ -99,7 +135,8 @@ class NML:
         def nml_output():
             """Returns a string representation of the .nml file.
 
-            Constructs a string representation of the .nml file from `nml_block()`.
+            Constructs a string representation of the .nml file from
+            `nml_block()`.
 
             Returns
             -------
@@ -148,7 +185,7 @@ class NML:
 
 
 class NMLBase:
-    """Base class for each  NML block class.
+    """Base class for each NML block class.
 
     Provides the `set_attributes()` method for assigning a dictionary of
     attributes to any NML block class.
@@ -156,7 +193,7 @@ class NMLBase:
     Attributes
     ----------
     attrs_dict : dict
-        A dictionary containing the GLM configuration options as keys and the
+        A dictionary containing the GLM configuration parameters as keys and the
         corresponding values to set.
 
     Examples
@@ -180,21 +217,17 @@ class NMLBase:
     >>> morphometry.set_attributes(attrs_dict=morphometry_attrs)
     """
 
-    def set_attributes(
-        self, attrs_dict: dict
-    ):
-        """Set attributes for the NMLSetup class.
+    def set_attributes(self, attrs_dict: dict):
+        """Set attributes for a NML block class.
 
-        Set the attributes of the NMLSetup object using a dictionary of attribute names and values.
+        Set the attributes of any NML block class (e.g. `NMLSetup`, `NMLTime`)
+        using a dictionary of attribute names and values.
 
         Parameters
         ----------
         attrs_dict : dict
-            A dictionary containing the attribute names as keys and the corresponding values to set.
-
-        Returns
-        -------
-        None
+            A dictionary containing the attribute names as keys and the
+            corresponding values to set.
 
         Examples
         --------
@@ -226,7 +259,7 @@ class NMLBase:
     ) -> Union[str, List[Union[str, None]], None]:
         """Python boolean to Fortran boolean string.
 
-        Convert a Python boolean or a list of Python booleans to a Fortran
+        Convert a Python boolean, or a list of Python booleans, to a Fortran
         boolean string or a list of Fortran boolean strings.
 
         Parameters
@@ -269,17 +302,18 @@ class NMLBase:
         list_input: Union[List[int], List[float], List[str], List[bool], None],
         inverted_commas: bool = False,
     ):
-        """Convert a Python list to a NML formatted  comma separated string.
+        """Convert a Python list to a NML formatted comma separated string.
 
-        If the list_input is None, None is returned. If inverted_commas is True,
-        the list items are returned as strings with inverted commas.
+        If the list_input is None, None is returned. If inverted_commas is
+        True, the list items are returned as strings with inverted commas.
 
         Parameters
         ----------
         list_input : list
             A list of values.
         inverted_commas : bool
-            If True, the list items are returned as strings with inverted commas.
+            If True, the list items are returned as strings with inverted
+            commas.
 
         Returns
         -------
@@ -314,18 +348,19 @@ class NMLBase:
 
 
 class NMLSetup(NMLBase):
-    """Define the glm_setup block of a GLM simulation configuration.
+    """Define the `&glm_setup` block of a GLM model.
 
-    The glm_setup component is used to define the simulations layer details.
-    Attributes are set using the `set_attributes()` method and returned as a
-    formatted string using the `__str__()` method.
+    The `&glm_setup` component is used to define properties of the vertical
+    series of layers used by GLM to model a water body. Attributes are set
+    using the `set_attributes()` method and returned as a formatted
+    string using the `__str__()` method.
 
     Attributes
     ----------
-    sim_name : str
-        Title of simulation. Default is 'lake'.
+    sim_name : Union[str, None]
+        Title of simulation. Default is None.
     max_layers : Union[int, None]
-        Maximum number of layers. Default is 500.
+        Maximum number of layers. Default is None.
     min_layer_vol : Union[float, None]
         Minimum layer volume. Default is None.
     min_layer_thick : Union[float, None]
@@ -333,7 +368,7 @@ class NMLSetup(NMLBase):
     max_layer_thick : Union[float, None]
         Maximum thickness of a layer (m). Default is None.
     density_model : Union[int, None]
-        Switch to set the density equation. Default is 1.
+        Switch to set the density equation. Default is None.
     non_avg : Union[bool, None]
         Switch to configure flow boundary condition temporal interpolation.
         Default is None.
@@ -358,12 +393,12 @@ class NMLSetup(NMLBase):
 
     def __init__(
         self,
-        sim_name: str = "lake",
-        max_layers: Union[int, None] = 500,
+        sim_name: Union[str, None] = None,
+        max_layers: Union[int, None] = None,
         min_layer_vol: Union[float, None] = None,
         min_layer_thick: Union[float, None] = None,
         max_layer_thick: Union[float, None] = None,
-        density_model: Union[int, None] = 1,
+        density_model: Union[int, None] = None,
         non_avg: Union[bool, None] = None,
     ):
         self.sim_name = sim_name
@@ -375,15 +410,14 @@ class NMLSetup(NMLBase):
         self.non_avg = non_avg
 
     def __str__(self):
-        """Return the string representation of the NMLSetup object.
+        """Return the string representation of the `NMLSetup` object.
 
-        Returns a formatted string of the NMLSetup configution options and
-        values.
+        Returns a `.nml` formatted string of the `NMLSetup` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLSetup object.
+            String representation of the `NMLSetup` object.
 
         Examples
         --------
@@ -419,19 +453,23 @@ class NMLSetup(NMLBase):
                 self.non_avg,
             ),
         ]
-        return "&glm_setup \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&glm_setup \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLMorphometry(NMLBase):
-    """Define the morphometry block of a GLM simulation configuration.
+    """Define the `&morphometry` block of a GLM model.
 
-    Used to configure the location, depth & hypsographic curve. Attributes are
-    set using the `set_attributes()` method and returned as a formatted string
-    using the `__str__()` method.
+    Used to configure the morphological parameters of the modelled water body.
+    Attributes are set using the `set_attributes()` method and returned as a
+    formatted string using the `__str__()` method.
 
     Attributes
     ----------
@@ -522,15 +560,14 @@ class NMLMorphometry(NMLBase):
         self.A = A
 
     def __str__(self):
-        """Return the string representation of the NMLMorphometry object.
+        """Return the string representation of the `NMLMorphometry` object.
 
-        Returns a formatted string of the NMLMorphometry configution options and
-        values.
+        Returns a `.nml` formatted string of the `NMLMorphometry` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLMorphometry object.
+            String representation of the `NMLMorphometry` object.
 
         Examples
         --------
@@ -581,24 +618,29 @@ class NMLMorphometry(NMLBase):
             (f"   H = {self.comma_sep_list(self.H)}", self.H),
             (f"   A = {self.comma_sep_list(self.A)}", self.A),
         ]
-        return "&morphometry \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&morphometry \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLMixing(NMLBase):
-    """Define the mixing block of a GLM simulation configuration.
+    """Define the `&mixing` block of a GLM model.
 
-    Used to configure mixing parameters. Attributes are set using the
-    `set_attributes()` method and returned as a formatted string using the
-    `__str__()` method.
+    Used to configure the mixing processes within the modelled water body.
+    Attributes are set using the `set_attributes()` method and returned as a
+    formatted string using the `__str__()` method.
 
     Attributes
     ----------
-    surface_mixing : int
-        Switch to select the options of the surface mixing model. Default is 1.
+    surface_mixing : Union[int, None]
+        Switch to select the options of the surface mixing model. Default is
+        None.
     coef_mix_conv : Union[float, None]
         Mixing efficiency - convective overturn. Default is None.
     coef_wind_stir : Union[float, None]
@@ -639,7 +681,7 @@ class NMLMixing(NMLBase):
 
     def __init__(
         self,
-        surface_mixing: int = 1,
+        surface_mixing: Union[int, None] = None,
         coef_mix_conv: Union[float, None] = None,
         coef_wind_stir: Union[float, None] = None,
         coef_mix_shear: Union[float, None] = None,
@@ -660,15 +702,14 @@ class NMLMixing(NMLBase):
         self.diff = diff
 
     def __str__(self):
-        """Return the string representation of the NMLMixing object.
+        """Return the string representation of the `NMLMixing` object.
 
-        Returns a formatted string of the NMLMixing configution options and
-        values.
+        Returns a `.nml` formatted string of the `NMLMixing` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLMixing object.
+            String representation of the `NMLMixing` object.
 
         Examples
         --------
@@ -708,19 +749,24 @@ class NMLMixing(NMLBase):
             (f"   coef_mix_hyp = {self.coef_mix_hyp}", self.coef_mix_hyp),
             (f"   diff = {self.diff}", self.diff),
         ]
-        return "&mixing \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&mixing \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLTime(NMLBase):
-    """Define the time block of a GLM simulation configuration.
+    """Define the `&time` block of a GLM model.
 
-    Used to configure the simulation period, time step, and time zone.
-    Attributes are set using the `set_attributes()` method and returned as a
-    formatted string using the `__str__()` method.
+    Used to configure the temporal parameters of the model, e.g., simulation
+    period, time step, and time zone. Attributes are set using the
+    `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
 
     Attributes
     ----------
@@ -732,12 +778,12 @@ class NMLTime(NMLBase):
     stop : Union[str, None]
         End time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'. Default is
         None.
-    dt : float
-        Time step (seconds). Default is 3600.0.
+    dt : Union[float, None]
+        Time step (seconds). Default is None
     num_days : Union[int, None]
         Number of days to simulate. Default is None.
-    timezone : float
-        UTC time zone. Default is 0.0.
+    timezone : Union[float, None]
+        UTC time zone. Default is None.
 
     Examples
     --------
@@ -760,9 +806,9 @@ class NMLTime(NMLBase):
         timefmt: Union[int, None] = None,
         start: Union[str, None] = None,
         stop: Union[int, None] = None,
-        dt: float = 3600.0,
+        dt: Union[float, None] = None,
         num_days: Union[int, None] = None,
-        timezone: float = 0.0,
+        timezone: Union[float, None] = None,
     ):
         self.timefmt = timefmt
         self.start = start
@@ -772,15 +818,14 @@ class NMLTime(NMLBase):
         self.timezone = timezone
 
     def __str__(self):
-        """Return the string representation of the NMLTime object.
+        """Return the string representation of the `NMLTime` object.
 
-        Returns a formatted string of the NMLTime configution options and
-        values.
+        Returns a `.nml` formatted string of the `NMLTime` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLTime object.
+            String representation of the `NMLTime` object.
 
         Examples
         --------
@@ -806,34 +851,39 @@ class NMLTime(NMLBase):
             (f"   num_days = {self.num_days}", self.num_days),
             (f"   timezone = {self.timezone}", self.timezone),
         ]
-        return "&time \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&time \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLOutput(NMLBase):
-    """Define the output block of a GLM simulation configuration.
+    """Define the `&output` block of a GLM model.
 
-    Used to configure the netcdf & csv output details. Attributes are set using
-    the `set_attributes()` method and returned as a formatted string using the
-    `__str__()` method.
+    Used to configure how GLM saves the model outputs to file.  Attributes are
+    set using the `set_attributes()` method and returned as a formatted string
+    using the `__str__()` method.
 
     Attributes
     ----------
-    out_dir : str
-        Directory to write the output files. Default is './'.
-    out_fn : str
-        Filename of the main NetCDF output file. Default is 'output'.
-    nsave : int
-        Frequency to write to the NetCDF and CSV point files. Default is 1.
-    csv_lake_fname : str
-        Filename for the daily summary file. Default is 'lake'.
-    csv_point_nlevs : float
-        Number of specific level/depth csv files to be created. Default is 0.0.
-    csv_point_fname : str
-        Name to be appended to specified depth CSV files. Default is 'WQ_'.
+    out_dir : Union[str, None]
+        Directory to write the output files. Default is None.
+    out_fn : Union[str, None]
+        Filename of the main NetCDF output file. Default is None.
+    nsave : Union[int, None]
+        Frequency to write to the NetCDF and CSV point files. Default is None.
+    csv_lake_fname : Union[str, None]
+        Filename for the daily summary file. Default is None
+    csv_point_nlevs : Union[float, None]
+        Number of specific level/depth csv files to be created. Default is
+        None.
+    csv_point_fname : Union[str, None]
+        Name to be appended to specified depth CSV files. Default is None.
     csv_point_frombot : Union[List[float], None]
         Comma separated list identify whether each output point listed in
         csv_point_at is relative to the bottom (ie heights) or the surface
@@ -850,9 +900,9 @@ class NMLOutput(NMLBase):
         is False.
     csv_outlet_fname : Union[str, None]
         Name to be appended to each of the outlet CSV files. Default is None.
-    csv_outlet_nvars : int
+    csv_outlet_nvars : Union[int, None]
         Number of variables to be written into the outlet file(s). Default is
-        0.
+        None.
     csv_outlet_vars : Union[str, None]
         Comma separated list of variable names to be included in the output
         file(s). Default is None.
@@ -886,19 +936,19 @@ class NMLOutput(NMLBase):
 
     def __init__(
         self,
-        out_dir: str = "./",
-        out_fn: str = "output",
-        nsave: int = 1,
-        csv_lake_fname: str = "lake",
-        csv_point_nlevs: float = 0.0,
-        csv_point_fname: str = "WQ_",
+        out_dir: Union[str, None] = None,
+        out_fn: Union[str, None] = None,
+        nsave: Union[int, None] = None,
+        csv_lake_fname: Union[str, None] = None,
+        csv_point_nlevs: Union[float, None] = None,
+        csv_point_fname: Union[str, None] = None,
         csv_point_frombot: Union[List[float], None] = None,
         csv_point_at: Union[List[float], None] = None,
         csv_point_nvars: Union[int, None] = None,
         csv_point_vars: Union[List[str], None] = None,
         csv_outlet_allinone: bool = False,
         csv_outlet_fname: Union[str, None] = None,
-        csv_outlet_nvars: int = 0,
+        csv_outlet_nvars: Union[int, None] = None,
         csv_outlet_vars: Union[List[str], None] = None,
         csv_ovrflw_fname: Union[str, None] = None,
     ):
@@ -919,15 +969,14 @@ class NMLOutput(NMLBase):
         self.csv_ovrflw_fname = csv_ovrflw_fname
 
     def __str__(self):
-        """Return the string representation of the NMLOutput object.
+        """Return the string representation of the `NMLOutput` object.
 
-        Returns a formatted string of the NMLOutput configution options and
-        values.
+        Returns a `.nml` formatted string of the `NMLOutput` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLOutput object.
+            String representation of the `NMLOutput` object.
 
         Examples
         --------
@@ -1005,19 +1054,24 @@ class NMLOutput(NMLBase):
                 self.csv_ovrflw_fname,
             ),
         ]
-        return "&output \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&output \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLInitProfiles(NMLBase):
-    """Define the initial profiles block of a GLM simulation configuration.
+    """Define the `&init_profiles` block of a GLM model.
 
-    Used to configure the initial temperature and salinity profiles.
-    Attributes are set using the `set_attributes()` method and returned as a
-    formatted string using the `__str__()` method.
+    Used to configure the initial state of various water quality variables at
+    specific depths in the water body. Attributes are set using the
+    `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
 
     Attributes
     ----------
@@ -1087,15 +1141,14 @@ class NMLInitProfiles(NMLBase):
         self.wq_init_vals = wq_init_vals
 
     def __str__(self):
-        """Return the string representation of the NMLInitProfiles object.
+        """Return the string representation of the `NMLInitProfiles` object.
 
-        Returns a formatted string of the NMLInitProfiles configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLInitProfiles` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLInitProfiles object.
+            String representation of the `NMLInitProfiles` object.
 
         Examples
         --------
@@ -1144,30 +1197,35 @@ class NMLInitProfiles(NMLBase):
                 self.wq_init_vals,
             ),
         ]
-        return "&init_profiles \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&init_profiles \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLMeteorology(NMLBase):
-    """Define the meteorology block of a GLM simulation configuration.
+    """Define the `&meteorology` block of a GLM model.
 
-    Used to configure the surface energy balance options, and  local run-off
-    parameters. Attributes are set using the `set_attributes()` method and
-    returned as a formatted string using the `__str__()` method.
+    Used to configure the meteorological dynamics of the model, e.g., rainfall,
+    air temperature, and incoming radiation. Attributes are set using  the
+    `set_attributes()` method and returned as a formatted string using the
+    `__str__()` method.
 
     Attributes
     ----------
-    met_sw : bool
-        Switch to enable the surface heating module. Default is True.
+    met_sw : Union[bool, None]
+        Switch to enable the surface heating module. Default is None.
     meteo_fl : Union[str, None]
         Filename of the meterological file. Default is None.
-    subdaily : bool
+    subdaily : Union[bool, None]
         Switch to indicate the meteorological data is provided with sub-daily
         resolution, at an interval equivalent to Δt. Default is None.
-    time_fmt : str
+    time_fmt : Union[str, None]
         Time format of the 1st column in the inflow_fl. For example,
         'YYYY-MM-DD hh:mm:ss'. Default is None.
     rad_mode : Union[int, None]
@@ -1199,10 +1257,10 @@ class NMLMeteorology(NMLBase):
         meteo_fl. Default is None.
     ce : Union[float, None]
         Bulk aerodynamic transfer coefficient for latent heat flux. Default is
-        0.0013.
+        None.
     ch : Union[float, None]
         Bulk aerodynamic transfer coefficient for sensible heat flux. Default
-        is 0.0013.
+        is None.
     rain_sw : Union[bool, None]
         Switch to configure rainfall input concentrations. Default is None.
     rain_factor : Union[float, None]
@@ -1217,14 +1275,14 @@ class NMLMeteorology(NMLBase):
     runoff_coef : Union[float, None]
         Conversion fraction of infiltration excess rainfall to runoff in
         exposed lake banks. Default is None.
-    cd :
-        Bulk aerodynamic transfer coefficient for momentum. Default is 0.0013.
+    cd : Union[float, None]
+        Bulk aerodynamic transfer coefficient for momentum. Default is None.
     wind_factor : Union[float, None]
         Scaling factor to adjust the windspeed data provided in the meteo_fl.
         Default is None.
-    fetch_mode : int
+    fetch_mode : Union[int, None]
         Switch to configure which wind-sheltering/fetch option to use. Default
-        is 0.
+        is None.
     num_dir : Union[int, None]
         Number of wind direction reference points being read in. Default is
         None.
@@ -1263,7 +1321,7 @@ class NMLMeteorology(NMLBase):
 
     def __init__(
         self,
-        met_sw: bool = True,
+        met_sw: Union[bool, None] = None,
         meteo_fl: Union[str, None] = None,
         subdaily: Union[bool, None] = None,
         time_fmt: Union[str, None] = None,
@@ -1276,16 +1334,16 @@ class NMLMeteorology(NMLBase):
         atm_stab: Union[int, None] = None,
         rh_factor: Union[float, None] = None,
         at_factor: Union[float, None] = None,
-        ce: Union[float, None] = 0.0013,
-        ch: Union[float, None] = 0.0013,
+        ce: Union[float, None] = None,
+        ch: Union[float, None] = None,
         rain_sw: Union[bool, None] = None,
         rain_factor: Union[float, None] = None,
         catchrain: Union[bool, None] = None,
         rain_threshold: Union[float, None] = None,
         runoff_coef: Union[float, None] = None,
-        cd: Union[float, None] = 0.0013,
+        cd: Union[float, None] = None,
         wind_factor: Union[float, None] = None,
-        fetch_mode: int = 0,
+        fetch_mode: Union[int, None] = None,
         num_dir: Union[int, None] = None,
         wind_dir: Union[float, None] = None,
         fetch_scale: Union[float, None] = None,
@@ -1318,15 +1376,14 @@ class NMLMeteorology(NMLBase):
         self.fetch_scale = fetch_scale
 
     def __str__(self):
-        """Return the string representation of the NMLMeteorology object.
+        """Return the string representation of the `NMLMeteorology` object.
 
-        Returns a formatted string of the NMLMeteorology configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLMeteorology` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLMeteorology object.
+            String representation of the `NMLMeteorology` object.
 
         Examples
         --------
@@ -1398,30 +1455,34 @@ class NMLMeteorology(NMLBase):
             (f"   wind_dir = {self.wind_dir}", self.wind_dir),
             (f"   fetch_scale = {self.fetch_scale}", self.fetch_scale),
         ]
-        return "&meteorology \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&meteorology \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLLight(NMLBase):
-    """Define the light block of a GLM simulation configuration.
+    """Define the `&light` block of a GLM model.
 
-    Used to configure the light settings. Attributes are set using the
-    `set_attributes()` method and returned as a formatted string using the
-    `__str__()` method.
+    Used to configure the how light will penetrates the water body. Attributes
+    are set using the `set_attributes()` method and returned as a formatted
+    string using the `__str__()` method.
 
     Attributes
     ----------
-    light_mode : int
-        Switch to configure the approach to light penetration. Default is 1.
+    light_mode : Union[int, None]
+        Switch to configure the approach to light penetration. Default is None.
     Kw : Union[float, None]
         Light extinction coefficient. Default is None
     Kw_file : Union[str, None]
         Name of file with Kw time-series included. Default is None.
     n_bands : Union[int, None]
-        Number of light bandwidths to simulate. Default is 4.
+        Number of light bandwidths to simulate. Default is None.
     light_extc : Union[List[float], None]
         Comma-separated list of light extinction coefficients for each
         waveband. Default is None.
@@ -1450,10 +1511,10 @@ class NMLLight(NMLBase):
 
     def __init__(
         self,
-        light_mode: int = 1,
+        light_mode: Union[int, None] = None,
         Kw: Union[float, None] = None,
         Kw_file: Union[str, None] = None,
-        n_bands: Union[int, None] = 4,
+        n_bands: Union[int, None] = None,
         light_extc: Union[List[float], None] = None,
         energy_frac: Union[List[float], None] = None,
         Benthic_Imin: Union[float, None] = None,
@@ -1467,15 +1528,14 @@ class NMLLight(NMLBase):
         self.Benthic_Imin = Benthic_Imin
 
     def __str__(self):
-        """Return the string representation of the NMLLight object.
+        """Return the string representation of the `NMLLight` object.
 
-        Returns a formatted string of the NMLLight configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLLight` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLLight object.
+            String representation of the `NMLLight` object.
 
         Examples
         --------
@@ -1506,19 +1566,23 @@ class NMLLight(NMLBase):
             ),
             (f"   Benthic_Imin = {self.Benthic_Imin}", self.Benthic_Imin),
         ]
-        return "&light \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&light \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLBirdModel(NMLBase):
-    """Define the bird model block of a GLM simulation configuration.
+    """Define the `&bird_model` block of a GLM simulation configuration.
 
-    Used to configure the surface energy balance options, and  local run-off
-    parameters. Attributes are set using the `set_attributes()` method and
-    returned as a formatted string using the `__str__()` method.
+    Used to configure surface irradiance based on the Bird Clear Sky Model
+    (BCSM) (Bird, 1984). Attributes are set using the `set_attributes()` method
+    and returned as a formatted string using the `__str__()` method.
 
     Attributes
     ----------
@@ -1536,7 +1600,7 @@ class NMLBirdModel(NMLBase):
         None.
     Albedo : Union[float, None]
         Albedo of the surface used for Bird Model insolation calculation.
-        Default is 0.2.
+        Default is None.
 
     Examples
     --------
@@ -1561,7 +1625,7 @@ class NMLBirdModel(NMLBase):
         WatVap: Union[float, None] = None,
         AOD500: Union[float, None] = None,
         AOD380: Union[float, None] = None,
-        Albedo: Union[float, None] = 0.2,
+        Albedo: Union[float, None] = None,
     ):
         self.AP = AP
         self.Oz = Oz
@@ -1571,15 +1635,14 @@ class NMLBirdModel(NMLBase):
         self.Albedo = Albedo
 
     def __str__(self):
-        """Return the string representation of the NMLBirdModel object.
+        """Return the string representation of the `NMLBirdModel` object.
 
-        Returns a formatted string of the NMLBirdModel configution options
-        and values.
+        Returns a `.nml` formatted string of the NMLBirdModel attributes.
 
         Returns
         -------
         str
-            String representation of the NMLBirdModel object.
+            String representation of the `NMLBirdModel` object.
 
         Examples
         --------
@@ -1604,29 +1667,33 @@ class NMLBirdModel(NMLBase):
             (f"   AOD380 = {self.AOD380}", self.AOD380),
             (f"   Albedo = {self.Albedo}", self.Albedo),
         ]
-        return "&bird_model \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&bird_model \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLInflows(NMLBase):
-    """Define the inflows block of a GLM simulation configuration.
+    """Define the `&inflow` block of a GLM model.
 
-    Used to configure the number/type of inflows and inflow files. Attributes
-    are set using the `set_attributes()` method and returned as a formatted
-    string using the `__str__()` method.
+    Used to configure the number/type of water inflows. Attributes are set
+    using the `set_attributes()` method and returned as a formatted string
+    using the `__str__()` method.
 
     Attributes
     ----------
-    num_inflows : int
-        Number of inflows to be simulated in this simulation. Default is 0.
+    num_inflows : Union[int, None]
+        Number of inflows to be simulated in this simulation. Default is None.
     names_of_strms : Union[List[str], None]
         Names of each inflow.
     subm_flag : Union[List[bool], None]
         Switch indicating if the inflow I is entering as a submerged input.
-        Default is [False].
+        Default is None.
     strm_hf_angle : Union[List[float], None]
         Angle describing the width of an inflow river channel ("half angle").
         Default is None.
@@ -1640,17 +1707,17 @@ class NMLInflows(NMLBase):
         Default is None.
     inflow_factor : Union[List[float], None]
         Scaling factor that can be applied to adjust the provided input data.
-        Default is 1.0.
+        Default is None.
     inflow_fl : Union[List[str], None]
         Filename(s) of the inflow CSV boundary condition files. Default is None.
-    inflow_varnum : int
+    inflow_varnum : Union[int, None]
         Number of variables being listed in the columns of inflow_fl
-        (comma-separated list). Default is 0.
+        (comma-separated list). Default is None.
     inflow_vars : Union[List[str], None]
         Names of the variables in the inflow_fl. Default is None.
     time_fmt : Union[str, None]
         Time format of the 1st column in the inflow_fl. Default is
-        'YYYY-MM-DD hh:mm:ss'.
+        None.
 
     Examples
     --------
@@ -1676,18 +1743,18 @@ class NMLInflows(NMLBase):
 
     def __init__(
         self,
-        num_inflows: int = 0,
+        num_inflows: Union[int, None] = None,
         names_of_strms: Union[List[str], None] = None,
-        subm_flag: Union[List[bool], None] = [False],
+        subm_flag: Union[List[bool], None] = None,
         strm_hf_angle: Union[List[float], None] = None,
         strmbd_slope: Union[List[float], None] = None,
         strmbd_drag: Union[List[float], None] = None,
         coef_inf_entrain: Union[List[float], None] = None,
-        inflow_factor: Union[List[float], None] = [1.0],
+        inflow_factor: Union[List[float], None] = None,
         inflow_fl: Union[List[str], None] = None,
-        inflow_varnum: int = 0,
+        inflow_varnum: Union[int, None] = None,
         inflow_vars: Union[List[str], None] = None,
-        time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss'
+        time_fmt: Union[str, None] = None,
     ):
         self.num_inflows = num_inflows
         self.names_of_strms = names_of_strms
@@ -1703,15 +1770,14 @@ class NMLInflows(NMLBase):
         self.time_fmt = time_fmt
 
     def __str__(self):
-        """Return the string representation of the NMLInflows object.
+        """Return the string representation of the `NMLInflows` object.
 
-        Returns a formatted string of the NMLInflows configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLInflows` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLInflows object.
+            String representation of the `NMLInflows` object.
 
         Examples
         --------
@@ -1775,37 +1841,42 @@ class NMLInflows(NMLBase):
             ),
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
         ]
-        return "&inflows \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&inflows \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLOutflows(NMLBase):
-    """Define the outflows block of a GLM simulation configuration.
+    """Define the `&outflow` block of a GLM model.
 
-    Used to configure the number/type of outflows and outflow files. Attributes
-    are set using the `set_attributes()` method and returned as a formatted
-    string using the `__str__()` method.
+    Used to configure the number/type of water outflows. Attributes are set
+    using the `set_attributes()` method and returned as a formatted string
+    using the `__str__()` method.
 
     Attributes
     ----------
-    num_outlet : int
+    num_outlet : Union[int, None]
         Number of outflows (including withdrawals, outlets or offtakes) to be
-        included in this simulation. Default is 0.
+        included in this simulation. Default is None.
     outflow_fl : Union[str, None]
-        Filename of the file containing the outflow time-series.
+        Filename of the file containing the outflow time-series. Default is
+        None.
     time_fmt : Union[str, None]
         Time format of the 1st column in the outflow_fl. Default is
-        'YYYY-MM-DD hh:mm:ss'.
-    outflow_factor : float
-        Scaling factor used as a multiplier for outflows. Default is 1.0.
+        None.
+    outflow_factor : Union[float, None]
+        Scaling factor used as a multiplier for outflows. Default is None.
     outflow_thick_limit : Union[List[float], None]
         Maximum vertical limit of withdrawal entrainment. Default is None.
     single_layer_draw : Union[List[bool], None]
         Switch to only limit withdrawal entrainment and force outflows from
-        layer at the outlet elevation height. Default is [False].
+        layer at the outlet elevation height. Default is None.
     flt_off_sw : Union[List[bool], None]
         Switch to indicate if the outflows are floating offtakes
         (taking water from near the surface). Default is None.
@@ -1819,15 +1890,16 @@ class NMLOutflows(NMLBase):
         Basin width at the outlet heights (m). Default is None.
     seepage : Union[bool, None]
         Switch to enable the seepage of water from the lake bottom. Default is
-        False.
+        None.
     seepage_rate : Union[float, None]
-        Seepage rate of water, or, soil hydraulic conductivity. Default is 0.0.
+        Seepage rate of water, or, soil hydraulic conductivity. Default is
+        None.
     crest_width : Union[float, None]
         Width of weir (at crest height) where lake overflows (m). Default is
-        0.0.
+        None.
     crest_factor : Union[float, None]
         Drag coefficient associated with the weir crest, used to compute the
-        overflow discharge rate. Default is 0.0.
+        overflow discharge rate. Default is None.
 
     Examples
     --------
@@ -1851,21 +1923,21 @@ class NMLOutflows(NMLBase):
 
     def __init__(
         self,
-        num_outlet: int = 0,
+        num_outlet: Union[int, None] = None,
         outflow_fl: Union[str, None] = None,
-        time_fmt: Union[str, None] = None,  # 'YYYY-MM-DD hh:mm:ss',
-        outflow_factor: List[float] = [1.0],
+        time_fmt: Union[str, None] = None,
+        outflow_factor: Union[List[float], None] = None,
         outflow_thick_limit: Union[List[float], None] = None,
         single_layer_draw: Union[List[bool], None] = None,
         flt_off_sw: Union[List[bool], None] = None,
         outlet_type: Union[List[int], None] = None,
-        outl_elvs: Union[List[float], None] = None,  # [0],
+        outl_elvs: Union[List[float], None] = None,
         bsn_len_outl: Union[List[float], None] = None,
         bsn_wid_outl: Union[List[float], None] = None,
-        seepage: Union[bool, None] = None,  # False,
-        seepage_rate: Union[float, None] = None,  # 0.0,
-        crest_width: Union[float, None] = None,  # 0.0,
-        crest_factor: Union[float, None] = None,  # 0.0
+        seepage: Union[bool, None] = None,
+        seepage_rate: Union[float, None] = None,
+        crest_width: Union[float, None] = None,
+        crest_factor: Union[float, None] = None,
     ):
         self.num_outlet = num_outlet
         self.outflow_fl = outflow_fl
@@ -1884,15 +1956,14 @@ class NMLOutflows(NMLBase):
         self.crest_factor = crest_factor
 
     def __str__(self):
-        """Return the string representation of the NMLOutflows object.
+        """Return the string representation of the `NMLOutflows` object.
 
-        Returns a formatted string of the NMLOutflows configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLOutflows` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLOutflows object.
+            String representation of the `NMLOutflows` object.
 
         Examples
         --------
@@ -1954,19 +2025,23 @@ class NMLOutflows(NMLBase):
             (f"   crest_width = {self.crest_width}", self.crest_width),
             (f"   crest_factor = {self.crest_factor}", self.crest_factor),
         ]
-        return "&outflows \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&outflows \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLSediment(NMLBase):
-    """Define the sediment block of a GLM simulation configuration.
+    """Define the `&sediment` block of a GLM model.
 
-    Used to configure the sediment thermal properties. Attributes are set using
-    the `set_attributes()` method and returned as a formatted string using the
-    `__str__()` method.
+    Used to configure the thermal properties of the soil-sediment. Attributes
+    are set using the `set_attributes()` method and returned as a formatted
+    string using the `__str__()` method.
 
     Attributes
     ----------
@@ -1986,11 +2061,11 @@ class NMLSediment(NMLBase):
         Switch to configure which mode of benthic interaction to apply. Default
         is None.
     n_zones : Union[int, None]
-        Number of sediment zones to simulate. Default is 0.
+        Number of sediment zones to simulate. Default is None.
     zone_heights : Union[List[float], None]
         Upper height of zone boundary. Default is None.
     sed_reflectivity : Union[List[float], None]
-        Sediment reflectivity. Default is [0].
+        Sediment reflectivity. Default is None.
     sed_roughness : Union[List[float], None]
         Sediment roughness. Default is None.
 
@@ -2022,9 +2097,9 @@ class NMLSediment(NMLBase):
         sed_temp_amplitude: Union[List[float], None] = None,
         sed_temp_peak_doy: Union[List[int], None] = None,
         benthic_mode: Union[int, None] = None,
-        n_zones: Union[int, None] = 0,
+        n_zones: Union[int, None] = None,
         zone_heights: Union[List[float], None] = None,
-        sed_reflectivity: Union[List[float], None] = [0],
+        sed_reflectivity: Union[List[float], None] = None,
         sed_roughness: Union[List[float], None] = None,
     ):
         self.sed_heat_Ksoil = sed_heat_Ksoil
@@ -2039,15 +2114,14 @@ class NMLSediment(NMLBase):
         self.sed_roughness = sed_roughness
 
     def __str__(self):
-        """Return the string representation of the NMLSediment object.
+        """Return the string representation of the `NMLSediment` object.
 
-        Returns a formatted string of the NMLSediment configution options
-        and values.
+        Returns a `.nml` formatted string of the NMLSediment attributes.
 
         Returns
         -------
         str
-            String representation of the NMLSediment object.
+            String representation of the `NMLSediment` object.
 
         Examples
         --------
@@ -2104,75 +2178,78 @@ class NMLSediment(NMLBase):
                 self.sed_roughness,
             ),
         ]
-        return "&sediment \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&sediment \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
-class NMLIceSnow(NMLBase):
-    """Define the ice/snow block of a GLM simulation configuration.
+class NMLSnowIce(NMLBase):
+    """Define the `&snowice` block of a GLM model.
 
-    Used to configure the surface energy balance options, and  local run-off
-    parameters. Attributes are set using the `set_attributes()` method and
-    returned as a formatted string using the `__str__()` method.
+    Used to configure formation of snow and ice cover on the simulated water
+    body. Attributes are set using the `set_attributes()` method and returned
+    as a formatted string using the `__str__()` method.
 
     Attributes
     ----------
-    snow_albedo_factor : float
+    snow_albedo_factor : Union[float, None]
         Scaling factor used to as a multiplier to scale the snow/ice albedo
-        estimate. Default is 1.0.
-    snow_rho_max : float
-        Minimum snow density allowable. Default is 300.
-    snow_rho_min : float
-        Maximum snow density allowable. Default is 50.
+        estimate. Default is None.
+    snow_rho_max : Union[float, None]
+        Minimum snow density allowable. Default is None.
+    snow_rho_min : Union[float, None]
+        Maximum snow density allowable. Default is None.
 
     Examples
     --------
-    >>> from glmpy import NMLIceSnow
-    >>> ice_snow = NMLIceSnow()
-    >>> my_ice_snow = {
+    >>> from glmpy import NMLSnowIce
+    >>> snow_ice = NMLSnowIce()
+    >>> my_snow_ice = {
     >>>        'snow_albedo_factor': 0.0,
     >>>        'snow_rho_min': 50,
     >>>        'snow_rho_max': 300
     >>>    }
-    >>> ice_snow.set_attributes(my_ice_snow)
-    >>> print(ice_snow)
+    >>> snow_ice.set_attributes(my_snow_ice)
+    >>> print(snow_ice)
     """
 
     def __init__(
         self,
-        snow_albedo_factor: float = 1.0,
-        snow_rho_max: float = 300,
-        snow_rho_min: float = 50,
+        snow_albedo_factor: Union[float, None] = None,
+        snow_rho_max: Union[float, None] = None,
+        snow_rho_min: Union[float, None] = None,
     ):
         self.snow_albedo_factor = snow_albedo_factor
         self.snow_rho_max = snow_rho_max
         self.snow_rho_min = snow_rho_min
 
     def __str__(self):
-        """Return the string representation of the NMLIceSnow object.
+        """Return the string representation of the `NMLSnowIce` object.
 
-        Returns a formatted string of the NMLIceSnow configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLSnowIce` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLIceSnow object.
+            String representation of the `NMLSnowIce` object.
 
         Examples
         --------
-        >>> from glmpy import NMLIceSnow
-        >>> ice_snow = NMLIceSnow()
-        >>> my_ice_snow = {
+        >>> from glmpy import NMLSnowIce
+        >>> snow_ice = NMLSnowIce()
+        >>> my_snow_ice = {
         >>>        'snow_albedo_factor': 0.0,
         >>>        'snow_rho_min': 50,
         >>>        'snow_rho_max': 300
         >>>    }
-        >>> ice_snow.set_attributes(my_ice_snow)
-        >>> print(ice_snow)
+        >>> snow_ice.set_attributes(my_snow_ice)
+        >>> print(snow_ice)
         """
         params = [
             (
@@ -2182,39 +2259,43 @@ class NMLIceSnow(NMLBase):
             (f"   snow_rho_max = {self.snow_rho_max}", self.snow_rho_max),
             (f"   snow_rho_min = {self.snow_rho_min}", self.snow_rho_min),
         ]
-        return "&ice_snow \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&snowice \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )
 
 
 class NMLWQSetup(NMLBase):
-    """Define the water quality setup block of a GLM simulation configuration.
+    """Define the `&wq_setup`  block of a GLM simulation configuration.
 
     Used to configure the water quality library selection, solution options,
-    and  benthic coupling mode. Attributes are set using the `set_attributes()`
+    and benthic coupling mode. Attributes are set using the `set_attributes()`
     method and returned as a formatted string using the `__str__()` method.
 
     Attributes
     ----------
-    wq_lib : str
-        Water quality model selection. Default is 'aed2'.
-    wq_nml_file : str
-        Filename of WQ configuration file. Default is './aed2.nml'.
+    wq_lib : Union[bool, str]
+        Water quality model selection. Default is None.
+    wq_nml_file : Union[str, None]
+        Filename of WQ configuration file. Default is None.
     bioshade_feedback : Union[bool, None]
         Switch to enable Kw to be updated by the WQ model. Default is None.
-    mobility_off : bool
-        Switch to enable settling within the WQ model. Default is False.
+    mobility_off : Union[bool, None]
+        Switch to enable settling within the WQ model. Default is None.
     ode_method : Union[int, None]
         Method to use for ODE solution of water quality module. Default is
         None.
-    split_factor : float
+    split_factor : Union[float, None]
         Factor weighting implicit vs explicit numerical solution of the WQ
-        model. Default is 1.
-    repair_state : bool
+        model. Default is None.
+    repair_state : Union[bool, None]
         Switch to correct negative or out of range WQ variables. Default is
-        True.
+        None.
 
     Examples
     --------
@@ -2235,13 +2316,13 @@ class NMLWQSetup(NMLBase):
 
     def __init__(
         self,
-        wq_lib: str = "aed2",
-        wq_nml_file: str = "./aed2.nml",
+        wq_lib: Union[str, None] = None,
+        wq_nml_file: Union[str, None] = None,
         bioshade_feedback: Union[bool, None] = None,
-        mobility_off: bool = False,
+        mobility_off: Union[bool, None] = None,
         ode_method: Union[int, None] = None,
-        split_factor: float = 1.0,
-        repair_state: bool = True,
+        split_factor: Union[float, None] = None,
+        repair_state: Union[bool, None] = None,
     ):
         self.wq_lib = wq_lib
         self.wq_nml_file = wq_nml_file
@@ -2252,15 +2333,14 @@ class NMLWQSetup(NMLBase):
         self.repair_state = repair_state
 
     def __str__(self):
-        """Return the string representation of the NMLWQSetup object.
+        """Return the string representation of the `NMLWQSetup` object.
 
-        Returns a formatted string of the NMLWQSetup configution options
-        and values.
+        Returns a `.nml` formatted string of the `NMLWQSetup` attributes.
 
         Returns
         -------
         str
-            String representation of the NMLWQSetup object.
+            String representation of the `NMLWQSetup` object.
 
         Examples
         --------
@@ -2296,8 +2376,12 @@ class NMLWQSetup(NMLBase):
                 self.repair_state,
             ),
         ]
-        return "&wq_setup \n" + "\n".join(
-            param_str
-            for param_str, param_val in params
-            if param_val is not None
-        ) + "\n/"
+        return (
+            "&wq_setup \n"
+            + "\n".join(
+                param_str
+                for param_str, param_val in params
+                if param_val is not None
+            )
+            + "\n/"
+        )

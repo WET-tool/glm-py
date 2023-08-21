@@ -2,16 +2,21 @@ from datetime import datetime
 
 import pandas as pd
 
+from typing import Dict, Union
+
 
 class Outflows:
     """
-    Class for creating GLM outflow timeseries.
+    Create a simple outflow timeseries for GLM.
 
-    The outflow timeseries is created by providing a start date, end date and
-    base flow. The outflow timeseries can then be updated with a dictionary to
-    specify outflows on specific dates. Alternatively, the outflow timeseries
-    can be updated with a fixed outflow value between two dates. Outflows can
-    then be written to a CSV file.
+    Generates a daily outflow timeseries between a given start and end date
+    using a specified base flow (m^3/day). The timeseries can be updated in
+    two ways:
+    1. By providing a dictionary with specific dates and their corresponding
+    outflows.
+    2. By specifying a fixed outflow value between two dates.
+    Once updated, the outflow data can be exported to a CSV file in units of
+    m^3/second.
 
     Attributes
     ----------
@@ -22,7 +27,7 @@ class Outflows:
         End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
         format.
     base_flow : float
-        Base flow of the outflow timeseries in ??? units. Defaults to 0.0.
+        Base flow of the outflow timeseries in m^3/day. Defaults to 0.0.
 
     Examples
     --------
@@ -61,7 +66,7 @@ class Outflows:
                 "time": pd.date_range(
                     start=start_date, end=end_date, freq="D"
                 ),
-                "flow": base_flow,
+                "flow": base_flow/86400,
             }
         )
 
@@ -76,14 +81,14 @@ class Outflows:
         except ValueError:
             return False
 
-    def set_discrete_outflows(self, outflows_dict: dict[str, float]):
+    def set_discrete_outflows(self, outflows_dict: Dict[str, Union[int, float]]):
         """
         Set the outflow volume for specific dates.
 
         The outflow volume for specific dates can be set by providing a
         dictionary with dates as keys and outflow volumes as values. The
         dictionary keys must be in 'YYYY-MM-DD' format and the dictionary
-        values must be positive.
+        values must be positive and in units of m^3/day.
 
         Parameters
         ----------
@@ -133,6 +138,8 @@ class Outflows:
             list(outflows_dict.items()), columns=["time", "flow"]
         )
 
+        outflows_dict_df["flow"] = outflows_dict_df["flow"]/86400
+
         outflows_dict_df["time"] = pd.to_datetime(outflows_dict_df["time"])
 
         self.outflows.set_index("time", inplace=True)
@@ -153,8 +160,9 @@ class Outflows:
         Set the outflow volume between two dates.
 
         All outflow volumes between two dates can be set by providing a start
-        date, end date and outflow volume. The start date and end date must be
-        in 'YYYY-MM-DD' format and the outflow volume must be positive.
+        date, end date and an outflow volume in m^3/day. The start date and end
+        date must be in 'YYYY-MM-DD' format and the outflow volume must be
+        positive.
 
         Parameters
         ----------
@@ -165,7 +173,7 @@ class Outflows:
             End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
             format.
         outflow_volume : float
-            Outflow volume between the start date and end date in ??? units.
+            Outflow volume between the start date and end date in m^3/day.
 
         Examples
         --------
@@ -185,7 +193,7 @@ class Outflows:
 
         self.outflow_start_date = outflow_start_date
         self.outflow_end_date = outflow_end_date
-        self.outflow_volume = outflow_volume
+        self.outflow_volume = outflow_volume/86400
 
         if not Outflows.vali_date(
             self.outflow_start_date
@@ -270,4 +278,4 @@ class Outflows:
         """
         if not isinstance(path_to_outflows_csv, str):
             raise ValueError("path_to_outflows_csv must be a string.")
-        self.outflows.to_csv(path_to_outflows_csv)
+        self.outflows.to_csv(path_to_outflows_csv, index=False)

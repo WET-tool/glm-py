@@ -32,7 +32,7 @@ class CatchmentInflows:
         will result in runoff. Either `runoff_coef` or `runoff_threshold`
         must be provided.
     runoff_threshold : Union[float, None]
-        Runoff threshold for the catchment. The amount of rainfall in m to
+        Runoff threshold for the catchment. The amount of rainfall in mm to
         generate runoff. Either `runoff_coef` or `runoff_threshold` must be
         provided.
     date_time_col : str
