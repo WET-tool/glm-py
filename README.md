@@ -1,5 +1,9 @@
 # glm-py
 
+<!-- badges: start -->
+![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+<!-- badges: end -->
+
 Python tools for running General Lake Model (GLM) simulations.
 
 ## GLM
