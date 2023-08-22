@@ -243,7 +243,7 @@ from glmpy import inflows
 
 ### Calculating inflows from catchment runoff
 
-The [`CatchmentInflows`](inflows.md#glmpy.inflows.CatchmentInflows) class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coefficient/threshold.
+The [`CatchmentRunoffInflows`](inflows.md#glmpy.inflows.CatchmentRunoggInflows) class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coefficient/threshold.
 
 First, an existing `.csv` file with precipitation data must be available on disk or loaded into a `pandas.DataFrame` object:
 
@@ -258,23 +258,49 @@ met_data = pd.DataFrame({
 met_data.to_csv('met_data.csv')
 ```
 
-Next, the `CatchmentInflows` class can be instantiated with the path to the precipitation data. Provide the column names for the date and precipitation data (`date_time_col` and `precip_col` respectively). The `runoff_coeff` or `runoff_threshold` parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (`catchment_area`):
+Next, the `CatchmentRunoffInflows` class can be initiated with the path to the precipitation data. Provide the column names for the date and precipitation data (`date_time_col` and `precip_col` respectively). The `runoff_coeff` or `runoff_threshold` parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (`catchment_area`):
 
 ```python
-my_inflows = CatchmentInflows(
+my_inflows = CatchmentRunoffInflows(
     input_type = 'file',
     path_to_met_csv = 'met_data.csv',
-    catchment_area = 1000,
-    runoff_threshold = 10.0,
+    catchment_area = 1000, # a 1000 m^2 catchment area
+    runoff_threshold = 10.0, # a 10mm runoff threshold
     precip_col = 'Rain',
     date_time_col = 'Date',
     date_time_format= '%Y-%m-%d %H:%M:%S'
 )
 ```
 
+### Inspect the catchment inflows
+
+`CatchmentRunoffInflows` calculates a inflows timeseries at a daily frequency with units of m<sup>3</sup>/sec. You can return the timeseries as a Pandas dataframe by calling the [`get_inflows()`](inflows.md#glmpy.inflows.CatchmentRunoffInflows.get_inflows) method:
+
+```{python}
+my_inflows.get_inflows()
+```
+
+```
+                flow
+time
+1997-01-01  2.777662
+1997-01-02  2.777662
+1997-01-03  2.777662
+1997-01-04  2.777662
+1997-01-05  2.777662
+...              ...
+2004-12-27  2.777662
+2004-12-28  2.777662
+2004-12-29  2.777662
+2004-12-30  2.777662
+2004-12-31  0.115625
+
+[2922 rows x 1 columns]
+```
+
 ### Writing catchment inflows to disk
 
-GLM inflows must be recorded at daily timesteps. As catchment inflows are often calculated directly from high resolution precipitation data, the [`write_inflows`](inflows.md#glmpy.inflows.CatchmentInflows.write_inflows) method can be used resample the inflows to daily timesteps when writing them to disk:
+GLM inflows must be recorded at daily timesteps. As catchment inflows are often calculated directly from high resolution precipitation data, the [`write_inflows`](inflows.md#glmpy.inflows.CatchmentRunoffInflows.write_inflows) method can be used resample the inflows to daily timesteps when writing them to disk:
 
 ```python
 my_inflows.write_inflows(
