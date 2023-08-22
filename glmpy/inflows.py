@@ -3,13 +3,16 @@ from typing import Union
 import pandas as pd
 
 
-class CatchmentInflows:
+class CatchmentRunoffInflows:
     """
-    Calculates the catchment inflows for the GLM model.
+    Calculate runoff inflows from a catchment.
 
-    The `CatchmentInflows` class reads the GLM meteorological data to calculate
-    inflows (m^3/s) using a provided catchment area and runoff
-    coefficient/threshold. Inflows can then be written to a CSV file.
+    Generates an inflows timeseries by calculating catchment runoff from
+    precipitation data. Requires a catchment area, a runoff coefficient or
+    threshold, and a precipitation timeseries in either hourly or daily
+    timesteps. `CatchmentRunoffInflows` resamples the precipitation data to
+    daily timesteps before calculating inflows. As per GLM requirements, the
+    inflows timeseries is recorded at a daily timestep but in units of m^3/s.
 
     Attributes
     ----------
@@ -24,7 +27,7 @@ class CatchmentInflows:
         'dataframe'.
     precip_col : str
         Name of the column in the CSV file containing precipitation data in
-        m/day or m/hour.
+        m^3/day or m^3/hour.
     catchment_area : float
         Area of the catchment in square meters.
     runoff_coef : Union[float, None]
@@ -50,7 +53,7 @@ class CatchmentInflows:
     ...     freq='D'),
     ... 'Rain': 0.024 #m per day
     ... })
-    >>> inflows_data = CatchmentInflows(
+    >>> inflows_data = CatchmentRunoffInflows(
     ...     input_type = 'dataframe',
     ...     met_data = met_data_daily,
     ...     catchment_area = 1000,
@@ -70,7 +73,7 @@ class CatchmentInflows:
     ... 'Rain': 0.001 #m per hour
     ... })
     >>> met_data_hourly.to_csv('met_data_hourly.csv')
-    >>> inflows_data = CatchmentInflows(
+    >>> inflows_data = CatchmentRunoffInflows(
     ...     input_type = 'file',
     ...     path_to_met_csv = 'met_data_hourly.csv',
     ...     catchment_area = 1000,
@@ -89,7 +92,7 @@ class CatchmentInflows:
     ...         freq='D'),
     ...     'Rain': 0.024 #m per day
     ... })
-    >>> inflows_data = CatchmentInflows(
+    >>> inflows_data = CatchmentRunoffInflows(
     ...     input_type = 'dataframe',
     ...     met_data = met_data_daily,
     ...     catchment_area = 1000,
@@ -109,7 +112,7 @@ class CatchmentInflows:
     ...     'Rain': 0.001 #m per hour
     ... })
     >>> met_data_hourly.to_csv('met_data_hourly.csv')
-    >>> inflows_data = CatchmentInflows(
+    >>> inflows_data = CatchmentRunoffInflows(
     ...     input_type = 'file',
     ...     path_to_met_csv = 'met_data_hourly.csv',
     ...     catchment_area = 1000,
@@ -214,12 +217,47 @@ class CatchmentInflows:
         )
         self.catchment_inflows.set_index("time", inplace=True)
 
+    def get_inflows(self):
+        """
+        Get the inflows timeseries.
+
+        Returns the inflows timeseries as a pandas dataframe.
+
+        Returns
+        -------
+        inflows : pd.DataFrame
+            DataFrame of inflow data.
+
+        Examples
+        --------
+        >>> from glmpy import inflows
+        >>> met_data = pd.DataFrame({
+        ...     'Date': pd.date_range(
+        ...         start='1997-01-01',
+        ...         end='2004-12-31',
+        ...         freq='H'),
+        ...     'Rain': 10
+        ... })
+        >>> met_data.to_csv('met_data.csv', index=False)
+        >>> inflows_data = inflows.CatchmentRunoffInflows(
+        ...     input_type = 'file',
+        ...     path_to_met_csv = 'met_data.csv',
+        ...     catchment_area = 1000,
+        ...     runoff_coef = 0.5,
+        ...     precip_col = 'Rain',
+        ...     date_time_col = 'Date',
+        ...     date_time_format= '%Y-%m-%d %H:%M:%S'
+        ... )
+        >>> inflows_data.get_inflows()
+        """
+        return self.catchment_inflows
+
     def write_inflows(self, path_to_inflow_csv: str):
         """
-        Writes the inflow data to a CSV file.
+        Writes the inflow timseries to a CSV file.
 
-        The inflow data is resampled to a daily timestep before writing to
-        file.
+        The inflow data exported to a CSV file with two columns: 'time' and
+        'flow'.
 
         Parameters
         ----------
@@ -237,7 +275,7 @@ class CatchmentInflows:
         ...     'Rain': 10
         ... })
         >>> met_data.to_csv('met_data.csv', index=False)
-        >>> inflows_data = inflows.CatchmentInflows(
+        >>> inflows_data = inflows.CatchmentRunoffInflows(
         ...     input_type = 'file',
         ...     path_to_met_csv = 'met_data.csv',
         ...     catchment_area = 1000,
