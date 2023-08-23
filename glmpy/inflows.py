@@ -10,7 +10,8 @@ class CatchmentRunoffInflows:
     Generates an inflows timeseries by calculating catchment runoff from
     precipitation data. Requires a catchment area, a runoff coefficient or
     threshold, and a precipitation timeseries in either hourly or daily
-    timesteps. `CatchmentRunoffInflows` resamples the precipitation data to
+    timesteps (the precipitation timeseries should be in units of m ).
+    `CatchmentRunoffInflows` resamples the precipitation data to
     daily timesteps before calculating inflows. As per GLM requirements, the
     inflows timeseries is recorded at a daily timestep but in units of m^3/s.
 
@@ -27,7 +28,7 @@ class CatchmentRunoffInflows:
         'dataframe'.
     precip_col : str
         Name of the column in the CSV file containing precipitation data in
-        m^3/day or m^3/hour.
+        m/day or m/hour.
     catchment_area : float
         Area of the catchment in square meters.
     runoff_coef : Union[float, None]
@@ -210,6 +211,7 @@ class CatchmentRunoffInflows:
             ) * self.catchment_area
             inflow_data[inflow_data < 0] = 0
 
+        # note that inflow data in m is = to m^3
         inflow_data = inflow_data / 86400
 
         self.catchment_inflows = pd.DataFrame(
