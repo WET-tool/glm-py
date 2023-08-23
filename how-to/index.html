@@ -482,6 +482,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#inspect-the-catchment-inflows" class="md-nav__link">
+    Inspect the catchment inflows
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#writing-catchment-inflows-to-disk" class="md-nav__link">
     Writing catchment inflows to disk
   </a>
@@ -827,6 +834,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#inspect-the-catchment-inflows" class="md-nav__link">
+    Inspect the catchment inflows
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#writing-catchment-inflows-to-disk" class="md-nav__link">
     Writing catchment inflows to disk
   </a>
@@ -1029,7 +1043,7 @@
 <div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">inflows</span>
 </span></code></pre></div>
 <h3 id="calculating-inflows-from-catchment-runoff">Calculating inflows from catchment runoff<a class="headerlink" href="#calculating-inflows-from-catchment-runoff" title="Permanent link">&para;</a></h3>
-<p>The <a href="../inflows/#glmpy.inflows.CatchmentInflows"><code>CatchmentInflows</code></a> class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coefficient/threshold.</p>
+<p>The <a href="../inflows/#glmpy.inflows.CatchmentRunoggInflows"><code>CatchmentRunoffInflows</code></a> class provides functionality for calculating inflows from catchment runoff. The amount of runoff is calculated as a product of the catchment area, precipitation, and a runoff coefficient/threshold.</p>
 <p>First, an existing <code>.csv</code> file with precipitation data must be available on disk or loaded into a <code>pandas.DataFrame</code> object:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">met_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="s1">&#39;Date&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
@@ -1040,22 +1054,42 @@
 </span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="p">})</span>
 </span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="n">met_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;met_data.csv&#39;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Next, the <code>CatchmentInflows</code> class can be instantiated with the path to the precipitation data. Provide the column names for the date and precipitation data (<code>date_time_col</code> and <code>precip_col</code> respectively). The <code>runoff_coeff</code> or <code>runoff_threshold</code> parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (<code>catchment_area</code>):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">my_inflows</span> <span class="o">=</span> <span class="n">CatchmentInflows</span><span class="p">(</span>
+<p>Next, the <code>CatchmentRunoffInflows</code> class can be initiated with the path to the precipitation data. Provide the column names for the date and precipitation data (<code>date_time_col</code> and <code>precip_col</code> respectively). The <code>runoff_coeff</code> or <code>runoff_threshold</code> parameters can be used to set a constant runoff coefficient/threshold for the area of the catchment (<code>catchment_area</code>):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">my_inflows</span> <span class="o">=</span> <span class="n">CatchmentRunoffInflows</span><span class="p">(</span>
 </span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="n">input_type</span> <span class="o">=</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span>
 </span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="n">path_to_met_csv</span> <span class="o">=</span> <span class="s1">&#39;met_data.csv&#39;</span><span class="p">,</span>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="n">catchment_area</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="n">runoff_threshold</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="n">catchment_area</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="c1"># a 1000 m^2 catchment area</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="n">runoff_threshold</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="c1"># a 10mm runoff threshold</span>
 </span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="n">precip_col</span> <span class="o">=</span> <span class="s1">&#39;Rain&#39;</span><span class="p">,</span>
 </span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="n">date_time_col</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span><span class="p">,</span>
 </span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="n">date_time_format</span><span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
 </span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="p">)</span>
 </span></code></pre></div>
+<h3 id="inspect-the-catchment-inflows">Inspect the catchment inflows<a class="headerlink" href="#inspect-the-catchment-inflows" title="Permanent link">&para;</a></h3>
+<p><code>CatchmentRunoffInflows</code> calculates a inflows timeseries at a daily frequency with units of m<sup>3</sup>/sec. You can return the timeseries as a Pandas dataframe by calling the <a href="../inflows/#glmpy.inflows.CatchmentRunoffInflows.get_inflows"><code>get_inflows()</code></a> method:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>my_inflows.get_inflows()
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>                flow
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>time
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>1997-01-01  2.777662
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>1997-01-02  2.777662
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>1997-01-03  2.777662
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>1997-01-04  2.777662
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>1997-01-05  2.777662
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>...              ...
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>2004-12-27  2.777662
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>2004-12-28  2.777662
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>2004-12-29  2.777662
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>2004-12-30  2.777662
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>2004-12-31  0.115625
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
+</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>[2922 rows x 1 columns]
+</span></code></pre></div>
 <h3 id="writing-catchment-inflows-to-disk">Writing catchment inflows to disk<a class="headerlink" href="#writing-catchment-inflows-to-disk" title="Permanent link">&para;</a></h3>
-<p>GLM inflows must be recorded at daily timesteps. As catchment inflows are often calculated directly from high resolution precipitation data, the <a href="../inflows/#glmpy.inflows.CatchmentInflows.write_inflows"><code>write_inflows</code></a> method can be used resample the inflows to daily timesteps when writing them to disk:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">my_inflows</span><span class="o">.</span><span class="n">write_inflows</span><span class="p">(</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">path_to_inflow_csv</span> <span class="o">=</span> <span class="s2">&quot;runoff.csv&quot;</span>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="p">)</span>
+<p>GLM inflows must be recorded at daily timesteps. As catchment inflows are often calculated directly from high resolution precipitation data, the <a href="../inflows/#glmpy.inflows.CatchmentRunoffInflows.write_inflows"><code>write_inflows</code></a> method can be used resample the inflows to daily timesteps when writing them to disk:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="n">my_inflows</span><span class="o">.</span><span class="n">write_inflows</span><span class="p">(</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>    <span class="n">path_to_inflow_csv</span> <span class="o">=</span> <span class="s2">&quot;runoff.csv&quot;</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="p">)</span>
 </span></code></pre></div>
 
 
