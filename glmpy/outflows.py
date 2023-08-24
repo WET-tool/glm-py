@@ -277,7 +277,7 @@ class CustomOutflows:
 
         Examples
         --------
-        >>> from glmpy import Outflows
+        >>> from glmpy import outflows
         >>> outflows = outflows.CustomOutflows(
         ...     start_datetime="2020-01-01",
         ...     end_datetime="2020-01-10",
