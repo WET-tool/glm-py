@@ -2,7 +2,6 @@ from typing import Union
 
 import pandas as pd
 
-
 class CatchmentRunoffInflows:
     """
     Calculate runoff inflows from a catchment.
