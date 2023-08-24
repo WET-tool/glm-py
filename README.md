@@ -1,10 +1,14 @@
 # glm-py
 
+<!-- badges: start -->
+![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+<!-- badges: end -->
+
 Python tools for running General Lake Model (GLM) simulations.
 
 ## GLM
 
-GLM is a 1-dimensional lake water balance and stratification model. It is distributed coupled with a powerful ecological modelling library to also support simulations of lake water quality and ecosystems processes.
+GLM is a 1-dimensional lake water balance and stratification model. It is coupled with a powerful ecological modelling library to also support simulations of lake water quality and ecosystems processes.
 
 GLM is suitable for a wide range of natural and engineered lakes, including shallow (well-mixed) and deep (stratified) systems. The model has been successfully applied to systems from the scale of individual ponds and wetlands to the scale of Great Lakes.
 

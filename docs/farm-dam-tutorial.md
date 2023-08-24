@@ -124,7 +124,7 @@ We now have the morphometry of our dam! Let's use these values as inputs to the 
 - `base_elev`: The elevation of the bottom of the water body
 - `crest_elev`: The elevation of the top of the water body
 - `bsn_len`: The surface length of the water body in metres
-- `bsn_wid`: The sureface width of the water body in metres
+- `bsn_wid`: The surface width of the water body in metres
 - `A`: A list of surface areas. We just calculated this!
 - `H`: A list of heights. We just calculated this!
 
