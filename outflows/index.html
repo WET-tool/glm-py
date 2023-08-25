@@ -543,36 +543,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows" class="md-nav__link">
-    Outflows
+  <a href="#glmpy.outflows.CustomOutflows" class="md-nav__link">
+    CustomOutflows
   </a>
   
-    <nav class="md-nav" aria-label="Outflows">
+    <nav class="md-nav" aria-label="CustomOutflows">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.get_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.get_outflows" class="md-nav__link">
     get_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.set_continuous_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.set_continuous_outflows" class="md-nav__link">
     set_continuous_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.set_discrete_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.set_discrete_outflows" class="md-nav__link">
     set_discrete_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.write_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.write_outflows" class="md-nav__link">
     write_outflows()
   </a>
   
@@ -630,36 +630,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows" class="md-nav__link">
-    Outflows
+  <a href="#glmpy.outflows.CustomOutflows" class="md-nav__link">
+    CustomOutflows
   </a>
   
-    <nav class="md-nav" aria-label="Outflows">
+    <nav class="md-nav" aria-label="CustomOutflows">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.get_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.get_outflows" class="md-nav__link">
     get_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.set_continuous_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.set_continuous_outflows" class="md-nav__link">
     set_continuous_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.set_discrete_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.set_discrete_outflows" class="md-nav__link">
     set_discrete_outflows()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#glmpy.outflows.Outflows.write_outflows" class="md-nav__link">
+  <a href="#glmpy.outflows.CustomOutflows.write_outflows" class="md-nav__link">
     write_outflows()
   </a>
   
@@ -712,19 +712,19 @@
 
 
 
-<h2 id="glmpy.outflows.Outflows" class="doc doc-heading">
-          <code>Outflows</code>
+<h2 id="glmpy.outflows.CustomOutflows" class="doc doc-heading">
+          <code>CustomOutflows</code>
 
 
-<a href="#glmpy.outflows.Outflows" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#glmpy.outflows.CustomOutflows" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
 
   
       <p>Create a simple outflow timeseries for GLM.</p>
-<p>Generates a daily outflow timeseries between a given start and end date
-using a specified base flow (m^3/day). The timeseries can be updated in
+<p>Generates a outflow timeseries between a given start and end date
+using a specified base flow (m^3). The timeseries can be updated in
 two ways:
 1. By providing a dictionary with specific dates and their corresponding
 outflows.
@@ -745,37 +745,50 @@ m^3/second.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>start_date</code></td>
+          <td><code>start_datetime</code></td>
           <td>
                 <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-format.</p>
+              <p>Start datetime of the outflow timeseries. Must be in either
+'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.</p>
             </div>
           </td>
         </tr>
         <tr>
-          <td><code>end_date</code></td>
+          <td><code>end_datetime</code></td>
           <td>
                 <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-format.</p>
+              <p>End datetime of the outflow timeseries. Must be in either 'YYYY-MM-DD'
+or 'YYYY-MM-DD HH:MM:SS' format.</p>
             </div>
           </td>
         </tr>
         <tr>
-          <td><code>base_flow</code></td>
+          <td><code>frequency</code></td>
           <td>
-                <code>float</code>
+                <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Base flow of the outflow timeseries in m^3/day. Defaults to 0.0.</p>
+              <p>Frequency of the outflow timeseries. Must be either 'daily' or
+'hourly'. Defaults to 'daily'.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code>base_outflow</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[int, float]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Base flow of the outflow timeseries in m^3/day or m^3/hour depending on
+<code>frequency</code>. Defaults to 0.0.</p>
             </div>
           </td>
         </tr>
@@ -785,13 +798,37 @@ format.</p>
 
 
 <p><strong>Examples:</strong></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">Outflows</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span> <span class="o">=</span> <span class="n">Outflows</span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-01&#39;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_flow</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">outflows</span>
+</span></code></pre></div>
+    <p>Initialise a daily outflow timeseries with a base outflow of 0.0 m^3/day:</p>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span> <span class="o">=</span> <span class="n">outflows</span><span class="o">.</span><span class="n">CustomOutflows</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="n">start_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">end_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-10&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">frequency</span><span class="o">=</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_outflow</span><span class="o">=</span><span class="mf">0.0</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
+</span></code></pre></div>
+    <p>Update the timeseries with a dictionary of specific dates and their
+corresponding outflows:</p>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows_dict</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-01 00:00:00&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-02 00:00:00&quot;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-03 00:00:00&quot;</span><span class="p">:</span> <span class="mi">12</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span><span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">set_discrete_outflows</span><span class="p">(</span><span class="n">outflows_dict</span><span class="p">)</span>
+</span></code></pre></div>
+    <p>Return the outflows timeseries as a pandas DataFrame:</p>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
+</span></code></pre></div>
+    <p>Update the timeseries with a fixed outflow between two dates:</p>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">set_continuous_outflows</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="n">from_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-05&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">to_datetime</span> <span class="o">=</span> <span class="s2">&quot;2020-01-09&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">continuous_outflow</span> <span class="o">=</span> <span class="mi">9</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span><span class="p">)</span>
+</span></code></pre></div>
+    <p>Return the updated timeseries:</p>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
 </span></code></pre></div>
 
 
@@ -812,27 +849,28 @@ format.</p>
 
 
 
-<h3 id="glmpy.outflows.Outflows.get_outflows" class="doc doc-heading">
+<h3 id="glmpy.outflows.CustomOutflows.get_outflows" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">get_outflows</span><span class="p">()</span></code>
 
-<a href="#glmpy.outflows.Outflows.get_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#glmpy.outflows.CustomOutflows.get_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
   <div class="doc doc-contents ">
   
       <p>Get the outflow timeseries.</p>
-<p>Returns the outflow timeseries as a pandas dataframe.</p>
+<p>Returns the outflow timeseries as a pandas DataFrame.</p>
 
 
 
 <p><strong>Examples:</strong></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">Outflows</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span> <span class="o">=</span> <span class="n">Outflows</span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-01&#39;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_flow</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">outflows</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span> <span class="o">=</span> <span class="n">outflows</span><span class="o">.</span><span class="n">CustomOutflows</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-10&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">frequency</span><span class="o">=</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span>    <span class="n">base_outflow</span><span class="o">=</span><span class="mf">0.0</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">... </span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
 </span></code></pre></div>
 
   </div>
@@ -844,19 +882,17 @@ format.</p>
 
 
 
-<h3 id="glmpy.outflows.Outflows.set_continuous_outflows" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">set_continuous_outflows</span><span class="p">(</span><span class="n">outflow_start_date</span><span class="p">,</span> <span class="n">outflow_end_date</span><span class="p">,</span> <span class="n">outflow_volume</span><span class="p">)</span></code>
+<h3 id="glmpy.outflows.CustomOutflows.set_continuous_outflows" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_continuous_outflows</span><span class="p">(</span><span class="n">from_datetime</span><span class="p">,</span> <span class="n">to_datetime</span><span class="p">,</span> <span class="n">continuous_outflow</span><span class="p">)</span></code>
 
-<a href="#glmpy.outflows.Outflows.set_continuous_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#glmpy.outflows.CustomOutflows.set_continuous_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Set the outflow volume between two dates.</p>
-<p>All outflow volumes between two dates can be set by providing a start
-date, end date and an outflow volume in m^3/day. The start date and end
-date must be in 'YYYY-MM-DD' format and the outflow volume must be
-positive.</p>
+      <p>Set the outflow volume between two datetimes.</p>
+<p>Outflow volumes between two datetimes can be set by providing a start
+datetime, end datetime and an outflow volume.</p>
 
 
 
@@ -872,14 +908,14 @@ positive.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>outflow_start_date</code></td>
+          <td><code>from_datetime</code></td>
           <td>
                 <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Start date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-format.</p>
+              <p>Update the outflow timeseries from this datetime. Must be in
+'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.</p>
             </div>
           </td>
           <td>
@@ -887,14 +923,14 @@ format.</p>
           </td>
         </tr>
         <tr>
-          <td><code>outflow_end_date</code></td>
+          <td><code>to_datetime</code></td>
           <td>
                 <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>End date of the outflow timeseries. Must be in 'YYYY-MM-DD'
-format.</p>
+              <p>Update the outflow timeseries to this datetime. Must be in
+ 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.</p>
             </div>
           </td>
           <td>
@@ -902,13 +938,14 @@ format.</p>
           </td>
         </tr>
         <tr>
-          <td><code>outflow_volume</code></td>
+          <td><code>continuous_outflow</code></td>
           <td>
                 <code>float</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Outflow volume between the start date and end date in m^3/day.</p>
+              <p>The outflow volume to set between the <code>from_datetime</code> and
+<code>to_datetime</code> in m^3/day or m^3/hour.</p>
             </div>
           </td>
           <td>
@@ -921,18 +958,19 @@ format.</p>
 
 
 <p><strong>Examples:</strong></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">Outflows</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span> <span class="o">=</span> <span class="n">Outflows</span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-01&#39;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_flow</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">set_continuous_outflows</span><span class="p">(</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">... </span>    <span class="n">outflow_start_date</span><span class="o">=</span><span class="s1">&#39;1997-01-07&#39;</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gp">... </span>    <span class="n">outflow_end_date</span><span class="o">=</span><span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="gp">... </span>    <span class="n">outflow_volume</span><span class="o">=</span> <span class="mf">1.5</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">outflows</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span> <span class="o">=</span> <span class="n">outflows</span><span class="o">.</span><span class="n">CustomOutflows</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01 00:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01 23:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">frequency</span><span class="o">=</span><span class="s2">&quot;hourly&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span>    <span class="n">base_outflow</span><span class="o">=</span><span class="mf">0.0</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">... </span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">set_continuous_outflows</span><span class="p">(</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gp">... </span>    <span class="n">from_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01 01:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="gp">... </span>    <span class="n">to_datetime</span> <span class="o">=</span> <span class="s2">&quot;2020-01-01 10:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="gp">... </span>    <span class="n">continuous_outflow</span> <span class="o">=</span> <span class="mi">9</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="gp">... </span><span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
 </span></code></pre></div>
 
   </div>
@@ -944,19 +982,20 @@ format.</p>
 
 
 
-<h3 id="glmpy.outflows.Outflows.set_discrete_outflows" class="doc doc-heading">
+<h3 id="glmpy.outflows.CustomOutflows.set_discrete_outflows" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">set_discrete_outflows</span><span class="p">(</span><span class="n">outflows_dict</span><span class="p">)</span></code>
 
-<a href="#glmpy.outflows.Outflows.set_discrete_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#glmpy.outflows.CustomOutflows.set_discrete_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Set the outflow volume for specific dates.</p>
-<p>The outflow volume for specific dates can be set by providing a
-dictionary with dates as keys and outflow volumes as values. The
-dictionary keys must be in 'YYYY-MM-DD' format and the dictionary
-values must be positive and in units of m^3/day.</p>
+      <p>Set the outflow volume for specific datetimes.</p>
+<p>The outflow volume for specific datetimes can be set by providing a
+dictionary with datetimes as keys and outflow volumes as values. The
+dictionary keys must be in 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS.
+Outflow volumes must be provided in the same units as the base outflow
+(m^3/day or m^3/hour).</p>
 
 
 
@@ -974,11 +1013,11 @@ values must be positive and in units of m^3/day.</p>
         <tr>
           <td><code>outflows_dict</code></td>
           <td>
-                <code>dict[str, float]</code>
+                <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Union">Union</span>[int, float]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Dictionary with dates as keys and outflow volumes as values.</p>
+              <p>Dictionary with datetimes as keys and outflow volumes as values.</p>
             </div>
           </td>
           <td>
@@ -991,19 +1030,20 @@ values must be positive and in units of m^3/day.</p>
 
 
 <p><strong>Examples:</strong></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">Outflows</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span> <span class="o">=</span> <span class="n">Outflows</span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-01&#39;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_flow</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">specific_outflows</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">... </span>    <span class="s2">&quot;1997-01-02&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gp">... </span>    <span class="s2">&quot;1997-01-03&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="gp">... </span>    <span class="s2">&quot;1997-01-05&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="gp">... </span><span class="p">}</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">set_discrete_outflows</span><span class="p">(</span><span class="n">outflows_dict</span> <span class="o">=</span> <span class="n">specific_outflows</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">outflows</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span> <span class="o">=</span> <span class="n">outflows</span><span class="o">.</span><span class="n">CustomOutflows</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01 00:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01 23:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">frequency</span><span class="o">=</span><span class="s2">&quot;hourly&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span>    <span class="n">base_outflow</span><span class="o">=</span><span class="mf">0.0</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">... </span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows_dict</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-01 01:00:00&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-01 02:00:00&quot;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="gp">... </span>    <span class="s2">&quot;2020-01-01 03:00:00&quot;</span><span class="p">:</span> <span class="mi">12</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="gp">... </span><span class="p">}</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">set_discrete_outflows</span><span class="p">(</span><span class="n">outflows_dict</span><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">get_outflows</span><span class="p">()</span>
 </span></code></pre></div>
 
   </div>
@@ -1015,10 +1055,10 @@ values must be positive and in units of m^3/day.</p>
 
 
 
-<h3 id="glmpy.outflows.Outflows.write_outflows" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">write_outflows</span><span class="p">(</span><span class="n">path_to_outflows_csv</span><span class="p">)</span></code>
+<h3 id="glmpy.outflows.CustomOutflows.write_outflows" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">write_outflows</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span></code>
 
-<a href="#glmpy.outflows.Outflows.write_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#glmpy.outflows.CustomOutflows.write_outflows" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
   <div class="doc doc-contents ">
@@ -1041,7 +1081,7 @@ path to the csv file.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>path_to_outflows_csv</code></td>
+          <td><code>file_path</code></td>
           <td>
                 <code>str</code>
           </td>
@@ -1061,15 +1101,14 @@ written.</p>
 
 
 <p><strong>Examples:</strong></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">Outflows</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span> <span class="o">=</span> <span class="n">Outflows</span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-01&#39;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_date</span> <span class="o">=</span> <span class="s1">&#39;1997-01-11&#39;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">base_flow</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">my_outflows</span><span class="o">.</span><span class="n">write_outflows</span><span class="p">(</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">... </span>    <span class="n">path_to_outflows_csv</span> <span class="o">=</span> <span class="s1">&#39;outflows.csv&#39;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="gp">... </span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glmpy</span> <span class="kn">import</span> <span class="n">outflows</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span> <span class="o">=</span> <span class="n">outflows</span><span class="o">.</span><span class="n">CustomOutflows</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">start_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">end_datetime</span><span class="o">=</span><span class="s2">&quot;2020-01-10&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span>    <span class="n">frequency</span><span class="o">=</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="gp">... </span>    <span class="n">base_outflow</span><span class="o">=</span><span class="mi">10</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="gp">... </span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">outflows</span><span class="o">.</span><span class="n">write_outflows</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;outflows.csv&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 
   </div>
