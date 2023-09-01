@@ -475,10 +475,10 @@ class NMLMorphometry(NMLBase):
     ----------
     lake_name : Union[str, None]
         Site name. Default is None.
-    latitude : float
-        Latitude, positive North. Default is 0.0.
-    longitude : float
-        Longitude, positive East. Default is 0.0.
+    latitude : Union[float, None]
+        Latitude, positive North. Default is None.
+    longitude : Union[float, None]
+        Longitude, positive East. Default is None.
     base_elev: Union[float, None]
         Elevation of the bottom-most point of the lake (m above datum). Default
         is None.
@@ -538,8 +538,8 @@ class NMLMorphometry(NMLBase):
     def __init__(
         self,
         lake_name: Union[str, None] = None,
-        latitude: float = 0.0,
-        longitude: float = 0.0,
+        latitude: Union[float, None] = None,
+        longitude: Union[float, None] = None,
         base_elev: Union[float, None] = None,
         crest_elev: Union[float, None] = None,
         bsn_len: Union[float, None] = None,
