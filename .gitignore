@@ -16,10 +16,11 @@ build
 .ruff_cache
 .pytest_cache
 
+scratch*/
 scratch.py
 
 
-scratch.ipynb
+
 sparkling.nml
 # MkDocs documentation
 site*/
