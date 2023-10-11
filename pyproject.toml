@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "glm-py"
-version = "0.0.2"
+version = "0.0.1"
 description = "Python tools for running General Lake Model (GLM) simulations"
 readme = "README.md"
 authors = []
