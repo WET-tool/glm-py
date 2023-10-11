@@ -1,66 +1,52 @@
 import math
+from typing import Union
 
 
 class SimpleTruncatedPyramidWaterBody:
-    """Calculates the volume and surface area of a truncated pyramid water
-    body.
+    """Calculates the volume and surface area of a truncated square pyramid.
 
-    Assumes only the height, slope, and surface dimensions of a truncated
-    pyramid water body are known. Enables calculation of the volume and
-    surface area of the water body at each height increment. The
-    `get_heights()` method returns a list of height values that are formatted
-    as per the GLM requirements.
+    Assumes only the height (i.e., depth), slope, and surface length of a 
+    square truncated pyramidal water body are known. Enables calculation of the 
+    volume and surface area of the water body at each height increment. Useful 
+    for constructing the `A` and `H` parameters of the `&morphometry` block 
+    with `nml.NMLMorphometry()`.
 
     Attributes
     ----------
     height : float
-        Height of dam, metres.
-    surface_width : float
-        Width of dam, metres.
+        Height of water body from the base to surface in metres.
     surface_length : float
-        Length of dam, metres.
+        Surface length of the water body in metres.
     side_slope : float
-        Side slope of dam - the rise over run, metres/metre. By default, 3.
+        Side slope of water body - the rise over run (metres/metre). By 
+        default, 1/3.
 
     Examples
     --------
     Import the `dimensions` and `nml` modules:
     >>> from glmpy import dimensions, nml
 
-    Consider an on-farm reservoir that is 30m long, 30m wide, and 5m deep:
+    Consider a square on-farm reservoir that is 40m long, 40m wide, 5m deep, 
+    and has a side slope of 1/3:
     >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
-    ...     height=5,
-    ...     surface_width=30,
-    ...     surface_length=30
+    ...     height=6,
+    ...     surface_length=40,
+    ...     side_slope=1/3
     ... )
 
     Get the total volume at each metre increment of the reservoir profile:
     >>> ofr.get_volumes()
-    [
-        0.0,
-        729.0370370370372,
-        1494.5185185185187,
-        2297.3333333333335,
-        3138.3703703703704,
-        4018.518518518519
-    ]
+    [0.0, 52.0, 224.0, 588.0, 1216.0, 2180.0, 3552.0]
 
     Get the surface water area at each metre increment of the reservoir
     profile:
     >>> ofr.get_surface_areas()
-    [
-        711.1111111111112,
-        747.1111111111112,
-        784.0,
-        821.7777777777778,
-        860.4444444444446,
-        900.0
-    ]
+    [16.0, 100.0, 256.0, 484.0, 784.0, 1156.0, 1600.0]
 
     Get the each metre increment of the reservoirs profile formatted as per GLM
     requirements:
     >>> ofr.get_heights()
-    [-5, -4, -3, -2, -1, 0]
+    [-6, -5, -4, -3, -2, -1, 0]
 
     Combine the surface area and height values into a dictionary for setting
     the `A` and `H` attributes of `NMLMorphometry()`:
@@ -70,62 +56,78 @@ class SimpleTruncatedPyramidWaterBody:
     ... }
     >>> morphometry = nml.NMLMorphometry()
     >>> morphometry.set_attributes(dimensions_dict)
+
+    Print the &morphometry block:
+    >>> print(morphometry)
+
     """
 
     def __init__(
         self,
-        height: float,
-        surface_width: float,
-        surface_length: float,
-        side_slope: float = 3,
+        height: Union[float, int],
+        surface_length: Union[float, int],
+        side_slope: Union[float, int] = 3,
     ):
-        try:
-            self.height = float(height)
-            self.surface_width = float(surface_width)
-            self.surface_length = float(surface_length)
-            self.side_slope = float(side_slope)
-        except:
+
+        if not isinstance(height, (float, int)):
             raise ValueError(
-                "Height, surface width, surface length, and side slope must be numeric"
+                f"height must be a numeric value, but got {type(height)}."
             )
-        try:
-            assert (
-                self.surface_length > (self.height / self.side_slope) * 2
-            ), "Invalid length"
-            assert (
-                self.surface_width > (self.height / self.side_slope) * 2
-            ), "Invalid width"
-        except AssertionError as error:
-            if str(error) == "Invalid length":
-                print(
-                    f"The surface length must be greater than {2*(self.height/self.side_slope)}m"
-                )
-            if str(error) == "Invalid width":
-                print(
-                    f"The surface width must be greater than {2*(self.height/self.side_slope)}m"
-                )
-        else:
-            self.base_length = (
-                self.surface_length - (self.height / self.side_slope) * 2
+        if not isinstance(surface_length, (float, int)):
+            raise ValueError(
+                "surface_length must be a numeric value, but got "
+                f"{type(surface_length)}."
             )
-            self.base_width = (
-                self.surface_width - (self.height / self.side_slope) * 2
+        if not isinstance(side_slope, (float, int)):
+            raise ValueError(
+                "side_slope must be a numeric value, but got "
+                f"{type(side_slope)}."
             )
+        if height < 0:
+            raise ValueError(
+                "height must be a positive value."
+            )
+        if surface_length < 0:
+            raise ValueError(
+                "surface_length must be a positive value."
+            )
+        if side_slope < 0:
+            raise ValueError(
+                "side_slope must be a positive value."
+            )
+
+        base_length = (
+            surface_length - (height / side_slope) * 2
+        )
+
+        if base_length <= 0:
+            raise ValueError(
+                "Invalid combination of height, surface_length, and "
+                "side_slope parameters. The calculated base_length of the "
+                "polyhedron is currently <=0. base_width is calculated by "
+                "(surface_length-(height/side_slope)*2). Adjust your input "
+                "parameters to calculate a positive base_length value."
+            )
+
+        self.height = height
+        self.surface_length = surface_length
+        self.side_slope = side_slope
+        self.base_length = base_length
 
     def get_volumes(self):
         """Calculates volumes.
 
         Calculates the total volume of the water body at each metre increment
         of its profile. Volumes are returned as a list of floats where the
-        first item is the volume at the bottom of the water body and the last is
-        the volume at the top.
+        first item is the volume at the bottom of the water body and the last 
+        is the volume at the surface.
 
         Parameters
         ----------
         None
 
         Returns
-        -------z
+        -------
         volume : list
             The volume of water body (m^3) at each metre height increment.
 
@@ -134,42 +136,33 @@ class SimpleTruncatedPyramidWaterBody:
         Import the `dimensions` module:
         >>> from glmpy import dimensions
 
-        Consider an on-farm reservoir that is 30m long, 30m wide, and 5m deep:
+        Consider a square on-farm reservoir that is 40m long, 40m wide, 5m 
+        deep, and has a side slope of 1/3:
         >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
-        ...     height=5,
-        ...     surface_width=30,
-        ...     surface_length=30
+        ...     height=6,
+        ...     surface_length=40,
+        ...     side_slope=1/3
         ... )
 
         Get the total volume at each metre increment of the reservoir profile:
         >>> ofr.get_volumes()
-        [
-            0.0,
-            729.0370370370372,
-            1494.5185185185187,
-            2297.3333333333335,
-            3138.3703703703704,
-            4018.518518518519
-        ]
+        [0.0, 52.0, 224.0, 588.0, 1216.0, 2180.0, 3552.0]
 
         Get the total volume of the reservoir at 1m from the bottom:
         >>> ofr.get_volumes()[1]
-        729.0370370370372
+        52.0
 
         Get the total volume of the entire reservoir, i.e., from the top of the
         water body:
         >>> ofr.get_volumes()[-1]
-        4018.518518518519
+        3552.0
         """
 
         return [
             (
-                (self.base_length * self.base_width * i)
-                + (
-                    (i**2)
-                    * ((self.base_length + self.base_width) / self.side_slope)
-                )
-                + ((4 * (i**3)) / (3 * (self.side_slope**2)))
+                ((self.base_length**2)*i) +
+                (2*(i**2)*((self.base_length)/(self.side_slope))) +
+                ((4*(i**3))/(3*(self.side_slope**2)))
             )
             for i in range(0, int(self.height) + 1)
         ]
@@ -197,46 +190,37 @@ class SimpleTruncatedPyramidWaterBody:
         Import the `dimensions` module:
         >>> from glmpy import dimensions
 
-        Consider an on-farm reservoir that is 30m long, 30m wide, and 5m deep:
+        Consider a square on-farm reservoir that is 40m long, 40m wide, 5m 
+        deep, and has a side slope of 1/3:
         >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
-        ...     height=5,
-        ...     surface_width=30,
-        ...     surface_length=30
+        ...     height=6,
+        ...     surface_length=40,
+        ...     side_slope=1/3
         ... )
 
         Get the surface water area at each metre increment of the reservoir
         profile:
         >>> ofr.get_surface_areas()
-        [
-            711.1111111111112,
-            747.1111111111112,
-            784.0,
-            821.7777777777778,
-            860.4444444444446,
-            900.0
-        ]
+        [16.0, 100.0, 256.0, 484.0, 784.0, 1156.0, 1600.0]
 
         Get the surface area of the reservoir at 1m from the bottom:
         >>> ofr.get_surface_areas()[1]
-        747.1111111111112
+        100.0
 
         Get the surface area at the surface of the reservoir:
         >>> ofr.get_surface_areas()[-1]
-        900.0
+        1600.0
         """
 
         return [
-            (self.base_width + ((2 * i) / (self.side_slope)))
-            * (self.base_length + (2 * i) / (self.side_slope))
+            ((self.base_length + ((2*i)/(self.side_slope)))**2)
             for i in range(0, int(self.height) + 1)
         ]
 
-    def get_heights(self):
+    def get_heights(self,):
         """Calculates heights.
 
-        Returns a list of heights from base to surface at each metre increment.
-        Heights are formatted as per the requirements for the `H` parameter of
-        GLM's `&morphometry`.
+        Returns a list of heights from base to surface.
 
         Parameters
         ----------
@@ -246,23 +230,8 @@ class SimpleTruncatedPyramidWaterBody:
         -------
         heights : list
             Heights (m) from base to surface.
-
-        Examples
-        --------
-        Import the `dimensions` module:
-        >>> from glmpy import dimensions
-
-        Consider an on-farm reservoir that is 30m long, 30m wide, and 5m deep:
-        >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
-        ...     height=5,
-        ...     surface_width=30,
-        ...     surface_length=30
-        ... )
-
-        Get the heights:
-        >>> ofr.get_heights()
         """
-        # todo! should be m above datum - needs datum input
+
         return list(range(0, -abs(int(self.height) + 1), -1))[::-1]
 
 
