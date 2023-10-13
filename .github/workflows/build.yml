@@ -29,7 +29,7 @@ jobs:
     - name: Build Wheel with Bundled Executable
       run: |
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-          cp executables/linux/glm glmpy/glm
+          cp executables/ubuntu/glm glmpy/glm
         elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
           cp executables/windows/glm.exe glmpy/glm
         elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
