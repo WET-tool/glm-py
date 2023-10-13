@@ -117,7 +117,11 @@ class GlmSim:
 
         return self.inputs_dir
 
-    def glm_run(self, inputs_dir: str, glm_path: str) -> None:
+    def glm_run(
+            self,
+            inputs_dir: str,
+            glm_path: Union[str, None] = None
+    ) -> None:
         """Run a GLM simulation.
 
         Parameters
@@ -125,9 +129,22 @@ class GlmSim:
         inputs_dir : str
             File path to directory with input files required for a GLM
             simulation.
-        glm_path : str
-            Path to location of GLM binary.
+        glm_path : Union[str, None]
+            Path to location of GLM binary. If None, the internally bundled
+            GLM executable will be called.
         """
+        if glm_path is None:
+
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
+            if os.name == 'nt':
+                exe_name = "glm.exe"
+            else:
+                exe_name = "glm"
+
+            exe_path = os.path.join(base_path, "glm", exe_name)
+            glm_path = exe_path
+            print(glm_path)
 
         nml_file = str(os.path.join(inputs_dir, "glm3.nml"))
         run_command = f'{glm_path} --nml "{nml_file}"'
