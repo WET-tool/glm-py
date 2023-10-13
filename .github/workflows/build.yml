@@ -27,6 +27,7 @@ jobs:
         pip install setuptools wheel build
 
     - name: Bundled Executable and Build Package
+      shell: bash
       run: |
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
           cp executables/ubuntu/glm glmpy/glm
