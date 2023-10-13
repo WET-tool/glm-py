@@ -1,0 +1,44 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - executable 
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8 
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel
+
+    - name: Build Wheel with Bundled Executable
+      run: |
+        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          cp executables/linux/glm glmpy/glm
+        elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          cp executables/windows/glm.exe glmpy/glm
+        elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          cp executables/macos/glm glmpy/glm
+        fi
+        python setup.py sdist bdist_wheel
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist-${{ matrix.os }}
+        path: dist/
