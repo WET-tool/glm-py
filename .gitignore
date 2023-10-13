@@ -17,8 +17,8 @@ build
 
 scratch*/
 scratch.py
-glm*/
-
+# glm*/
+glmpy/setup.py
 
 sparkling.nml
 # MkDocs documentation
