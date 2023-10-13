@@ -24,6 +24,9 @@ dependencies = [
     "python-multipart"
 ]
 
+[options]
+include_package_data = True
+
 [project.urls]
 Repository = "https://github.com/WET-tool/glm-py"
 
