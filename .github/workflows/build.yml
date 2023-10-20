@@ -30,12 +30,13 @@ jobs:
       shell: bash
       run: |
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-          cp executables/ubuntu/glm glmpy/glm
+          cp executables/ubuntu/glm glmpy/bin
         elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          cp executables/windows/glm.exe glmpy/glm
+          cp executables/windows/glm.exe glmpy/bin
         elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-          cp executables/macos/glm glmpy/glm
+          cp executables/macos/glm glmpy/bin
         fi
+        chmod +x glmpy/bin/* 
         python -m build
 
 
