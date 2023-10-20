@@ -1,4 +1,4 @@
-name: Build and Package
+name: build-and-deploy
 
 on:
   push:
@@ -44,9 +44,16 @@ jobs:
         chmod +x glmpy/bin/*
         python -m build
 
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: dist-${{ matrix.os }}
         path: dist/
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/
+
