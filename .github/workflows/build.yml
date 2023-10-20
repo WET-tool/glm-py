@@ -36,7 +36,7 @@ jobs:
         elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
           cp executables/macos/glm glmpy/bin
         fi
-        chmod +x /home/runner/work/glm-py/glm-py/glmpy/bin*
+        chmod +x glmpy/bin/*
         python -m build
 
 
