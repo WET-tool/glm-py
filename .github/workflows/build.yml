@@ -31,6 +31,7 @@ jobs:
       run: |
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
           cp executables/ubuntu/glm glmpy/bin
+          pwd
           chmod +x glmpy/bin/glm
         elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
           cp executables/windows/glm.exe glmpy/bin
