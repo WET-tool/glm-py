@@ -142,7 +142,7 @@ class GlmSim:
             else:
                 exe_name = "glm"
 
-            exe_path = os.path.join(base_path, "glm", exe_name)
+            exe_path = os.path.join(base_path, "bin", exe_name)
             glm_path = exe_path
             print(glm_path)
 
