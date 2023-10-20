@@ -1,9 +1,8 @@
 name: Build and Package
 
-on:
-  push:
-    branches:
-      - executable 
+on: [push, pull_request]
+  branches:
+    - executable 
 
 jobs:
   build:
