@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "glm-py"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Python tools for running General Lake Model (GLM) simulations"
 readme = "README.md"
 authors = []
@@ -19,7 +19,7 @@ keywords = ["GLM", "Lake", "Model"]
 requires-python = ">=3.9"
 
 dependencies = [
-    "pandas[excel]>=2.0.1",
+    "pandas[excel]>=2.0.0",
     "fastapi[all]>=0.88.0",
     "python-multipart"
 ]
@@ -40,3 +40,18 @@ namespaces = false
 pythonpath = [
   "."
 ]
+
+
+# See the docstring in versioneer.py for instructions. Note that you must
+# re-run 'versioneer.py setup' after changing this section, and commit the
+# resulting files.
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "glmpy/_version.py"
+versionfile_build = "glmpy/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "glmpy-"
+
+
