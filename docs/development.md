@@ -17,14 +17,91 @@ pre-commit is used to run ruff and black.
 
 ## Tests
 
-<a href="https://docs.pytest.org/en/7.4.x/" target="_blank">pytest</a> is used for testing glm-met. 
+<a href="https://docs.pytest.org/en/7.4.x/" target="_blank">pytest</a> is used for testing glm-py. 
 
 If testing, please add tests under the `tests` directory. If you need test data for running tests, add them as `pytest.fixtures` in `conftest.py`. 
+
+## Docs
 
 Build the docs (from the package root): 
 
 ```
 mkdocs serve 
+```
+
+## Build package
+
+```
+python -m build
+```
+
+## Release to PyPI
+
+Use semantic versioning, versioneer, GitHub Actions workflows. Push to GitHub with a `vX.X.X` tag to trigger a the `build-and-deploy.yml` workflow.
+
+`build-and-deploy.yml` will build glm-py and push the new release to PyPI. 
+
+To use versioneer:
+
+```
+pip install versioneer
+```
+
+Then add the following to `pyproject.toml`:
+
+```
+[build-system]
+requires = ["setuptools>=61.0.0", "versioneer[toml]"]
+build-backend = "setuptools.build_meta"
+```
+
+and
+
+```
+# See the docstring in versioneer.py for instructions. Note that you must
+# re-run 'versioneer.py setup' after changing this section, and commit the
+# resulting files.
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "glmpy/_version.py"
+versionfile_build = "glmpy/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "glmpy-"
+```
+
+and
+
+```
+[project.optional-dependencies]
+toml = ["tomli; python_version < '3.11'"]
+```
+
+Create `setup.py`:
+
+```
+touch setup.py
+```
+
+and add the following to `setup.py`:
+
+```
+from setuptools import setup
+
+import versioneer
+
+# see pyproject.toml for static project metadata
+setup(
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+)
+```
+
+Run:
+
+```
+versioneer install --vendor
 ```
 
 ## Code style
@@ -91,8 +168,4 @@ Examples
 Do not list methods - add docstrings to methods within the class. 
 
 
-### Build package
 
-```
-python -m build
-```

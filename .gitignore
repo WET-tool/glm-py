@@ -2,13 +2,10 @@ examples
 
 *.DS_Store
 
-test-data
-
 */__pycache__
 *__pycache__
 *.py[cod]
 
-dist
 build
 *.egg-info
 
@@ -18,8 +15,8 @@ build
 
 scratch*/
 scratch.py
-
-
+# glm*/
+glmpy/setup.py
 
 sparkling.nml
 # MkDocs documentation
