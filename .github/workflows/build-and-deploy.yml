@@ -5,6 +5,11 @@ on:
   pull_request:
     branches:
       - executable 
+  
+# on:
+#   push:
+#     tags:
+#       - v*
 
 jobs:
   build:
@@ -15,19 +20,19 @@ jobs:
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9 
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel build
 
-    - name: Bundled Executable and Build Package
+    - name: Bundled executable and build package
       shell: bash
       run: |
         BASE_URL="https://raw.githubusercontent.com/AquaticEcoDynamics/glm-aed/main/binaries/"
@@ -44,8 +49,8 @@ jobs:
         chmod +x glmpy/bin/*
         python -m build
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
       with:
         name: dist-${{ matrix.os }}
         path: dist/
@@ -53,31 +58,36 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Download Artifacts (Ubuntu 22.04)
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist-ubuntu-22.04
           path: dist/
+
       - name: Download Artifacts (Ubuntu 20.04)
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist-ubuntu-20.04
           path: dist/
+
       - name: Download Artifacts (Windows)
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist-windows-latest
           path: dist/
+
       - name: Download Artifacts (MacOS)
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist-macos-latest
           path: dist/
-      - name: Publish to TestPyPI
+
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/
+          repository-url: https://pypi.org/p/glm-py
 
