@@ -2,8 +2,6 @@ examples
 
 *.DS_Store
 
-test-data
-
 */__pycache__
 *__pycache__
 *.py[cod]
