@@ -1,1 +1,1 @@
-pandas[excel]>=2.0.1
+pandas>=2.0.0

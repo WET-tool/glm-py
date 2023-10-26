@@ -19,7 +19,7 @@ keywords = ["GLM", "Lake", "Model"]
 requires-python = ">=3.9"
 
 dependencies = [
-    "pandas[excel]>=2.0.0",
+    "pandas>=2.0.0",
     "fastapi[all]>=0.88.0",
     "python-multipart"
 ]
