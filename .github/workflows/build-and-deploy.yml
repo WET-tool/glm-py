@@ -60,33 +60,49 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-latest]
     
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Bundle executable 
-        shell: bash
+      - name: Build on manylinux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          BASE_URL="https://raw.githubusercontent.com/AquaticEcoDynamics/glm-aed/main/binaries/"
-          mkdir -p glmpy/bin
-          if [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
-            curl -L -o glmpy/bin/glm "$BASE_URL"ubuntu/22.04/glm_latest/glm""
-          elif [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
-            curl -L -o glmpy/bin/glm "$BASE_URL"ubuntu/20.04/glm_latest/glm""
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            curl -L -o glmpy/bin/glm.exe "$BASE_URL"windows/glm_latest/glm.exe""
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            curl -L -o glmpy/bin/glm "$BASE_URL"macos/Monterey/glm_latest/glm""
-          fi
+          docker run -it --rm quay.io/pypa/manylinux2014_x86_64
+          git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git
+          yum install -y netcdf-devel
+          yum install -y gd gd-devel
+          yum install -y gcc-gfortran
+          cd glm-aed/glm-source
+          mkdir binaries
+          ./build_glm.sh
 
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
+
+
+
+
+      # - name: Bundle executable 
+      #   shell: bash
+      #   run: |
+      #     BASE_URL="https://raw.githubusercontent.com/AquaticEcoDynamics/glm-aed/main/binaries/"
+      #     mkdir -p glmpy/bin
+      #     if [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
+      #       curl -L -o glmpy/bin/glm "$BASE_URL"ubuntu/22.04/glm_latest/glm""
+      #     elif [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
+      #       curl -L -o glmpy/bin/glm "$BASE_URL"ubuntu/20.04/glm_latest/glm""
+      #     elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+      #       curl -L -o glmpy/bin/glm.exe "$BASE_URL"windows/glm_latest/glm.exe""
+      #     elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+      #       curl -L -o glmpy/bin/glm "$BASE_URL"macos/Monterey/glm_latest/glm""
+      #     fi
+
+      # - name: Build wheels
+      #   uses: pypa/cibuildwheel@v2.16.2
       
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     path: ./wheelhouse/*.whl
 
 
   # deploy:
