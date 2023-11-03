@@ -71,7 +71,7 @@ jobs:
         run: |
           docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "\
               git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
-              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel && \
+              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel szip szip-devel && \
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
@@ -80,7 +80,8 @@ jobs:
               cp /usr/lib64/libjpeg.so.62 /glm/ && \
               cp /usr/lib64/libnetcdf.so.7 /glm/ && \
               cp /usr/lib64/libhdf5.so.8 /glm/ && \
-              cp /usr/lib64/libhdf5_hl.so.8 /glm/"
+              cp /usr/lib64/libhdf5_hl.so.8 /glm/ && \
+              cp /usr/lib64/libsz.so.2 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
