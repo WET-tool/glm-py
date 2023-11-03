@@ -75,10 +75,10 @@ jobs:
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
-              cp /glm_latest /output/""
+              cp /glm_latest /output/"
             
            mv output/glm_latest glmpy/bin/
-           
+
 
 
 
