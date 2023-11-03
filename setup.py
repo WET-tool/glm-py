@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import Extension, setup
 
 import versioneer
 
@@ -6,4 +6,11 @@ import versioneer
 setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
+    ext_modules=[
+        Extension(
+            name="dummylib.foo",  
+            sources=["dummy.c"], 
+        ),
+    ]
 )
+
