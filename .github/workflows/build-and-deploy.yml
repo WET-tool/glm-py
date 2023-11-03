@@ -76,8 +76,9 @@ jobs:
               mkdir binaries && \
               ./build_glm.sh
               cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
-            
-           mv glm/glm glmpy/bin/
+
+          mkdir -p glmpy/bin
+          mv glm/glm glmpy/bin/
 
 
 
