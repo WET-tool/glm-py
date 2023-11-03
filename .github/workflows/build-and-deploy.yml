@@ -75,11 +75,13 @@ jobs:
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
-              cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
+              cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
+              cp /usr/lib64/libgd.so.2 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
           sudo chmod +x glmpy/bin/*
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
       
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
