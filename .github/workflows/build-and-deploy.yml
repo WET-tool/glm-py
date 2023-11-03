@@ -71,7 +71,7 @@ jobs:
         run: |
           docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "\
               git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
-              yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
+              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran && \
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
@@ -83,7 +83,7 @@ jobs:
       
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
-        
+
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
