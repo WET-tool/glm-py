@@ -79,7 +79,7 @@ jobs:
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
-          chmod +x glmpy/bin/*
+          sudo chmod +x glmpy/bin/*
 
 
 
