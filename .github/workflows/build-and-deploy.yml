@@ -78,7 +78,8 @@ jobs:
               cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
 
           mkdir -p glmpy/bin
-          mv glm/glm glmpy/bin/
+          sudo mv glm/glm glmpy/bin/
+          chmod +x glmpy/bin/*
 
 
 
