@@ -77,7 +77,8 @@ jobs:
               ./build_glm.sh
               cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
               cp /usr/lib64/libgd.so.2 /glm/ && \
-              cp /usr/lib64/libjpeg.so.62 /glm/"
+              cp /usr/lib64/libjpeg.so.62 /glm/ && \
+              cp /usr/lib64/libnetcdf.so.7 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
