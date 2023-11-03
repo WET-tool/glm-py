@@ -79,7 +79,8 @@ jobs:
               cp /usr/lib64/libgd.so.2 /glm/ && \
               cp /usr/lib64/libjpeg.so.62 /glm/ && \
               cp /usr/lib64/libnetcdf.so.7 /glm/ && \
-              cp /usr/lib64/libhdf5.so.8 /glm/"
+              cp /usr/lib64/libhdf5.so.8 /glm/ && \
+              cp /usr/lib64/libhdf5_hl.so.8 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
