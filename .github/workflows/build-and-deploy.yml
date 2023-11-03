@@ -69,14 +69,12 @@ jobs:
       - name: Build on manylinux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          docker run --rm quay.io/pypa/manylinux2014_x86_64
-          git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git
-          yum install -y netcdf-devel
-          yum install -y gd gd-devel
-          yum install -y gcc-gfortran
-          cd glm-aed/glm-source
-          mkdir binaries
-          ./build_glm.sh
+          docker run --rm -v $(pwd):/workdir quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "\
+              git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
+              yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
+              cd glm-aed/glm-source && \
+              mkdir binaries && \
+              ./build_glm.sh"
 
 
 
