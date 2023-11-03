@@ -9,7 +9,7 @@ setup(
     ext_modules=[
         Extension(
             name="dummylib.foo",  
-            sources=["dummy.c"], 
+            sources=["glmpy/dummy.c"], 
         ),
     ]
 )
