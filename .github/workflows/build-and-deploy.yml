@@ -73,6 +73,7 @@ jobs:
               git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
               yum install epel-release -y && \
               yum install dnf -y && \
+              dnf install 'dnf-command(config-manager)' && \ 
               dnf config-manager --set-enabled PowerTools && \
               yum update && \
               yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel szip szip-devel && \
