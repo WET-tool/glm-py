@@ -72,11 +72,8 @@ jobs:
           docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "\
               git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
               yum install epel-release -y && \
-              yum install dnf -y && \
-              yum install dnf-plugins-core -y && \
-              dnf config-manager --set-enabled PowerTools && \
               yum update && \
-              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel szip szip-devel && \
+              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel libaec libaec-devel && \
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
