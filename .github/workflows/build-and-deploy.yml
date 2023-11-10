@@ -47,6 +47,7 @@ jobs:
           curl -L -o glmpy/bin/glm "$BASE_URL"macos/Monterey/glm_latest/glm""
         fi
         chmod +x glmpy/bin/*
+        python -m pip install -U pip setuptools
         python -m build
 
     - name: Upload artifact
