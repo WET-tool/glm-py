@@ -8,7 +8,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     ext_modules=[
         Extension(
-            name="dummylib.foo",  
+            name="dummylib.dummy",  
             sources=["glmpy/dummy.c"], 
         ),
     ]
