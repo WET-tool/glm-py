@@ -89,7 +89,7 @@ jobs:
               cp /usr/lib64/libdl.so.2 /glm/ &&
               cp /usr/lib64/libc.so.6 /glm/ &&
               cp /usr/lib64/libm.so.6 /glm/ &&
-              cp /usr/lib64/libpng15.so.15"
+              cp /usr/lib64/libpng15.so.15 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
