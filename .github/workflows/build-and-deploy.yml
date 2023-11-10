@@ -87,7 +87,8 @@ jobs:
               cp /usr/lib64/libaec.so.0 /glm/ &&
               cp /usr/lib64/libXpm.so.4 /glm/ &&
               cp /usr/lib64/libdl.so.2 /glm/ &&
-              cp /usr/lib64/libc.so.6 /glm/"
+              cp /usr/lib64/libc.so.6 /glm/ &&
+              cp /usr/lib64/libm.so.6 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
