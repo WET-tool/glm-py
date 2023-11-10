@@ -73,7 +73,7 @@ jobs:
               git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
               yum install epel-release -y && \
               yum update && \
-              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel libaec libaec-devel libXpm && \
+              yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel libaec libaec-devel libXpm glibc && \
               cd glm-aed/glm-source && \
               mkdir binaries && \
               ./build_glm.sh
@@ -85,7 +85,8 @@ jobs:
               cp /usr/lib64/libhdf5_hl.so.8 /glm/ && \
               cp /usr/lib64/libsz.so.2 /glm/ && \
               cp /usr/lib64/libaec.so.0 /glm/ &&
-              cp /usr/lib64/libXpm.so.4 /glm/"
+              cp /usr/lib64/libXpm.so.4 /glm/ &&
+              cp /usr/lib64/libdl.so.2 /glm/"
 
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
