@@ -95,7 +95,9 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
+          CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64 cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 p310-*_aarch64'
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
 
       - uses: actions/upload-artifact@v3
