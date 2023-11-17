@@ -60,9 +60,3 @@ parentdir_prefix = "glmpy-"
 
 [tool.cibuildwheel]
 skip = "*musllinux*"
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64", "universal2", "arm64"]
-
-[tool.cibuildwheel.linux]
-archs = ["auto", "aarch64"]
