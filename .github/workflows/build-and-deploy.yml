@@ -130,7 +130,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}/wheelhouse:/wheelhouse quay.io/pypa/${{ matrix.manylinux-version }} /bin/bash -c "\
             yum install python${{ matrix.python-version }} -y && \
-            python${{ matrix.python-version }} -m pip install /wheelhouse/*cp${{ matrix.python-version.replace('.', '') }}*.whl && \
+            python${{ matrix.python-version }} -m pip install /wheelhouse/*cp${{ matrix.python-version.replace('.', '') }}*.whl"
 
 
 
