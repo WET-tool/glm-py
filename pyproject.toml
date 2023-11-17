@@ -58,3 +58,5 @@ tag_prefix = "v"
 parentdir_prefix = "glmpy-"
 
 
+[tool.cibuildwheel]
+skip = *musllinux*

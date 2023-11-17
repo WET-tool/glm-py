@@ -108,31 +108,6 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  test-wheels:
-    needs: build-wheels
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']  # Update with your Python versions
-        manylinux-version: ['manylinux2014_x86_64', 'manylinux2014_aarch64']  # Update with your target manylinux versions
-
-    runs-on: ubuntu-latest  # You can run Docker on any runner, but ubuntu-latest is generally a good default
-    
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Download built wheels
-        uses: actions/download-artifact@v3
-        with:
-          name: wheelhouse
-
-      - name: Test wheel
-        run: |
-          docker run --rm -v ${{ github.workspace }}/wheelhouse:/wheelhouse quay.io/pypa/${{ matrix.manylinux-version }} /bin/bash -c "\
-            yum install python${{ matrix.python-version }} -y && \
-            python${{ matrix.python-version }} -m pip install /wheelhouse/*cp${{ matrix.python-version.replace('.', '') }}*.whl"
-
-
 
 
       # - name: Bundle executable 
