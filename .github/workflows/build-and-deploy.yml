@@ -69,7 +69,7 @@ jobs:
       - name: Compile GLM for aarch64
         if: matrix.os == 'ubuntu-latest'
         run: |
-          docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
+          docker run --platform linux/arm64/v8 --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
             git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
             yum update -y && \
             yum install epel-release -y && \
