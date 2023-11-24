@@ -113,6 +113,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64'
+          CIBW_ARCHS_LINUX: 'x86_64'
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64
           CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
 
