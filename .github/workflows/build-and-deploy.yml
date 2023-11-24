@@ -66,29 +66,34 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # - name: Compile GLM for aarch64
-      #   if: matrix.os == 'ubuntu-latest'
-      #   run: |
-      #     docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
-      #       git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
-      #       yum update -y && \
-      #       yum install epel-release -y && \
-      #       yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
-      #       cd glm-aed/glm-source && \
-      #       mkdir binaries && \
-      #       ./build_glm.sh && \
-      #       cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
-      #     mkdir -p glmpy/bin
-      #     sudo mv glm/glm glmpy/bin/
-      #     sudo chmod +x glmpy/bin/*
-      #     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
+      - name: Compile GLM for aarch64
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
+            git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
+            yum update -y && \
+            yum install epel-release -y && \
+            yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
+            cd glm-aed/glm-source && \
+            mkdir binaries && \
+            ./build_glm.sh && \
+            cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
+          mkdir -p glmpy/bin
+          sudo mv glm/glm glmpy/bin/
+          sudo chmod +x glmpy/bin/*
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
       
-      # - name: Buils wheels for aarch64
-      #   uses: pypa/cibuildwheel@v2.16.2
-      #   env:
-      #     CIBW_BUILD: 'cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 pp310-*_aarch64'
-      #     CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64
-      #     CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
+      - name: Buils wheels for aarch64
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_BUILD: 'cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 pp310-*_aarch64'
+          CIBW_ARCHS_LINUX: 'aarch64'
+          CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64
+          CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
 
 
       - name: Compile GLM for x86_64
