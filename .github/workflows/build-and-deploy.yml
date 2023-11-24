@@ -71,6 +71,17 @@ jobs:
         with:
           platforms: all
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Compile GLM for aarch64
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -82,13 +93,14 @@ jobs:
             cd glm-aed/glm-source && \
             mkdir binaries && \
             ./build_glm.sh && \
-            cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/"
+            cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
+            cp /usr/lib64/{libnetcdf.so.7} /glm/"
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
           sudo chmod +x glmpy/bin/*
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
       
-      - name: Buils wheels for aarch64
+      - name: Build wheels for aarch64
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: 'cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 pp310-*_aarch64'
