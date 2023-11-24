@@ -94,7 +94,7 @@ jobs:
             mkdir binaries && \
             ./build_glm.sh && \
             cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
-            cp /usr/lib64/{libnetcdf.so.7} /glm/"
+            cp /usr/lib64/libnetcdf.so.7 /glm/"
           mkdir -p glmpy/bin
           sudo mv glm/glm glmpy/bin/
           sudo chmod +x glmpy/bin/*
@@ -108,7 +108,8 @@ jobs:
           CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64
           CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
       
-      - uses: actions/upload-artifact@v3
+      - name: Upload aarch64 wheels artifact
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -139,7 +140,8 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64
           CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload x86_64 wheels artifact
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
