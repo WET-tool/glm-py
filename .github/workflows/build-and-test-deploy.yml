@@ -1,15 +1,9 @@
-name: build-and-deploy
+name: build-and-test-deploy
 
 on:
   push:
-  pull_request:
-    branches:
-      - manylinux 
-  
-# on:
-#   push:
-#     tags:
-#       - v*
+    tags:
+      - v
 
 jobs:
   build-source-dist:
@@ -146,15 +140,15 @@ jobs:
           name: wheels-manylinux2014-x86-64
           path: ./wheelhouse/*.whl
         
-  deploy:
+  publish-to-pypi:
+    name: Publish distributions to PyPI
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [build-source-dist, build-wheels]
     runs-on: ubuntu-latest
-
     environment:
       name: pypi
-      url: https://test.pypi.org/p/glm-py  
+      url: https://pypi.org/p/glm-py  
     permissions:
-      contents: write  
       id-token: write  
 
     steps:
@@ -194,33 +188,9 @@ jobs:
           name: wheels-manylinux2014-x86-64
           path: wheelhouse/x86_64
       
-      - name: Publish distribution 📦 to TestPyPI
+      - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
       
-      # - name: Publish distribution 📦 to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      
-      # - name: Create GitHub Release
-      #   run: >-
-      #     gh release create
-      #     '${{ github.ref_name }}'
-      #     --notes ""
-
-      # - name: Upload to GitHub Release
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   # Upload to GitHub Release using the `gh` CLI.
-      #   # `dist/` contains the built packages, and the
-      #   # sigstore-produced signatures and certificates.
-      #   run: >-
-      #     gh release upload
-      #     '${{ github.ref_name }}' dist/**
-      #     --repo '${{ github.repository }}'
-
-
 
 
 
