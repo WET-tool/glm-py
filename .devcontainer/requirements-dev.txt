@@ -11,3 +11,4 @@ build==0.10.0
 twine==4.0.2
 pymdown-extensions==10.1
 versioneer==0.29
+cibuildwheel==2.16.2
