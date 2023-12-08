@@ -188,7 +188,7 @@ jobs:
           name: wheels-manylinux2014-x86-64
           path: wheelhouse/x86_64
       
-      - name: Publish distribution to PyPI
+      - name: Publish distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       
 
