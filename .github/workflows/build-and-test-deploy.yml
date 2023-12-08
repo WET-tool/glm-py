@@ -2,6 +2,8 @@ name: build-and-test-deploy
 
 on:
   push:
+    branches:
+      - main
     tags:
       - v
 
