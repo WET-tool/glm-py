@@ -8,7 +8,7 @@ Begin by importing the `nml` module from `glmpy`:
 from glmpy import nml
 ```
 
-### Setting paramters
+### Setting parameters
 
 Parameters for each block in a `.nml` file can either be passed to the respective class as keyword arguments or as a dictionary object. For example, the `setup` block can be configured with the [`NMLSetup`](nml.md#glmpy.nml.NMLSetup) class as follows:
 
