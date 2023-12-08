@@ -22,4 +22,5 @@ sparkling.nml
 # MkDocs documentation
 site*/
 
-glm3.nml
+#glm3.nml
+notebooks/glmpy-demo/inputs
