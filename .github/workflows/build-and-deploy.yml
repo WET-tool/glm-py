@@ -78,37 +78,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Compile GLM for aarch64
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          docker run --platform linux/arm64/v8 --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
-            git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
-            yum update -y && \
-            yum install epel-release -y && \
-            yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
-            cd glm-aed/glm-source && \
-            mkdir binaries && \
-            ./build_glm.sh && \
-            cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
-            cp /usr/lib64/{libgd.so.2,libjpeg.so.62,libnetcdf.so.7,libhdf5.so.8,libhdf5_hl.so.8,libsz.so.2,libaec.so.0,libXpm.so.4,libdl.so.2,libc.so.6,libm.so.6,libpng15.so.15} /glm/"
-          mkdir -p glmpy/bin
-          sudo mv glm/glm glmpy/bin/
-          sudo chmod +x glmpy/bin/*
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
+      # - name: Compile GLM for aarch64
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     docker run --platform linux/arm64/v8 --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
+      #       git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
+      #       yum update -y && \
+      #       yum install epel-release -y && \
+      #       yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
+      #       cd glm-aed/glm-source && \
+      #       mkdir binaries && \
+      #       ./build_glm.sh && \
+      #       cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ && \
+      #       cp /usr/lib64/{libgd.so.2,libjpeg.so.62,libnetcdf.so.7,libhdf5.so.8,libhdf5_hl.so.8,libsz.so.2,libaec.so.0,libXpm.so.4,libdl.so.2,libc.so.6,libm.so.6,libpng15.so.15} /glm/"
+      #     mkdir -p glmpy/bin
+      #     sudo mv glm/glm glmpy/bin/
+      #     sudo chmod +x glmpy/bin/*
+      #     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
       
-      - name: Build wheels for aarch64
-        uses: pypa/cibuildwheel@v2.16.2
-        env:
-          CIBW_BUILD: 'cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 pp310-*_aarch64'
-          CIBW_ARCHS_LINUX: 'aarch64'
-          CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64
-          CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
+      # - name: Build wheels for aarch64
+      #   uses: pypa/cibuildwheel@v2.16.2
+      #   env:
+      #     CIBW_BUILD: 'cp39-*_aarch64 cp310-*_aarch64 cp311-*_aarch64 cp312-*_aarch64 pp39-*_aarch64 pp310-*_aarch64'
+      #     CIBW_ARCHS_LINUX: 'aarch64'
+      #     CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64
+      #     CIBW_ENVIRONMENT: "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm"
       
-      - name: Upload aarch64 wheels artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels-manylinux2014-aarch64
-          path: ./wheelhouse/*.whl
+      # - name: Upload aarch64 wheels artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: wheels-manylinux2014-aarch64
+      #     path: ./wheelhouse/*.whl
 
       - name: Compile GLM for x86_64
         if: matrix.os == 'ubuntu-latest'
@@ -177,11 +177,11 @@ jobs:
           name: dist-macos-latest
           path: dist/
       
-      - name: Download aarch64 Wheels Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-manylinux2014-aarch64
-          path: wheelhouse/aarch64
+      # - name: Download aarch64 Wheels Artifacts
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: wheels-manylinux2014-aarch64
+      #     path: wheelhouse/aarch64
 
       - name: Download x86_64 Wheels Artifacts
         uses: actions/download-artifact@v3
