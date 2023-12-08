@@ -185,7 +185,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: wheels-manylinux2014-x86-64
-          path: wheelhouse/x86_64
+          path: dist/ #wheelhouse/x86_64
       
       - name: Publish all distributions to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
