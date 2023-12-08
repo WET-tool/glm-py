@@ -144,7 +144,6 @@ jobs:
         
   publish-to-pypi:
     name: Publish distributions to PyPI
-    if: startsWith(github.ref, 'refs/tags/')
     needs: [build-source-dist, build-wheels]
     runs-on: ubuntu-latest
     environment:
