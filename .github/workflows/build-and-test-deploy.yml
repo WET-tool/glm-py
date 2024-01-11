@@ -29,7 +29,7 @@ jobs:
     - name: Bundled executable and build package
       shell: bash
       run: |
-        BASE_URL="https://raw.githubusercontent.com/AquaticEcoDynamics/glm-aed/main/binaries/"
+        BASE_URL="https://raw.githubusercontent.com/WET-tool/glm-aed/main/binaries/"
         mkdir -p glmpy/bin
         if [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
           curl -L -o glmpy/bin/glm "$BASE_URL"ubuntu/22.04/glm_latest/glm""
@@ -80,7 +80,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           docker run --platform linux/arm64/v8 --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_aarch64 /bin/bash -c "\
-            git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
+            git clone --recursive https://github.com/WET-tool/glm-aed.git && \
             yum update -y && \
             yum install epel-release -y && \
             yum install -y netcdf-devel gd gd-devel gcc-gfortran && \
@@ -112,7 +112,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           docker run --rm -v $(pwd)/glm:/glm quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "\
-              git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git && \
+              git clone --recursive https://github.com/WET-tool/glm-aed.git && \
               yum install epel-release -y && \
               yum update -y && \
               yum install -y netcdf netcdf-devel gd gd-devel gcc-gfortran libjpeg-turbo hdf5 hdf5-devel libaec libaec-devel libXpm glibc libpng-1.5.13-8.el7.i686 && \
