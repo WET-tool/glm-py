@@ -16,7 +16,7 @@ jobs:
       
       - name: Compile GLM for aarch64
         run: |
-          git clone --recursive https://github.com/WET-tool/glm-aed.git 
+          git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git 
           cd glm-aed/glm-source 
           mkdir binaries 
           ./build_glm.sh 
