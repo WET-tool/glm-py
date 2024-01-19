@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-wheel-windows:
-    name: Build wheels on Wimdows
+    name: Build wheels on Wimdows 
     runs-on: windows-latest
 
     steps:
