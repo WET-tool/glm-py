@@ -13,11 +13,21 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Install packages and setup
+        run: |
+          choco install make
+          choco install mingw
+          choco install git
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
       
       - name: Compile GLM for aarch64
         run: |
-          git clone --recursive https://github.com/AquaticEcoDynamics/glm-aed.git 
-          cd glm-aed/glm-source 
-          mkdir binaries 
-          ./build_glm.sh 
-          cp /glm-aed/glm-source/binaries/glm_latest/glm /glm/ 
+          cd $GITHUB_WORKSPACE/glm-source/ancillary/windows/Sources 
+          ./build_all.sh
+          cd $GITHUB_WORKSPACE/glm-source
+          ./build_glm.sh
+          mkdir -p $GITHUB_WORKSPACE/binaries/windows
+          cd $GITHUB_WORKSPACE/glm-source/binaries/windows
+          cp -r * $GITHUB_WORKSPACE/binaries/windows
