@@ -20,10 +20,11 @@ jobs:
           choco install mingw
           choco install git
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          git clone --recursive https://github.com/WET-tool/glm-aed.git
+          git clone --recursive https://github.com/WET-tool/glm-aed.git $GITHUB_WORKSPACE
       
-      - name: Compile GLM for aarch64
+      - name: Compile GLM for x84_64
         run: |
+          pwd
           cd $GITHUB_WORKSPACE/glm-source/ancillary/windows/Sources 
           ./build_all.sh
           cd $GITHUB_WORKSPACE/glm-source
