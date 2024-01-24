@@ -31,9 +31,9 @@ jobs:
       - name: Compile GLM for x84_64
         run: |
           echo "Current directory: $(pwd)"
-          cd "${GITHUB_WORKSPACE}/glm-aed/glm-source/ancillary/windows/Sources"
+          cd "${GITHUB_WORKSPACE}/glm-py/glm-aed/glm-source/ancillary/windows/Sources"
           ./build_all.sh
-          cd "${GITHUB_WORKSPACE}/glm-aed/glm-source"
+          cd "${GITHUB_WORKSPACE}/glm-py/glm-aed/glm-source"
           ./build_glm.sh
 
           # cd ${GITHUB_WORKSPACE} 
