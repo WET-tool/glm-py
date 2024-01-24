@@ -33,7 +33,7 @@ jobs:
           echo "Current directory: $(pwd)"
           cd glm-aed/glm-source/ancillary/windows/Sources
           ./build_all.sh
-          cd $GITHUB_WORKSPACE/glm-aed/glm-source
+          cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
           ./build_glm.sh
 
           # cd ${GITHUB_WORKSPACE} 
