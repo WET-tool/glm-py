@@ -14,25 +14,32 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Install packages and setup
+      - name: Install vcpkg
         run: |
-          choco install make
-          choco install mingw
-          choco install git
-          choco install libgd
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          cd ${{ github.workspace }}
-          git clone --recursive https://github.com/WET-tool/glm-aed.git
-    
-      - name: Compile GLM for x84_64
-        run: |
-          echo "Current directory: $(pwd)"
-          cd glm-aed/glm-source/ancillary/windows/Sources
-          bash ./build_all.sh
-          # cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
-          # bash ./build_glm.sh
+          git clone https://github.com/Microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
 
-      - name: List root directory structure
-        run: |
-          ls "${env:GITHUB_WORKSPACE}"
-          echo "GitHub workspace: ${env:GITHUB_WORKSPACE}"
+      - name: Install libgd
+        run: .\vcpkg\vcpkg install libgd
+
+      # - name: Install packages and setup
+      #   run: |
+      #     choco install make
+      #     choco install mingw
+      #     choco install git
+      #     choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      #     cd ${{ github.workspace }}
+      #     git clone --recursive https://github.com/WET-tool/glm-aed.git
+    
+      # - name: Compile GLM for x84_64
+      #   run: |
+      #     echo "Current directory: $(pwd)"
+      #     cd glm-aed/glm-source/ancillary/windows/Sources
+      #     bash ./build_all.sh
+      #     # cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
+      #     # bash ./build_glm.sh
+
+      # - name: List root directory structure
+      #   run: |
+      #     ls "${env:GITHUB_WORKSPACE}"
+      #     echo "GitHub workspace: ${env:GITHUB_WORKSPACE}"
