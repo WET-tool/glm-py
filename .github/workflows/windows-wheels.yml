@@ -22,21 +22,16 @@ jobs:
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
           cd ${{ github.workspace }}
           git clone --recursive https://github.com/WET-tool/glm-aed.git
-      
-      - name: List root directory structure
-        run: |
-          ls "${GITHUB_WORKSPACE}"
-          echo "GitHub workspace: ${GITHUB_WORKSPACE}"
-
+    
       - name: Compile GLM for x84_64
         run: |
           echo "Current directory: $(pwd)"
           cd glm-aed/glm-source/ancillary/windows/Sources
-          ./build_all.sh
+          bash ./build_all.sh
           cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
-          ./build_glm.sh
+          bash ./build_glm.sh
 
-          # cd ${GITHUB_WORKSPACE} 
-          # mkdir -p glmpy/bin
-          # cd $GITHUB_WORKSPACE/glm-source/binaries/windows
-          # cp -r * $GITHUB_WORKSPACE/binaries/windows
+      - name: List root directory structure
+        run: |
+          ls "${env:GITHUB_WORKSPACE}"
+          echo "GitHub workspace: ${env:GITHUB_WORKSPACE}"
