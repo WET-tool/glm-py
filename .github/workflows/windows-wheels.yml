@@ -22,6 +22,9 @@ jobs:
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
           git clone --recursive https://github.com/WET-tool/glm-aed.git $GITHUB_WORKSPACE
       
+      - name: List directory structure
+        run: ls -R
+      
       - name: Compile GLM for x84_64
         run: |
           cd glm-source/ancillary/windows/Sources 
