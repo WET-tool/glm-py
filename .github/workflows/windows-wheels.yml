@@ -20,7 +20,7 @@ jobs:
           choco install mingw
           choco install git
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          git clone --recursive https://github.com/WET-tool/glm-aed.git .
+          git clone --recursive https://github.com/WET-tool/glm-aed.git 
       
       - name: List directory structure
         run: ls -R
