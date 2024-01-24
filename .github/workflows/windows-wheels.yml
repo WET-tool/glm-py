@@ -20,7 +20,6 @@ jobs:
           choco install mingw
           choco install git
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          cd ~
           git clone --recursive https://github.com/WET-tool/glm-aed.git 
       
       - name: List directory structure
@@ -28,10 +27,11 @@ jobs:
       
       - name: Compile GLM for x84_64
         run: |
-          cd glm-aed\glm-source/ancillary/windows/Sources 
+          cd glm-aed/glm-source/ancillary/windows/Sources 
           ./build_all.sh
-          cd $GITHUB_WORKSPACE/glm-source
+          cd ~/a/glm-py/glm-py/glm-aed/glm-source
           ./build_glm.sh
-          mkdir -p $GITHUB_WORKSPACE/binaries/windows
-          cd $GITHUB_WORKSPACE/glm-source/binaries/windows
-          cp -r * $GITHUB_WORKSPACE/binaries/windows
+          cd ${GITHUB_WORKSPACE} 
+          # mkdir -p glmpy/bin
+          # cd $GITHUB_WORKSPACE/glm-source/binaries/windows
+          # cp -r * $GITHUB_WORKSPACE/binaries/windows
