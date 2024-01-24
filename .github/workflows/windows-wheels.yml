@@ -19,8 +19,8 @@ jobs:
           git clone https://github.com/Microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
 
-      - name: Install libgd
-        run: .\vcpkg\vcpkg install libgd
+      - name: Install libraries
+        run: .\vcpkg\vcpkg install zlib png freetype libgd szips curl hdf5 netcdf
 
       # - name: Install packages and setup
       #   run: |
