@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-wheel-windows:
-    name: Build wheels on Wimdows 
+    name: Build wheels on Windows 
     runs-on: windows-latest
 
     steps:
@@ -20,17 +20,20 @@ jobs:
           choco install mingw
           choco install git
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          git clone --recursive https://github.com/WET-tool/glm-aed.git 
+          cd ${{ github.workspace }}
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
       
       - name: List root directory structure
-        run: ls -R "${GITHUB_WORKSPACE}"
+        run: |
+          ls "${GITHUB_WORKSPACE}"
+          echo "GitHub workspace: ${GITHUB_WORKSPACE}"
 
       - name: Compile GLM for x84_64
         run: |
           echo "Current directory: $(pwd)"
-          cd D:/a/glm-py/glm-py/glm-aed/glm-source/ancillary/windows/Sources
+          cd "${GITHUB_WORKSPACE}/glm-aed/glm-source/ancillary/windows/Sources"
           ./build_all.sh
-          cd D:/a/glm-py/glm-py/glm-aed/glm-source
+          cd "${GITHUB_WORKSPACE}/glm-aed/glm-source"
           ./build_glm.sh
 
           # cd ${GITHUB_WORKSPACE} 
