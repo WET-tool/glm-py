@@ -24,8 +24,7 @@ jobs:
       
       - name: Compile GLM for x84_64
         run: |
-          pwd
-          cd $GITHUB_WORKSPACE/glm-source/ancillary/windows/Sources 
+          cd glm-source/ancillary/windows/Sources 
           ./build_all.sh
           cd $GITHUB_WORKSPACE/glm-source
           ./build_glm.sh
