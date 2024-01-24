@@ -20,7 +20,7 @@ jobs:
           .\vcpkg\bootstrap-vcpkg.bat
 
       - name: Install libraries
-        run: .\vcpkg\vcpkg install zlib libpng freetype libgd szip curl hdf5 netcdf
+        run: .\vcpkg\vcpkg install zlib libpng freetype libgd szip curl hdf5 netcdf-c
 
       # - name: Install packages and setup
       #   run: |
