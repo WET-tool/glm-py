@@ -19,7 +19,7 @@ jobs:
           choco install make
           choco install mingw
           choco install git
-          choco install gd
+          choco install libgd
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
           cd ${{ github.workspace }}
           git clone --recursive https://github.com/WET-tool/glm-aed.git
