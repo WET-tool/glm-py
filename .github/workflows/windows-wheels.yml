@@ -22,22 +22,22 @@ jobs:
       - name: Install libraries
         run: .\vcpkg\vcpkg install zlib libpng freetype libgd szip curl hdf5 netcdf-c
 
-      # - name: Install packages and setup
-      #   run: |
-      #     choco install make
-      #     choco install mingw
-      #     choco install git
-      #     choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-      #     cd ${{ github.workspace }}
-      #     git clone --recursive https://github.com/WET-tool/glm-aed.git
+      - name: Install packages and setup
+        run: |
+          choco install make
+          choco install mingw
+          choco install git
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          cd ${{ github.workspace }}
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
     
-      # - name: Compile GLM for x84_64
-      #   run: |
-      #     echo "Current directory: $(pwd)"
-      #     cd glm-aed/glm-source/ancillary/windows/Sources
-      #     bash ./build_all.sh
-      #     # cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
-      #     # bash ./build_glm.sh
+      - name: Compile GLM for x84_64
+        run: |
+          echo "Current directory: $(pwd)"
+          #cd glm-aed/glm-source/ancillary/windows/Sources
+          #bash ./build_all.sh
+          cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
+          bash ./build_glm.sh
 
       # - name: List root directory structure
       #   run: |
