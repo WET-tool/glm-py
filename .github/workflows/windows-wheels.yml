@@ -32,6 +32,11 @@ jobs:
           mkdir C:\include
           xcopy /E /I .\vcpkg\installed\x64-windows\include\* C:\include
 
+      - name: Set Environment Variables
+        run: |
+          echo "C_INCLUDE_PATH=C:\include" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=C:\lib" >> $GITHUB_ENV
+
       - name: Install packages and setup
         run: |
           choco install make
