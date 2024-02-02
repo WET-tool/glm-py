@@ -14,29 +14,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # - name: Install vcpkg
-      #   run: |
-      #     git clone https://github.com/Microsoft/vcpkg.git
-      #     .\vcpkg\bootstrap-vcpkg.bat
-
-      # - name: Install libraries
-      #   run: .\vcpkg\vcpkg install zlib libpng freetype libgd szip curl hdf5 netcdf-c
-      
-      # - name: Copy libraries to standard path
-      #   run: |
-      #     mkdir C:\lib
-      #     xcopy /E /I .\vcpkg\installed\x64-windows\lib\* C:\lib
-
-      # - name: Copy headers to standard path
-      #   run: |
-      #     mkdir C:\include
-      #     xcopy /E /I .\vcpkg\installed\x64-windows\include\* C:\include
-
-      # - name: Set Environment Variables
-      #   run: |
-      #     echo "C_INCLUDE_PATH=C:\include" >> $GITHUB_ENV
-      #     echo "LIBRARY_PATH=C:\lib" >> $GITHUB_ENV
-
       - name: Install packages and setup
         run: |
           choco install make
@@ -56,13 +33,9 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/glm-aed/binaries/windows
           cd $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows
           cp -r * $GITHUB_WORKSPACE/glm-aed/binaries/windows
-
-        # run: |
-        #     echo "Current directory: $(pwd)"
-        #     cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
-        #     bash ./build_glm.sh
-
-      # - name: List root directory structure
-      #   run: |
-      #     ls "${env:GITHUB_WORKSPACE}"
-      #     echo "GitHub workspace: ${env:GITHUB_WORKSPACE}"
+          cp $GITHUB_WORKSPACE/glm-aed/binaries/windows/glm.exe $GITHUB_WORKSPACE/glm/
+          cd $GITHUB_WORKSPACE
+          mkdir -p glmpy/bin
+          sudo mv glm/glm glmpy/bin/
+          sudo chmod +x glmpy/bin/*
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
