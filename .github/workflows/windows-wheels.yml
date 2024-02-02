@@ -49,13 +49,18 @@ jobs:
       - name: Compile GLM for x84_64
         shell: bash
         run: |
-          cd $GITHUB_WORKSPACE/glm-source/ancillary/windows/Sources
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/Sources
           ./build_all.sh
-          cd $GITHUB_WORKSPACE/glm-source
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source
           ./build_glm.sh
-          mkdir -p $GITHUB_WORKSPACE/binaries/windows
-          cd $GITHUB_WORKSPACE/glm-source/binaries/windows
-          cp -r * $GITHUB_WORKSPACE/binaries/windows
+          mkdir -p $GITHUB_WORKSPACE/glm-aed/binaries/windows
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows
+          cp -r * $GITHUB_WORKSPACE/glm-aed/binaries/windows
+
+        # run: |
+        #     echo "Current directory: $(pwd)"
+        #     cd "${env:GITHUB_WORKSPACE}\glm-aed\glm-source"
+        #     bash ./build_glm.sh
 
       # - name: List root directory structure
       #   run: |
