@@ -7,8 +7,14 @@ on:
 
 jobs:
   build-wheel-windows:
-    name: Build wheels on Windows 
-    runs-on: windows-latest
+    name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            cibw_archs: "auto64"
 
     steps:
       - name: Check out code
@@ -16,11 +22,10 @@ jobs:
 
       - name: Install packages and setup
         run: |
-          choco install make
-          choco install mingw
+          choco install make 
+          choco install mingw 
           choco install git
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          cd ${{ github.workspace }}
           git clone --recursive https://github.com/WET-tool/glm-aed.git
     
       - name: Compile GLM for x84_64
@@ -30,12 +35,13 @@ jobs:
           ./build_all.sh
           cd $GITHUB_WORKSPACE/glm-aed/glm-source
           ./build_glm.sh
-          mkdir -p $GITHUB_WORKSPACE/glm-aed/binaries/windows
-          cd $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows
-          cp -r * $GITHUB_WORKSPACE/glm-aed/binaries/windows
-          cp $GITHUB_WORKSPACE/glm-aed/binaries/windows/glm.exe $GITHUB_WORKSPACE/glm/
           cd $GITHUB_WORKSPACE
-          mkdir -p glmpy/bin
-          sudo mv glm/glm glmpy/bin/
-          sudo chmod +x glmpy/bin/*
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/glm
+          mkdir glmpy\bin\
+          cp "$GITHUB_WORKSPACE\glm-aed\glm-source\binaries\windows\glm_latest\glm.exe" "$GITHUB_WORKSPACE\glmpy\bin\"
+          cp "$GITHUB_WORKSPACE\glm-aed\glm-source\ancillary\windows\msys\bin\*.dll" "$GITHUB_WORKSPACE\glmpy\bin\"
+  
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_ARCHS: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
+          CIBW_ARCHS: ${{ matrix.cibw_archs }}
