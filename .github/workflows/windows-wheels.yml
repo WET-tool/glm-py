@@ -36,9 +36,9 @@ jobs:
           cd $GITHUB_WORKSPACE/glm-aed/glm-source
           ./build_glm.sh
           cd $GITHUB_WORKSPACE
-          mkdir glmpy\bin\
-          cp "$GITHUB_WORKSPACE\glm-aed\glm-source\binaries\windows\glm_latest\glm.exe" "$GITHUB_WORKSPACE\glmpy\bin\"
-          cp "$GITHUB_WORKSPACE\glm-aed\glm-source\ancillary\windows\msys\bin\*.dll" "$GITHUB_WORKSPACE\glmpy\bin\"
+          mkdir -p $GITHUB_WORKSPACE/glmpy/bin/
+          cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
+          cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
