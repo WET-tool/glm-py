@@ -6,81 +6,81 @@ on:
       - windows
 
 jobs:
-  # build-wheel-windows:
-  #   name: Build wheels on windows for x86_64 and AMD64
-  #   runs-on: windows-2022
+  build-wheel-windows:
+    name: Build wheels on windows for x86_64 and AMD64
+    runs-on: windows-2022
 
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
 
-  #     - name: Install packages and setup
-  #       run: |
-  #         choco install make 
-  #         choco install mingw 
-  #         choco install git
-  #         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-  #         git clone --recursive https://github.com/WET-tool/glm-aed.git
+      - name: Install packages and setup
+        run: |
+          choco install make 
+          choco install mingw 
+          choco install git
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
     
-  #     - name: Compile GLM for x84_64
-  #       shell: bash
-  #       run: |
-  #         cd $GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/Sources
-  #         ./build_all.sh
-  #         cd $GITHUB_WORKSPACE/glm-aed/glm-source
-  #         ./build_glm.sh
-  #         cd $GITHUB_WORKSPACE
-  #         mkdir -p $GITHUB_WORKSPACE/glmpy/bin/
-  #         cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
-  #         cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
+      - name: Compile GLM for x84_64
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/Sources
+          ./build_all.sh
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source
+          ./build_glm.sh
+          cd $GITHUB_WORKSPACE
+          mkdir -p $GITHUB_WORKSPACE/glmpy/bin/
+          cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
+          cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
-  #     - name: Build wheels for x86_64 and AMD64
-  #       uses: pypa/cibuildwheel@v2.16.5
-  #       env:
-  #         CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
-  #         CIBW_ARCHS_WINDOWS: "auto64"
+      - name: Build wheels for x86_64 and AMD64
+        uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
+          CIBW_ARCHS_WINDOWS: "auto64"
 
-  #     - name: Upload wheels artifact
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: wheels-windows-x86-64
-  #         path: ./wheelhouse/*.whl
+      - name: Upload wheels artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-windows-x86-64
+          path: ./wheelhouse/*.whl
   
-  # build-wheels-macos-x86_64:
-  #   name: Build wheels on macos for x86_64
-  #   runs-on: macos-12
+  build-wheels-macos-x86_64:
+    name: Build wheels on macos for x86_64
+    runs-on: macos-12
 
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
 
-  #     - name: Install packages and setup
-  #       run: |
-  #         brew reinstall gcc
-  #         brew install netcdf
-  #         brew install gd
-  #         git clone --recursive https://github.com/WET-tool/glm-aed.git
+      - name: Install packages and setup
+        run: |
+          brew reinstall gcc
+          brew install netcdf
+          brew install gd
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
       
-  #     - name: Compile GLM for x86_64
-  #       run: |
-  #         cd $GITHUB_WORKSPACE/glm-aed/glm-source
-  #         ./build_glm.sh
-  #         MOSDIR=`grep 'SOFTWARE LICENSE AGREEMENT FOR ' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf' | awk -F 'macOS ' '{print $NF}' | tr -d '\\' | tr ' ' '_'`
-  #         cd $GITHUB_WORKSPACE
-  #         mkdir $GITHUB_WORKSPACE/glmpy/bin/
-  #         cp $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/macos/${MOSDIR}/glm_latest/glm $GITHUB_WORKSPACE/glmpy/bin/
+      - name: Compile GLM for x86_64
+        run: |
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source
+          ./build_glm.sh
+          MOSDIR=`grep 'SOFTWARE LICENSE AGREEMENT FOR ' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf' | awk -F 'macOS ' '{print $NF}' | tr -d '\\' | tr ' ' '_'`
+          cd $GITHUB_WORKSPACE
+          mkdir $GITHUB_WORKSPACE/glmpy/bin/
+          cp $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/macos/${MOSDIR}/glm_latest/glm $GITHUB_WORKSPACE/glmpy/bin/
             
-  #     - name: Build wheels for x86_64
-  #       uses: pypa/cibuildwheel@v2.16.2
-  #       env:
-  #         CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64'
-  #         CIBW_ARCHS_MACOS: 'x86_64'
+      - name: Build wheels for x86_64
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64'
+          CIBW_ARCHS_MACOS: 'x86_64'
 
-  #     - name: Upload x86_64 wheels artifact
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: wheels-macos-x86-64
-  #         path: ./wheelhouse/*.whl
+      - name: Upload x86_64 wheels artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-macos-x86-64
+          path: ./wheelhouse/*.whl
 
   build-wheels-macos-arm64:
     name: Build wheels on macos for arm64
