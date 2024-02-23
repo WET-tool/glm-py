@@ -34,14 +34,61 @@ jobs:
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
-      - name: Build wheels for x86_64
+      - name: Build wheels for x86_64 and AMD64
         uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
           CIBW_ARCHS_WINDOWS: "auto64"
+
+      - name: debug
+        run: |
+          cd $GITHUB_WORKSPACE
+          ls
+          cd $GITHUB_WORKSPACE/wheelhouse
+          ls
       
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v3
         with:
           name: wheels-windows-2022
-          path: $GITHUB_WORKSPACE\wheelhouse\*.whl
+          path: $GITHUB_WORKSPACE/wheelhouse/*.whl
+  
+  build-wheels-macos:
+    name: Build wheels on macos for x86_64
+    runs-on: macos-12
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install packages and setup
+        run: |
+          brew install gcc
+          brew install netcdf
+          brew install gd
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
+      
+      - name: Compile GLM for x86_64
+        run: |
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source
+          ./build_glm.sh
+          MOSDIR=`grep 'SOFTWARE LICENSE AGREEMENT FOR ' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf' | awk -F 'macOS ' '{print $NF}' | tr -d '\\' | tr ' ' '_'`
+          cd $GITHUB_WORKSPACE
+          mkdir $GITHUB_WORKSPACE/glmpy/bin/
+          cp $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/macos/${MOSDIR}/glm_latest/glm $GITHUB_WORKSPACE/glmpy/bin/
+            
+      - name: Build wheels for x86_64
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64'
+          CIBW_ARCHS_LINUX: 'x86_64'
+
+      - name: Upload x86_64 wheels artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-macos-x86-64
+          path: $GITHUB_WORKSPACE/wheelhouse/*.whl
+        
+
+
+
