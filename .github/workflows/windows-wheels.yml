@@ -40,13 +40,6 @@ jobs:
           CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
           CIBW_ARCHS_WINDOWS: "auto64"
 
-      - name: debug
-        run: |
-          cd $GITHUB_WORKSPACE
-          ls
-          cd $GITHUB_WORKSPACE/wheelhouse
-          ls
-      
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v3
         with:
