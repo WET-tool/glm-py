@@ -46,7 +46,7 @@ jobs:
           name: wheels-windows-2022
           path: ./wheelhouse/*.whl
   
-  build-wheels-macos:
+  build-wheels-macos-x86_64:
     name: Build wheels on macos for x86_64
     runs-on: macos-12
 
@@ -74,14 +74,54 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: 'cp39-*_x86_64 cp310-*_x86_64 cp311-*_x86_64 cp312-*_x86_64 pp39-*_x86_64 p310-*_x86_64'
-          CIBW_ARCHS_LINUX: 'x86_64'
+          CIBW_ARCHS_MACOS: 'x86_64'
 
       - name: Upload x86_64 wheels artifact
         uses: actions/upload-artifact@v3
         with:
           name: wheels-macos-x86-64
           path: ./wheelhouse/*.whl
+
+  build-wheels-macos-arm64:
+    name: Build wheels on macos for arm64
+    runs-on: macos-14
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install packages and setup
+        run: |
+          brew reinstall gcc
+          brew install netcdf
+          brew install gd
+          git clone --recursive https://github.com/WET-tool/glm-aed.git
+      
+      - name: Compile GLM for arm64
+        run: |
+          cd $GITHUB_WORKSPACE/glm-aed/glm-source
+          ./build_glm.sh
+          MOSDIR=`grep 'SOFTWARE LICENSE AGREEMENT FOR ' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf' | awk -F 'macOS ' '{print $NF}' | tr -d '\\' | tr ' ' '_'`
+          cd $GITHUB_WORKSPACE
+          mkdir $GITHUB_WORKSPACE/glmpy/bin/
+          cp $GITHUB_WORKSPACE/glm-aed/glm-source/binaries/macos/${MOSDIR}/glm_latest/glm $GITHUB_WORKSPACE/glmpy/bin/
+            
+      - name: Build wheels for arm64
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* p310-*'
+          CIBW_ARCHS_MACOS: 'arm64'
+
+      - name: Upload arm64 wheels artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-macos-x86-64
+          path: ./wheelhouse/*.whl
         
+
+
+
+
 
 
 
