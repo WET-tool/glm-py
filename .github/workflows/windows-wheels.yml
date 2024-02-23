@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels-windows-2022
-          path: $GITHUB_WORKSPACE/wheelhouse/*.whl
+          path: ./wheelhouse/*.whl
   
   build-wheels-macos:
     name: Build wheels on macos for x86_64
@@ -63,7 +63,7 @@ jobs:
 
       - name: Install packages and setup
         run: |
-          brew install gcc
+          brew reinstall gcc
           brew install netcdf
           brew install gd
           git clone --recursive https://github.com/WET-tool/glm-aed.git
@@ -87,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels-macos-x86-64
-          path: $GITHUB_WORKSPACE/wheelhouse/*.whl
+          path: ./wheelhouse/*.whl
         
 
 
