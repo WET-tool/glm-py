@@ -35,7 +35,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
       - name: Build wheels for x86_64
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
           CIBW_ARCHS_WINDOWS: "x86_64"
