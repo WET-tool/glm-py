@@ -97,6 +97,15 @@ jobs:
           brew install gd
           git clone --recursive https://github.com/WET-tool/glm-aed.git
       
+      - name: Add CPATH to .zshrc
+        run: echo 'export CPATH="/opt/homebrew/include:$CPATH"' >> $HOME/.zshrc
+      
+      - name: Add LIBRARY_PATH to .zshrc
+        run: echo 'export LIBRARY_PATH="/opt/homebrew/lib:$LIBRARY_PATH"' >> $HOME/.zshrc
+
+      - name: Source .zshrc
+        run: source $HOME/.zshrc
+
       - name: Compile GLM for arm64
         run: |
           cd $GITHUB_WORKSPACE/glm-aed/glm-source
