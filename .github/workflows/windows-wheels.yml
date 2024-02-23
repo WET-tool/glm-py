@@ -43,7 +43,7 @@ jobs:
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wheels-windows-2022
+          name: wheels-windows-x86-64
           path: ./wheelhouse/*.whl
   
   build-wheels-macos-x86_64:
@@ -97,16 +97,10 @@ jobs:
           brew install gd
           git clone --recursive https://github.com/WET-tool/glm-aed.git
       
-      - name: Add CPATH to .zshrc
-        run: echo 'export CPATH="/opt/homebrew/include:$CPATH"' >> $HOME/.zshrc
-      
-      - name: Add LIBRARY_PATH to .zshrc
-        run: echo 'export LIBRARY_PATH="/opt/homebrew/lib:$LIBRARY_PATH"' >> $HOME/.zshrc
-
-      - name: Source .zshrc
-        run: source $HOME/.zshrc
-
       - name: Compile GLM for arm64
+        env:
+          CPATH: /opt/homebrew/include:$CPATH
+          LIBRARY_PATH: /opt/homebrew/lib:$LIBRARY_PATH
         run: |
           cd $GITHUB_WORKSPACE/glm-aed/glm-source
           ./build_glm.sh
@@ -124,7 +118,7 @@ jobs:
       - name: Upload arm64 wheels artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wheels-macos-x86-64
+          name: wheels-macos-arm64
           path: ./wheelhouse/*.whl
         
 
