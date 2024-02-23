@@ -95,6 +95,8 @@ jobs:
           brew reinstall gcc
           brew install netcdf
           brew install gd
+          brew install pipx
+          pipx ensurepath
           git clone --recursive https://github.com/WET-tool/glm-aed.git
       
       - name: Compile GLM for arm64
