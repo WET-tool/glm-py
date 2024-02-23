@@ -7,14 +7,8 @@ on:
 
 jobs:
   build-wheel-windows:
-    name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            cibw_archs: "auto64"
+    name: Build wheels on windows for x86_64
+    runs-on: windows-2022
 
     steps:
       - name: Check out code
@@ -40,8 +34,8 @@ jobs:
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
-      - name: Build wheels
+      - name: Build wheels for x86_64
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
-          CIBW_ARCHS: ${{ matrix.cibw_archs }}
+          CIBW_ARCHS_WINDOWS: "x86_64"
