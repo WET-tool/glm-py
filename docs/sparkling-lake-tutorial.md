@@ -192,9 +192,9 @@ There are up to 14 configurable blocks in the GLM namelist file - setting each w
 Import `JSONToNML` from `glmpy` and pass the JSON file to the class:
 
 ```python
-from glmpy import json
+from glmpy import glm_json
 
-json_attributes = json.JSONToNML("sparkling_lake.json")
+json_attributes = glm_json.JSONToNML("sparkling_lake.json")
 ```
 
 Let's have a go at extracting attributes for the `&meteorology` block using the `get_nml_attributes()` method. This block defines the complex interactions that occur between the lake and the atmosphere, e.g., radiation, heat fluxes, rainfall, and wind. We'll pass in the name of the block as it appears in the JSON file:
@@ -254,13 +254,13 @@ Easy! But before we go any futher, look closely at the `meteo_fl` attribute - wh
 Now, let's do the same for the remaining blocks:  `&output`, `&init_profiles`, `&time`, `&bird_model`, `&light`, `&sediment`. There won't be any more boundary conidition files to include. If you're want to find out more about the attributes for each block, check out the [NML documentation]().
 
 ```python
-output_attrs=json_attributes.get_nml_attributes("&output")
-init_profiles_attrs=json_attributes.get_nml_attributes("&init_profiles")
-time_attrs=json_attributes.get_nml_attributes("&time")
-light_attrs=json_attributes.get_nml_attributes("&light")
-bird_model_attrs=json_attributes.get_nml_attributes("&bird_model")
-sediment_attrs=json_attributes.get_nml_attributes("&sediment")
-wq_setup_attrs=json_attributes.get_nml_attributes("&wq_setup")
+output_attrs=glm_json_attributes.get_nml_attributes("&output")
+init_profiles_attrs=glm_json_attributes.get_nml_attributes("&init_profiles")
+time_attrs=glm_json_attributes.get_nml_attributes("&time")
+light_attrs=glm_json_attributes.get_nml_attributes("&light")
+bird_model_attrs=glm_json_attributes.get_nml_attributes("&bird_model")
+sediment_attrs=glm_json_attributes.get_nml_attributes("&sediment")
+wq_setup_attrs=glm_json_attributes.get_nml_attributes("&wq_setup")
 ```
 
 Now initialise the respective classes:

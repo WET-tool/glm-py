@@ -1,41 +1,42 @@
 import json
+import os
 
 
 class JSONToNML:
     """Supports the reading of GLM configuration blocks in a json format.
 
-    Reads and parses a json file into a dictionary. Dictionaries can then be
+    Reads and parses a json file into a dictionary object which can be
     used to set the attributes of the corresponding NML class. Useful for
     converting a json file of GLM parameters from a web application.
 
     Attributes
     ----------
-    json_file : str
-        The path to the json file to be read.
+    json_file : str | os.PathLike | dict
+        The path to the json file to be read or dict representation of
+        the nml file in memory.
     nml_file : str
         The path to the nml file to be written.
 
     Examples
     --------
-    >>> from glmpy import JSONToNML
+    >>> from glmpy.glm_json import JSONToNML
     >>> json_to_nml = JSONToNML("sparkling_lake.json")
     """
 
-    def __init__(self, json_file: str, nml_file: str = "sim.nml"):
-        if not isinstance(json_file, str):
-            raise TypeError(
-                f"Expected json_file to be a string, but got {type(json_file).__name__}."
-            )
+    def __init__(
+        self, json_file: str | os.PathLike, nml_file: str = "sim.nml"
+    ):
+        if not isinstance(json_file, str) or not isinstance(json_file, dict):
+            raise TypeError("Expected json_file to be a string or dict.")
         if not isinstance(nml_file, str):
-            raise TypeError(
-                f"Expected nml_file to be a string, but got {type(nml_file).__name__}."
-            )
+            raise TypeError("Expected nml_file to be a string.")
 
         self.json_file = json_file
         self.nml_file = nml_file
 
     def read_json(self):
-        """Reads the json file and returns a dictionary.
+        """Reads the json file and returns a dictionary or returns
+        a dict from the object attributes.
 
         Reads a json file of GLM configuration blocks and returns a dictionary.
 
@@ -49,9 +50,15 @@ class JSONToNML:
         >>> json_to_nml = JSONToNML("sparkling_lake.json")
         >>> json_to_nml.read_json()
         """
-        with open(self.json_file) as file:
-            json_data = json.load(file)
-        return json_data
+        if isinstance(self.json_file, str) or isinstance(
+            self.json_file, os.PathLike
+        ):
+            with open(self.json_file) as file:
+                json_data = json.load(file)
+            return json_data
+        else:
+            # here, we assume that json_file is in memory
+            return self.json_file
 
     def get_nml_blocks(self):
         """Reads a json file of GLM configuration blocks and returns a list of
