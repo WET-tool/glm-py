@@ -1,5 +1,5 @@
 import pytest
-from glmpy.json import JSONToNML
+from glmpy.glm_json import JSONToNML
 
 
 def test_json_to_nml_invalid_json_file():

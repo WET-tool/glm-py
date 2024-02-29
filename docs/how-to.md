@@ -150,7 +150,7 @@ Consider the following JSON file:
 First, import the `JSONToNML` class:
 
 ```python
-from glmpy import JSONToNML
+from glmpy import glm_json.JSONToNML as JSONToNML
 ```
 
 Then, create an instance of the `JSONToNML` class with the path to the JSON file:
