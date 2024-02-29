@@ -3,7 +3,8 @@ import os
 
 
 class JSONToNML:
-    """Supports the reading of GLM configuration blocks in a json format.
+    """Supports the reading of GLM configuration blocks in a json format or
+    working with GLM configuration blocks in dict format.
 
     Reads and parses a json file into a dictionary object which can be
     used to set the attributes of the corresponding NML class. Useful for
@@ -61,8 +62,8 @@ class JSONToNML:
             return self.json_file
 
     def get_nml_blocks(self):
-        """Reads a json file of GLM configuration blocks and returns a list of
-        the block names.
+        """Reads a json file or dict of GLM configuration blocks and
+        returns a list of the block names.
 
         Parameters
         ----------
