@@ -26,7 +26,7 @@ class JSONToNML:
     def __init__(
         self, json_file: str | os.PathLike, nml_file: str = "sim.nml"
     ):
-        if not isinstance(json_file, str) or not isinstance(json_file, dict):
+        if not isinstance(json_file, str) and not isinstance(json_file, dict):
             raise TypeError("Expected json_file to be a string or dict.")
         if not isinstance(nml_file, str):
             raise TypeError("Expected nml_file to be a string.")
