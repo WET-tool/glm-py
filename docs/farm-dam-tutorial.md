@@ -186,7 +186,7 @@ meteorology = nml.NMLMeteorology(
 
 ### Catchment inflows
 
-Let's now return to the large catchment mentioned at the beginning of this tutorial. During a rainfall event, this catchment captures additional inputs from beyond the spatial extent of the dam. This can be accounted for by configuring the `&inflows` component of the `.nml`. Catchment inflows are a function of the catchment area, rainfall, and a runoff threshold. The `NMLInflows` class expects a CSV with inflows pre-calculated for each day of the simulation. We'll use some of the additional functionality in `glmpy` to calculate this timeseries.
+Let's now return to the large catchment mentioned at the beginning of this tutorial. During a rainfall event, this catchment captures additional inputs from beyond the spatial extent of the dam. This can be accounted for by configuring the `&inflow` component of the `.nml`. Catchment inflows are a function of the catchment area, rainfall, and a runoff threshold. The `NMLInflow` class expects a CSV with inflows pre-calculated for each day of the simulation. We'll use some of the additional functionality in `glmpy` to calculate this timeseries.
 
 Start by importing the `inflows` module:
 

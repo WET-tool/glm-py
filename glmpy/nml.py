@@ -38,12 +38,12 @@ class NML:
     bird_model : Union[str, None]
         String representation of the `&bird_model` component of the .nml file.
         See `NMLBirdModel`. Default is None.
-    inflows : Union[str, None]
-        String representation of the `&inflows` component of the .nml file.
-        See `NMLInflows`. Default is None.
-    outflows : Union[str, None]
-        String representation of the `&outflows` component of the .nml file.
-        See `NMLOutflows`. Default is None.
+    inflow : Union[str, None]
+        String representation of the `&inflow` component of the .nml file.
+        See `NMLInflow`. Default is None.
+    outflow : Union[str, None]
+        String representation of the `&outflow` component of the .nml file.
+        See `NMLOutflow`. Default is None.
     sediment : Union[str, None]
         String representation of the `&sediment` component of the .nml file.
         See `NMLSediment`. Default is None.
@@ -96,8 +96,8 @@ class NML:
         meteorology: Union[str, None] = None,
         light: Union[str, None] = None,
         bird_model: Union[str, None] = None,
-        inflows: Union[str, None] = None,
-        outflows: Union[str, None] = None,
+        inflow: Union[str, None] = None,
+        outflow: Union[str, None] = None,
         sediment: Union[str, None] = None,
         ice_snow: Union[str, None] = None,
         wq_setup: Union[str, None] = None,
@@ -111,8 +111,8 @@ class NML:
         self.meteorology = meteorology
         self.light = light
         self.bird_model = bird_model
-        self.inflows = inflows
-        self.outflows = outflows
+        self.inflow = inflow
+        self.outflow = outflow
         self.sediment = sediment
         self.ice_snow = ice_snow
         self.wq_setup = wq_setup
@@ -174,10 +174,10 @@ class NML:
                 config_string += str(self.ice_snow) + "\n"
             if self.meteorology is not None:
                 config_string += str(self.meteorology) + "\n"
-            if self.inflows is not None:
-                config_string += str(self.inflows) + "\n"
-            if self.outflows is not None:
-                config_string += str(self.outflows) + "\n"
+            if self.inflow is not None:
+                config_string += str(self.inflow) + "\n"
+            if self.outflow is not None:
+                config_string += str(self.outflow) + "\n"
             return config_string
 
         with open(file=nml_file_path, mode="w") as file:
@@ -1678,7 +1678,7 @@ class NMLBirdModel(NMLBase):
         )
 
 
-class NMLInflows(NMLBase):
+class NMLInflow(NMLBase):
     """Define the `&inflow` block of a GLM model.
 
     Used to configure the number/type of water inflows. Attributes are set
@@ -1721,9 +1721,9 @@ class NMLInflows(NMLBase):
 
     Examples
     --------
-    >>> from glmpy import NMLInflows
-    >>> inflows = NMLInflows()
-    >>> my_inflows = {
+    >>> from glmpy import NMLInflow
+    >>> inflow = NMLInflow()
+    >>> my_inflow = {
     >>>     'num_inflows': 6,
     >>>     'names_of_strms': ['Inflow1','Inflow2','Inflow3','Inflow4','Inflow5','Inflow6'],
     >>>     'subm_flag': [False, False, False, True, False, False],
@@ -1737,8 +1737,8 @@ class NMLInflows(NMLBase):
     >>>     'coef_inf_entrain': [0.0],
     >>>     'time_fmt': 'YYYY-MM-DD hh:mm:ss'
     >>> }
-    >>> inflows.set_attributes(my_inflows)
-    >>> print(inflows)
+    >>> inflow.set_attributes(my_inflow)
+    >>> print(inflow)
     """
 
     def __init__(
@@ -1770,20 +1770,20 @@ class NMLInflows(NMLBase):
         self.time_fmt = time_fmt
 
     def __str__(self):
-        """Return the string representation of the `NMLInflows` object.
+        """Return the string representation of the `NMLInflow` object.
 
-        Returns a `.nml` formatted string of the `NMLInflows` attributes.
+        Returns a `.nml` formatted string of the `NMLInflow` attributes.
 
         Returns
         -------
         str
-            String representation of the `NMLInflows` object.
+            String representation of the `NMLInflow` object.
 
         Examples
         --------
-        >>> from glmpy import NMLInflows
-        >>> inflows = NMLInflows()
-        >>> my_inflows = {
+        >>> from glmpy import NMLInflow
+        >>> inflow = NMLInflow()
+        >>> my_inflow = {
         >>>     'num_inflows': 6,
         >>>     'names_of_strms': ['Inflow1','Inflow2','Inflow3','Inflow4','Inflow5','Inflow6'],
         >>>     'subm_flag': [False, False, False, True, False, False],
@@ -1797,8 +1797,8 @@ class NMLInflows(NMLBase):
         >>>     'coef_inf_entrain': [0.0],
         >>>     'time_fmt': 'YYYY-MM-DD hh:mm:ss'
         >>> }
-        >>> inflows.set_attributes(my_inflows)
-        >>> print(inflows)
+        >>> inflow.set_attributes(my_inflow)
+        >>> print(inflow)
         """
         params = [
             (f"   num_inflows = {self.num_inflows}", self.num_inflows),
@@ -1842,7 +1842,7 @@ class NMLInflows(NMLBase):
             (f"   time_fmt = '{self.time_fmt}'", self.time_fmt),
         ]
         return (
-            "&inflows \n"
+            "&inflow \n"
             + "\n".join(
                 param_str
                 for param_str, param_val in params
@@ -1852,7 +1852,7 @@ class NMLInflows(NMLBase):
         )
 
 
-class NMLOutflows(NMLBase):
+class NMLOutflow(NMLBase):
     """Define the `&outflow` block of a GLM model.
 
     Used to configure the number/type of water outflows. Attributes are set
@@ -1903,9 +1903,9 @@ class NMLOutflows(NMLBase):
 
     Examples
     --------
-    >>> from glmpy import NMLOutflows
-    >>> outflows = NMLOutflows()
-    >>> my_outflows = {
+    >>> from glmpy import NMLOutflow
+    >>> outflow = NMLOutflow()
+    >>> my_outflow = {
     >>>     'num_outlet': 1,
     >>>     'flt_off_sw': [False],
     >>>     'outlet_type': 1,
@@ -1917,8 +1917,8 @@ class NMLOutflows(NMLBase):
     >>>     'seepage': True,
     >>>     'seepage_rate': 0.01
     >>> }
-    >>> outflows.set_attributes(my_outflows)
-    >>> print(outflows)
+    >>> outflow.set_attributes(my_outflow)
+    >>> print(outflow)
     """
 
     def __init__(
@@ -1956,20 +1956,20 @@ class NMLOutflows(NMLBase):
         self.crest_factor = crest_factor
 
     def __str__(self):
-        """Return the string representation of the `NMLOutflows` object.
+        """Return the string representation of the `NMLOutflow` object.
 
-        Returns a `.nml` formatted string of the `NMLOutflows` attributes.
+        Returns a `.nml` formatted string of the `NMLOutflow` attributes.
 
         Returns
         -------
         str
-            String representation of the `NMLOutflows` object.
+            String representation of the `NMLOutflow` object.
 
         Examples
         --------
-        >>> from glmpy import NMLOutflows
-        >>> outflows = NMLOutflows()
-        >>> my_outflows = {
+        >>> from glmpy import NMLOutflow
+        >>> outflow = NMLOutflow()
+        >>> my_outflow = {
         >>>     'num_outlet': 1,
         >>>     'flt_off_sw': [False],
         >>>     'outlet_type': 1,
@@ -1981,8 +1981,8 @@ class NMLOutflows(NMLBase):
         >>>     'seepage': True,
         >>>     'seepage_rate': 0.01
         >>> }
-        >>> outflows.set_attributes(my_outflows)
-        >>> print(outflows)
+        >>> outflow.set_attributes(my_outflow)
+        >>> print(outflow)
         """
         params = [
             (f"   num_outlet = {self.num_outlet}", self.num_outlet),
@@ -2026,7 +2026,7 @@ class NMLOutflows(NMLBase):
             (f"   crest_factor = {self.crest_factor}", self.crest_factor),
         ]
         return (
-            "&outflows \n"
+            "&outflow \n"
             + "\n".join(
                 param_str
                 for param_str, param_val in params

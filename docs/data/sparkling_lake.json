@@ -112,7 +112,7 @@
     "Benthic_Imin": 10,
     "Kw": 0.331
   },
-  "&inflows": {
+  "&inflow": {
     "num_inflows": 0,
     "names_of_strms": ["Riv1", "Riv2"],
     "subm_flag": [false],
@@ -124,7 +124,7 @@
     "inflow_varnum": 4,
     "inflow_vars": ["FLOW", "TEMP", "SALT", "OXY_oxy", "SIL_rsi", "NIT_amm", "NIT_nit", "PHS_frp", "OGM_don", "OGM_pon", "OGM_dop", "OGM_pop", "OGM_doc", "OGM_poc", "PHY_green", "PHY_crypto", "PHY_diatom"]
   },
-  "&outflows": {
+  "&outflow": {
     "num_outlet": 0,
     "flt_off_sw": [false],
     "outl_elvs": [1],
