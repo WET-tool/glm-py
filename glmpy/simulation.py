@@ -117,6 +117,28 @@ class GlmSim:
 
         return self.inputs_dir
 
+    @staticmethod
+    def bundled_glm_path() -> Union[str, None]:
+        """Path of the bundled GLM executable.
+
+        Returns the path of the internally bundled GLM executable. If the 
+        executable does not exist in the expected path, `bundled_glm_path()` 
+        returns `None`.
+        """
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+        if os.name == 'nt':
+            exe_name = 'glm'
+        else:
+            exe_name = "glm"
+        
+        exe_path = os.path.join(base_path, "bin", exe_name)
+
+        if os.path.isfile(exe_path):
+            return exe_path
+        else:
+            return None
+
     def glm_run(
             self,
             inputs_dir: str,
@@ -135,16 +157,19 @@ class GlmSim:
         """
         if glm_path is None:
 
-            base_path = os.path.dirname(os.path.abspath(__file__))
+            glm_path = self.bundled_glm_path()
 
-            if os.name == 'nt':
-                exe_name = "glm.exe"
-            else:
-                exe_name = "glm"
-
-            exe_path = os.path.join(base_path, "bin", exe_name)
-            glm_path = exe_path
-            print(glm_path)
+            if glm_path is None:
+                expected_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), 'bin'
+                )
+                raise Exception(
+                    "The GLM binary was not found in the expected path: "
+                    f"{expected_path}"
+                    "\n If you have installed the source distribution of glmpy"
+                    ", a GLM binary is not included. Provide the path to an "
+                    "external GLM binary using the glm_path parameter."
+                )
 
         nml_file = str(os.path.join(inputs_dir, "glm3.nml"))
         run_command = f'{glm_path} --nml "{nml_file}"'
