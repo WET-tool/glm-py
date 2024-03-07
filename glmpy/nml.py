@@ -697,6 +697,49 @@ class NMLBase:
  
 
 class NMLGLMSetup(NMLBase):
+    """Construct the `&glm_setup` model parameters.
+
+    The `&glm_setup` parameters define the vertical series of layers that GLM 
+    resolves when modelling a water body. `NMLGLMSetup` provides the means to
+    constuct a dictionary containing these parameters for use in the `nml.NML`
+    class. Model parameters are set as attributes upon initialising an instance
+    of the class or using the `set_attributes()` method. Class instances are 
+    callable and return the dictionary of parameters
+
+    Attributes
+    ----------
+    sim_name : Union[str, None]
+        Title of simulation. Default is None.
+    max_layers : Union[int, None]
+        Maximum number of layers. Default is None.
+    min_layer_vol : Union[float, None]
+        Minimum layer volume. Default is None.
+    min_layer_thick : Union[float, None]
+        Minimum thickness of a layer (m). Default is None.
+    max_layer_thick : Union[float, None]
+        Maximum thickness of a layer (m). Default is None.
+    density_model : Union[int, None]
+        Switch to set the density equation. Default is None.
+    non_avg : Union[bool, None]
+        Switch to configure flow boundary condition temporal interpolation.
+        Default is None.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> glm_setup_attrs = {
+    ...     "sim_name": "Example Simulation #1",
+    ...     "max_layers": 500,
+    ...     "min_layer_thick": 0.15,
+    ...     "max_layer_thick": 1.50,
+    ...     "min_layer_vol": 0.025,
+    ...     "density_model": 1,
+    ...     "non_avg": False
+    ... }
+    >>> glm_setup = nml.NMLGLMSetup()
+    >>> glm_setup.set_attributes(glm_setup_attrs)
+    >>> print(glm_setup())
+    """
     def __init__(
         self,
         sim_name: Union[str, None] = None,
