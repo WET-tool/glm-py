@@ -81,7 +81,15 @@ class NML:
 
     @staticmethod
     def _nml_bool(python_bool: bool) -> str:
-        """Convert a python boolean to a string representation of a fortran boolean.
+        """Python boolean to Fortran boolean.
+
+        Convert a Python boolean to a string representation of a Fortran 
+        boolean. For internal `nml.NML` use in generating `.nml` files.
+
+        Parameters
+        ----------
+        python_bool : bool
+            A Python boolean
         """
         if python_bool is True:
             return '.true.'
@@ -90,6 +98,16 @@ class NML:
 
     @staticmethod    
     def _nml_str(python_str: str) -> str:
+        """Python string to Fortran string.
+
+        Convert a Python string to a Fortran string by adding inverted commas.
+        For internal `nml.NML` use in generating `.nml` files.
+
+        Parameters
+        ----------
+        python_str : str
+            A Python string
+        """
         return f"'{python_str}'"
 
     @staticmethod
