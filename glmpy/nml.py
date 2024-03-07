@@ -1,4 +1,5 @@
 from typing import Union, List, Any, Callable
+import warnings
 
 class NML:
     """Generate .nml files.
@@ -21,7 +22,7 @@ class NML:
         sediment: Union[dict, None] = None,
         snow_ice: Union[dict, None] = None,
         wq_setup: Union[dict, None] = None,  
-        error_checking: bool = True      
+        check_errors: bool = True      
     ):
         self.glm_setup = glm_setup
         self.mixing = mixing
@@ -38,8 +39,8 @@ class NML:
         self.snow_ice = snow_ice
         self.wq_setup = wq_setup
 
-        if error_checking:
-            pass
+        if check_errors:
+            warnings.warn
 
     def write_nml(self, nml_file_path: str = "glm3.nml"):
         
@@ -115,6 +116,20 @@ class NML:
             python_list: List[Any], 
             syntax_func: Union[Callable, None] = None
         ) -> str:
+        """Python list to comma-separated list.
+
+        Convert a Python list to a comma-separated list. A function can be 
+        optionally passed to the `syntax_func` parameter to format the syntax 
+        of each list item, e.g., `_nml_str()` and `_nml_bool()`. For internal 
+        `nml.NML` use in generating `.nml` files.
+
+        Parameters
+        ----------
+        python_list : List[Any]
+            A Python list
+        syntax_func: Union[Callable, None] = None
+            A function used to format each list item 
+        """
         if len(python_list) == 1:
             if syntax_func is not None:
                 return syntax_func(python_list[0])
@@ -132,8 +147,16 @@ class NML:
         python_list: List[Any], 
         func: Union[Callable, None] = None
     ) -> str:
-        """A wrapper function to process lists with a given nml syntax 
-        conversion function.
+        """Wrap `_nml_list()`
+
+        A wrapper function to process lists with a given nml syntax 
+        conversion function. For internal `nml.NML` use in generating `.nml` 
+        files.
+
+        python_list : List[Any]
+            A Python list
+        func: Union[Callable, None] = None
+            A function used to format each list item 
         """
         return self._nml_list(python_list, syntax_func=func)
 
@@ -143,6 +166,8 @@ class NML:
         param:str, 
         syntax_func: Union[Callable, None] = None
     ) -> str:
+        """
+        """
         if block[param] is not None:
             if syntax_func is not None:
                 return f"   {param} = {syntax_func(block[param])}\n"
