@@ -147,12 +147,14 @@ class NML:
         python_list: List[Any], 
         func: Union[Callable, None] = None
     ) -> str:
-        """Wrap `_nml_list()`
+        """Wrap `_nml_list()`.
 
         A wrapper function to process lists with a given nml syntax 
         conversion function. For internal `nml.NML` use in generating `.nml` 
         files.
 
+        Parameters
+        ----------
         python_list : List[Any]
             A Python list
         func: Union[Callable, None] = None
@@ -162,21 +164,40 @@ class NML:
 
     @staticmethod
     def _nml_param_val(
-        block: dict, 
-        param:str, 
+        param_dict: dict, 
+        param: str, 
         syntax_func: Union[Callable, None] = None
     ) -> str:
+        """GLM parameter/value string.
+
+        Construct a string containing a GLM parameter and value with the 
+        correct`.nml` syntax formatting. For internal `nml.NML` use in 
+        generating `.nml` files.
+
+        Parameters
+        ----------
+        param_dict: dict
+            A dictionary containing GLM parameters (keys) and values, e.g.,
+            from the `__call__()` method of a `nml.NMLGLMSetup` instance.
+        param: str
+            The dictionary key, i.e., GLM parameter, to construct the string
+            for.
+        syntax_func: Union[Callable, None] = None
+            A function used to format the syntax of the value.
         """
-        """
-        if block[param] is not None:
+        if param_dict[param] is not None:
             if syntax_func is not None:
-                return f"   {param} = {syntax_func(block[param])}\n"
+                return f"   {param} = {syntax_func(param_dict[param])}\n"
             else:
-                return f"   {param} = {block[param]}\n"
+                return f"   {param} = {param_dict[param]}\n"
         else:
             return ""
     
     def _write_nml_glm_setup(self, glm_setup: dict) -> str:
+        """
+        Construct a string of the `&glm_setup` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         glm_setup_str = (
             "&glm_setup\n" +
             self._nml_param_val(glm_setup, "sim_name", self._nml_str) +
@@ -192,6 +213,10 @@ class NML:
         return glm_setup_str
     
     def _write_nml_mixing(self, mixing: dict) -> str:
+        """
+        Construct a string of the `&mixing` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         mixing_str = (
             "&mixing\n" +
             self._nml_param_val(mixing, "surface_mixing") +
@@ -209,6 +234,10 @@ class NML:
         return mixing_str
 
     def _write_nml_wq_setup(self, wq_setup: dict) -> str:
+        """
+        Construct a string of the `&wq_setup` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         wq_setup_str = (
             "&wq_setup\n" +
             self._nml_param_val(wq_setup, "wq_lib", self._nml_str) +
@@ -226,6 +255,10 @@ class NML:
         return wq_setup_str
     
     def _write_nml_morphometry(self, morphometry: dict) -> str:
+        """
+        Construct a string of the `&morphometry` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         morphometry_str = (
             "&morphometry\n" +
             self._nml_param_val(morphometry, "lake_name", self._nml_str) +
@@ -248,6 +281,10 @@ class NML:
         return morphometry_str
 
     def _write_nml_time(self, time: dict) -> str:
+        """
+        Construct a string of the `&time` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         time_str = (
             "&time\n" +
             self._nml_param_val(time, "timefmt") +
@@ -262,6 +299,10 @@ class NML:
         return time_str
 
     def _write_nml_output(self, output: dict) -> str:
+        """
+        Construct a string of the `&output` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         output_str = (
             "&output\n" +
             self._nml_param_val(output, "out_dir", self._nml_str) +
@@ -301,6 +342,10 @@ class NML:
         return output_str
 
     def _write_nml_init_profiles(self, init_profiles: dict) -> str:
+        """
+        Construct a string of the `&init_profiles` model configuration block.
+        For internal `nml.NML` use in generating `.nml` files.
+        """
         init_profiles_str = (
             "&init_profiles\n" +
             self._nml_param_val(init_profiles, "lake_depth") +
@@ -335,6 +380,10 @@ class NML:
         return init_profiles_str
 
     def _write_nml_light(self, light: dict) -> str:
+        """
+        Construct a string of the `&light` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         light_str = (
             "&light\n" +
             self._nml_param_val(light, "light_mode") +
@@ -354,6 +403,10 @@ class NML:
         return light_str
     
     def _write_nml_bird_model(self, bird_model: dict) -> str:
+        """
+        Construct a string of the `&bird_model` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         bird_model_str = (
             "&bird_model\n" +
             self._nml_param_val(bird_model, "AP") +
@@ -368,6 +421,10 @@ class NML:
         return bird_model_str    
     
     def _write_nml_sediment(self, sediment: dict) -> str:
+        """
+        Construct a string of the `&sediment` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         sediment_str = (
             "&sediment\n" +
             self._nml_param_val(sediment, "sed_heat_Ksoil") +
@@ -408,6 +465,10 @@ class NML:
         return sediment_str
 
     def _write_nml_snow_ice(self, snow_ice: dict) -> str:
+        """
+        Construct a string of the `&snowice` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         snow_ice_str = (
             "&snowice\n" +
             self._nml_param_val(snow_ice, "snow_albedo_factor") +
@@ -419,6 +480,10 @@ class NML:
         return snow_ice_str
 
     def _write_nml_meteorology(self, meteorology: dict) -> str:
+        """
+        Construct a string of the `&meteorology` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         meteorology_str = (
             "&meteorology\n" +
             self._nml_param_val(meteorology, "met_sw", self._nml_bool) +
@@ -455,6 +520,10 @@ class NML:
         return meteorology_str
 
     def _write_nml_inflow(self, inflow: dict) -> str:
+        """
+        Construct a string of the `&inflow` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         inflow_str = (
             "&inflow\n" +
             self._nml_param_val(inflow, "num_inflows") +
@@ -501,6 +570,10 @@ class NML:
         return inflow_str
 
     def _write_nml_outflow(self, outflow: dict) -> str:
+        """
+        Construct a string of the `&outflow` model configuration block. For 
+        internal `nml.NML` use in generating `.nml` files.
+        """
         outflow_str = (
             "&outflow\n" +
             self._nml_param_val(outflow, "num_outlet")+
@@ -559,7 +632,37 @@ class NML:
         return outflow_str
 
 class NMLBase:
+    """
+    Base class for all `nml.NML*` classes.
+    """
     def set_attributes(self, attrs_dict: dict):
+        """Set attributes for an instance of a `nml.NML*` class.
+        
+        Set attributes using a dictionary of model parameters for `nml.NML*` 
+        classes, e.g., `nml.NMLGLMSetup`, `nml.NMLMixing`, 
+        `nml.NMLWQSetup`.
+
+        Parameters
+        ----------
+        attrs_dict: dict
+            A dictionary of GLM parameters to set the respective attributes in 
+            a `nml.NML*` class instance.
+
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> glm_setup_attrs = {
+        ...     "sim_name": "Example Simulation #1",
+        ...     "max_layers": 500,
+        ...     "min_layer_thick": 0.15,
+        ...     "max_layer_thick": 1.50,
+        ...     "min_layer_vol": 0.025,
+        ...     "density_model": 1,
+        ...     "non_avg": False
+        ... }
+        >>> glm_setup = nml.NMLGLMSetup()
+        >>> glm_setup.set_attributes(glm_setup_attrs)
+        """
         for key, value in attrs_dict.items():
             setattr(self, key, value)
 
@@ -567,18 +670,24 @@ class NMLBase:
             self, 
             value: Any
         ) -> List[Any]:
-        """Convert a single value to a list
+        """Convert a single value to a list.
 
-        Many GLM parameters expect a comma separated list of values, e.g., a 
+        Many GLM parameters expect a comma-separated list of values, e.g., a 
         list of floats, a list of integers, or a list of strings. Often this
         list may only contain a single value. Consider the `csv_point_vars` 
-        attribute of `NMLOutput()`. Here GLM expects a comma separated list of 
+        attribute of `NMLOutput()`. Here GLM expects a comma-separated list of 
         variable names. `glmpy` needs to convert lists such as 
         `['temp', 'salt']` and `['temp']` to `"'temp', 'salt'"` and `"'temp'"`,
         respectively. When setting attributes of `NMLOutput()`, 
         `csv_point_vars='temp'` is preferrable to `csv_point_vars=['temp']`. 
         The `_single_value_to_list` method will convert the value to a python 
-        list providing it is not `None`. 
+        list providing it is not `None`. For internal use in `nml.NML*` 
+        classes.
+
+        Parameters
+        ----------
+        value: Any
+            The value to convert to a list.
         """
         if not isinstance(value, list) and value is not None:
             list_value = [value]
