@@ -40,7 +40,7 @@ class NML:
         self.wq_setup = wq_setup
 
         if check_errors:
-            warnings.warn
+            pass
 
     def write_nml(self, nml_file_path: str = "glm3.nml"):
         
@@ -127,8 +127,8 @@ class NML:
         ----------
         python_list : List[Any]
             A Python list
-        syntax_func: Union[Callable, None] = None
-            A function used to format each list item 
+        syntax_func: Union[Callable, None], optional
+            A function used to format each list item. Default is `None`.
         """
         if len(python_list) == 1:
             if syntax_func is not None:
@@ -157,8 +157,8 @@ class NML:
         ----------
         python_list : List[Any]
             A Python list
-        func: Union[Callable, None] = None
-            A function used to format each list item 
+        func: Union[Callable, None], optional
+            A function used to format each list item. Default is `None`.
         """
         return self._nml_list(python_list, syntax_func=func)
 
@@ -182,8 +182,9 @@ class NML:
         param: str
             The dictionary key, i.e., GLM parameter, to construct the string
             for.
-        syntax_func: Union[Callable, None] = None
-            A function used to format the syntax of the value.
+        syntax_func: Union[Callable, None], optional
+            A function used to format the syntax of the value. Default is 
+            `None`.
         """
         if param_dict[param] is not None:
             if syntax_func is not None:
@@ -704,31 +705,36 @@ class NMLGLMSetup(NMLBase):
     constuct a dictionary containing these parameters for use in the `nml.NML`
     class. Model parameters are set as attributes upon initialising an instance
     of the class or using the `set_attributes()` method. Class instances are 
-    callable and return the dictionary of parameters
+    callable and return the dictionary of parameters.
 
     Attributes
     ----------
     sim_name : Union[str, None]
-        Title of simulation. Default is None.
+        Title of simulation. Default is `None`.
     max_layers : Union[int, None]
-        Maximum number of layers. Default is None.
+        Maximum number of layers. Default is `None`.
     min_layer_vol : Union[float, None]
-        Minimum layer volume. Default is None.
+        Minimum layer volume (m^3). Default is `None`.
     min_layer_thick : Union[float, None]
-        Minimum thickness of a layer (m). Default is None.
+        Minimum thickness of a layer (m). Default is `None`.
     max_layer_thick : Union[float, None]
-        Maximum thickness of a layer (m). Default is None.
+        Maximum thickness of a layer (m). Default is `None`.
     density_model : Union[int, None]
-        Switch to set the density equation. Default is None.
+        Switch to set the density equation. Options are `1` for TEOS-10, `2` 
+        for UNESCO(1981), and `3` for a custom implementation. Default is 
+        `None`.
     non_avg : Union[bool, None]
         Switch to configure flow boundary condition temporal interpolation.
-        Default is None.
+        Default is `None`.
     
     Examples
     --------
     >>> from glmpy import nml
+    >>> glm_setup = nml.NMLGLMSetup(
+    ...     sim_name="Example Simulation #1",
+    ...     max_layers=250
+    ... )
     >>> glm_setup_attrs = {
-    ...     "sim_name": "Example Simulation #1",
     ...     "max_layers": 500,
     ...     "min_layer_thick": 0.15,
     ...     "max_layer_thick": 1.50,
@@ -736,9 +742,7 @@ class NMLGLMSetup(NMLBase):
     ...     "density_model": 1,
     ...     "non_avg": False
     ... }
-    >>> glm_setup = nml.NMLGLMSetup()
     >>> glm_setup.set_attributes(glm_setup_attrs)
-    >>> print(glm_setup())
     """
     def __init__(
         self,
@@ -762,6 +766,44 @@ class NMLGLMSetup(NMLBase):
         self, 
         check_errors: bool = True
     ) -> dict[str, Union[float, int, str, bool, None]]:
+        """Consolidate the `&glm_setup` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, bool, None]]
+            A dictionary containing the `&glm_setup` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> glm_setup = NMLGLMSetup(
+        ...     sim_name="Example Simulation #1", 
+        ...     max_layers=100
+        ... )
+        >>> print(glm_setup(check_errors=False))
+        {
+            'sim_name': 'Example Simulation #1', 
+            'max_layers': 100, 
+            'min_layer_vol': None, 
+            'min_layer_thick': None, 
+            'max_layer_thick': None, 
+            'density_model': None, 
+            'non_avg': None
+        }
+        """
         if check_errors:
             pass
 
@@ -778,6 +820,60 @@ class NMLGLMSetup(NMLBase):
         return glm_setup_dict
 
 class NMLMixing(NMLBase):
+    """Construct the `&mixing` model parameters.
+
+    The `&mixing` parameters define the dynamics of layer mixing in the 
+    modelled water body. `NMLMixing` provides the means to constuct a 
+    dictionary containing these parameters for use in the `nml.NML` class. 
+    Model parameters are set as attributes upon initialising an instance of the
+    class or using the `set_attributes()` method. Class instances are callable 
+    and return the dictionary of parameters.
+
+    Attributes
+    ----------
+
+    surface_mixing : Union[int, None]
+        Switch to select the options of the surface mixing model. Options are 
+        `0` for no surface mixing, `1`, and `2`. Default is `None`.
+    coef_mix_conv : Union[float, None]
+        Mixing efficiency - convective overturn. Default is `None`.
+    coef_wind_stir : Union[float, None]
+        Mixing efficiency - wind stirring. Default is `None`.
+    coef_mix_shear : Union[float, None]
+        Mixing efficiency - shear production. Default is `None`.
+    coef_mix_turb : Union[float, None]
+        Mixing efficiency - unsteady turbulence effects. Default is `None`.
+    coef_mix_KH : Union[float, None]
+        Mixing efficiency - Kelvin-Helmholtz billowing. Default is `None`.
+    deep_mixing : Union[int, None]
+        Switch to select the options of the deep (hypolimnetic) mixing model.
+        Options are `0` for no deep mixing, `1` for constant diffusivity, and 
+        `2` for the Weinstock model. Default is `None`.
+    coef_mix_hyp : Union[float, None]
+        Mixing efficiency - hypolimnetic turbulence. Default is `None`.
+    diff : Union[float, None]
+        Background (molecular) diffusivity in the hypolimnion. Default is 
+        `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> mixing = nml.NMLMixing(
+    ...     surface_mixing=1,
+    ...     coef_mix_conv=0.1,
+    ... )
+    >>> mixing_attrs = {
+    ...     "coef_mix_conv": 0.125,
+    ...     "coef_wind_stir": 0.23,
+    ...     "coef_mix_shear":0.2,
+    ...     "coef_mix_turb": 0.51,
+    ...     "coef_mix_KH": 0.3,
+    ...     "deep_mixing": 2,
+    ...     "coef_mix_hyp": 0.5,
+    ...     "diff": 0.0
+    ... }
+    >>> mixing.set_attributes(mixing_attrs)
+    """
     def __init__(
         self,
         surface_mixing: Union[int, None] = None,
@@ -804,6 +900,46 @@ class NMLMixing(NMLBase):
         self, 
         check_errors: bool = True
     ) -> dict[str, Union[float, int, None]]:
+        """Consolidate the `&mixing` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, None]]
+            A dictionary containing the `&mixing` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> mixing = nml.NMLMixing(
+        ...     surface_mixing=1,
+        ...     coef_mix_conv=0.1,
+        ... )
+        >>> print(mixing(check_errors=False))
+        {
+            'surface_mixing': 1, 
+            'coef_mix_conv': 0.1, 
+            'coef_wind_stir': None, 
+            'coef_mix_shear': None, 
+            'coef_mix_turb': None, 
+            'coef_mix_KH': None, 
+            'deep_mixing': None, 
+            'coef_mix_hyp': None, 
+            'diff': None
+        }
+        """
         if check_errors:
             pass
 
@@ -822,6 +958,54 @@ class NMLMixing(NMLBase):
         return mixing_dict
 
 class NMLWQSetup(NMLBase):
+    """Construct the `&wq_setup` model parameters.
+
+    The `&wq_setup` parameters define the coupling of GLM with water quality 
+    and biogeochemical model libraries, e.g., AED2. `NMLWQSetup` provides the 
+    means to constuct a dictionary containing these parameters for use in the 
+    `nml.NML` class. Model parameters are set as attributes upon initialising 
+    an instance of the class or using the `set_attributes()` method. Class 
+    instances are callable and return the dictionary of parameters.
+    
+    wq_lib : Union[str, None]
+        Water quality model selection. Options are `"aed2"` and `"fabm"`. 
+        Default is `None`.
+    wq_nml_file : Union[str, None]
+        Filename of water quality configuration file, e.g., `"./aed2.nml"`. 
+        Default is `None`.
+    bioshade_feedback : Union[bool, None]
+        Switch to enable K_{w} to be updated by the WQ model. Default is 
+        `None`.
+    mobility_off : Union[bool, None]
+        Switch to enable settling within the WQ model. Default is `None`.
+    ode_method : Union[int, None]
+        Method to use for ODE solution of water quality module. Default is
+        `None`.
+    split_factor : Union[float, None]
+        Factor weighting implicit vs explicit numerical solution of the WQ
+        model. `split_factor` has a valid range between `0.0` and `1.0`. 
+        Default is `None`.
+    repair_state : Union[bool, None]
+        Switch to correct negative or out of range WQ variables. Default is
+        `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> wq_setup = nml.NMLWQSetup(
+    ...     wq_lib="aed2",
+    ...     wq_nml_file = "aed2/aed2.nml"
+    ... )
+    >>> wq_setup_attrs = {
+    ...     "wq_nml_file": "aed2/aed2.nml",
+    ...     "ode_method": 1,
+    ...     "split_factor": 1,
+    ...     "bioshade_feedback": True,
+    ...     "repair_state": True,
+    ...     "mobility_off": False
+    ... }
+    >>> wq_setup.set_attributes(wq_setup_attrs)
+    """
     def __init__(
         self,
         wq_lib: Union[str, None] = None,
@@ -844,6 +1028,44 @@ class NMLWQSetup(NMLBase):
         self, 
         check_errors: bool = True
     ) -> dict[str, Union[float, int, str, bool, None]]:
+        """Consolidate the `&wq_setup` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, bool, None]]
+            A dictionary containing the `&wq_setup` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> wq_setup = nml.NMLWQSetup(
+        ...     wq_lib="aed2",
+        ...     wq_nml_file = "./aed2.nml"
+        ... )
+        >>> print(wq_setup(check_errors=False))
+        {
+            'wq_lib': 'aed2', 
+            'wq_nml_file': './aed2.nml', 
+            'bioshade_feedback': None, 
+            'mobility_off': None, 
+            'ode_method': None, 
+            'split_factor': None, 
+            'repair_state': None
+        }
+        """
         if check_errors:
             pass        
 
@@ -860,6 +1082,78 @@ class NMLWQSetup(NMLBase):
         return wq_setup_dict
 
 class NMLMorphometry(NMLBase):
+    """Construct the `&morphometry` model parameters.
+
+    The `&morphometry` parameters define the physical dimensions and location 
+    of the water body. `NMLMorphometry` provides the means to constuct a 
+    dictionary containing these parameters for use in the `nml.NML` class. 
+    Model parameters are set as attributes upon initialising an instance of the
+    class or using the `set_attributes()` method. Class instances are callable 
+    and return the dictionary of parameters.
+
+    Attributes
+    ----------
+    lake_name : Union[str, None]
+        Site name. Default is `None`.
+    latitude : Union[float, None]
+        Latitude, positive North (°N). Default is `None`.
+    longitude : Union[float, None]
+        Longitude, positive East (°E). Default is `None`.
+    base_elev: Union[float, None]
+        Elevation of the bottom-most point of the lake (m above datum). Default
+        is `None`.
+    crest_elev : Union[float, None]
+        Elevation of a weir crest, where overflow begins (m above datum). 
+        Default is `None`.
+    bsn_len : Union[float, None]
+        Length of the lake basin, at crest height (m). Default is `None`.
+    bsn_wid : Union[float, None]
+        Width of the lake basin, at crest height (m). Default is `None`.
+    bsn_vals : Union[float, None]
+        Number of points being provided to described the hyposgraphic details.
+        Default is `None`.
+    H : Union[List[float], None]
+        Comma-separated list of lake elevations (m above datum). Default is
+        `None`.
+    A : Union[List[float], None]
+        Comma-separated list of lake areas (m^2). Default is `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> morphometry = nml.NMLMorphometry(
+    ...     lake_name='Example Lake',
+    ...     latitude=30.0
+    ... )
+    >>> morphometry_attrs = {
+    ...     "latitude": 32.0,
+    ...     "longitude": 35.0,
+    ...     "base_elev": -252.9,
+    ...     "crest_elev": -203.9,
+    ...     "bsn_len": 21000.0,
+    ...     "bsn_wid": 13000.0,
+    ...     "bsn_vals": 45,
+    ...     "H": [
+    ...         -252.9, -251.9, -250.9, -249.9, -248.9, -247.9, -246.9, -245.9, 
+    ...         -244.9, -243.9, -242.9, -241.9, -240.9, -239.9, -238.9, -237.9, 
+    ...         -236.9, -235.9, -234.9, -233.9, -232.9, -231.9, -230.9, -229.9,  
+    ...         -228.9, -227.9, -226.9, -225.9, -224.9, -223.9, -222.9, -221.9,  
+    ...         -220.9, -219.9, -218.9, -217.9, -216.9, -215.9, -214.9, -213.9,  
+    ...         -212.9, -211.9, -208.9, -207.9, -203.9
+    ...     ],
+    ...     "A": [
+    ...         0, 9250000, 15200000, 17875000, 21975000, 26625000, 31700000, 
+    ...         33950000, 38250000, 41100000, 46800000, 51675000, 55725000, 
+    ...         60200000, 64675000, 69600000, 74475000, 79850000, 85400000, 
+    ...         90975000, 96400000, 102000000, 107000000, 113000000, 118000000, 
+    ...         123000000, 128000000, 132000000, 136000000, 139000000, 
+    ...         143000000, 146000000, 148000000, 150000000, 151000000, 
+    ...         153000000, 155000000, 157000000, 158000000, 160000000, 
+    ...         161000000, 162000000, 167000000, 170000000, 173000000
+    ...     ]
+    ... }
+    >>> morphometry.set_attributes(morphometry_attrs)
+    """
     def __init__(
         self,
         lake_name: Union[str, None] = None,
@@ -888,6 +1182,47 @@ class NMLMorphometry(NMLBase):
         self, 
         check_errors: bool = True
     ) -> dict[str, Union[float, str, List[float], None]]:
+        """Consolidate the `&morphometry` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, bool, None]]
+            A dictionary containing the `&morphometry` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> morphometry = nml.NMLMorphometry(
+        ...     lake_name='Example Lake',
+        ...     latitude=30.0
+        ... )
+        >>> print(morphometry(check_errors=False))
+        {
+            'lake_name': 'Example Lake', 
+            'latitude': 30.0, 
+            'longitude': None, 
+            'base_elev': None, 
+            'crest_elev': None, 
+            'bsn_len': None, 
+            'bsn_wid': None, 
+            'bsn_vals': None, 
+            'H': None, 
+            'A': None
+        }
+        """
         if check_errors:
             pass
 
@@ -907,6 +1242,49 @@ class NMLMorphometry(NMLBase):
         return morphometry_dict
 
 class NMLTime(NMLBase):
+    """Construct the `&time` model parameters.
+
+    The `&time` parameters define the duration and timestep of a GLM 
+    simulation. `NMLTime` provides the means to constuct a dictionary 
+    containing these parameters for use in the `nml.NML` class. Model 
+    parameters are set as attributes upon initialising an instance of the class 
+    or using the `set_attributes()` method. Class instances are callable and 
+    return the dictionary of parameters.
+
+    Attributes
+    ----------
+    timefmt : Union[int, None]
+        Time configuration switch. Options are `2` when using `start` and 
+        `stop` parameters or `3` when using `num_days`. Default is `None`.
+    start : Union[str, None]
+        Start time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'. Default
+        is `None`.
+    stop : Union[str, None]
+        End time/date of simulation in format 'yyyy-mm-dd hh:mm:ss'. Used when
+        `timefmt=2`. Default is `None`.
+    dt : Union[float, None]
+        Time step (seconds). Default is `None`
+    num_days : Union[int, None]
+        Number of days to simulate. Used when `timefmt=3`. Default is `None`.
+    timezone : Union[float, None]
+        UTC time zone. Default is `None`.  
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> time = nml.NMLTime(
+    ...     timefmt=3,
+    ...     start="1998-01-01 00:00:00"
+    ... )
+    >>> time_attrs = {
+    ...     "start": "1997-01-01 00:00:00",
+    ...     "stop": "1999-01-01 00:00:00",
+    ...     "dt": 3600.0,
+    ...     "num_days": 730,
+    ...     "timezone": 7.0
+    ... }
+    >>> time.set_attributes(time_attrs)
+    """
     def __init__(
         self,
         timefmt: Union[int, None] = None,
@@ -927,6 +1305,43 @@ class NMLTime(NMLBase):
         self, 
         check_errors: bool = True
     ) -> dict[str, Union[float, int, str, None]]:
+        """Consolidate the `&time` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, None]]
+            A dictionary containing the `&time` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> time = nml.NMLTime(
+        ...     timefmt=3,
+        ...     start="1998-01-01 00:00:00"
+        ... )
+        >>> print(time(check_errors=False))
+        ... {
+        ...     'timefmt': 3, 
+        ...     'start': '1998-01-01 00:00:00', 
+        ...     'stop': None, 
+        ...     'dt': None, 
+        ...     'num_days': None, 
+        ...     'timezone': None
+        ... }
+        """
         if check_errors:
             pass
 
@@ -942,6 +1357,84 @@ class NMLTime(NMLBase):
         return time_dict    
     
 class NMLOutput(NMLBase):
+    """Construct the `&output` model parameters.
+
+    The `&output` parameters define the contents and location of GLM output 
+    files. `NMLOutput` provides the means to constuct a dictionary containing 
+    these parameters for use in the `nml.NML` class. Model parameters are set 
+    as attributes upon initialising an instance of the class or using the 
+    `set_attributes()` method. Class instances are callable and return the 
+    dictionary of parameters.
+
+    Attributes
+    ----------
+    out_dir : Union[str, None]
+        Directory to write the output files. Default is `None`.
+    out_fn : Union[str, None]
+        Filename of the main NetCDF output file. Default is `None`.
+    nsave : Union[int, None]
+        Frequency to write to the NetCDF and CSV point files. Default is 
+        `None`.
+    csv_lake_fname : Union[str, None]
+        Filename for the daily summary file. Default is `None`
+    csv_point_nlevs : Union[float, None]
+        Number of specific level/depth CSV files to be created. Default is
+        `None`.
+    csv_point_fname : Union[str, None]
+        Name to be appended to specified depth CSV files. Default is `None`.
+    csv_point_frombot : Union[List[float], float, None]
+        Comma separated list identify whether each output point listed in
+        csv_point_at is relative to the bottom (i.e., heights) or the surface
+        (i.e., depths). Default is `None`.
+    csv_point_at : Union[List[float], float, None]
+        Height or Depth of points to output at (comma-separated list). Default
+        is `None`.
+    csv_point_nvars : Union[int, None]
+        Number of variables to output into the csv files. Default is `None`.
+    csv_point_vars : Union[List[str], str, None]
+        Comma separated list of variable names. Default is `None`.
+    csv_outlet_allinone : Union[bool, None]
+        Switch to create an optional outlet file combining all outlets. Default
+        is `None`.
+    csv_outlet_fname : Union[str, None]
+        Name to be appended to each of the outlet CSV files. Default is `None`.
+    csv_outlet_nvars : Union[int, None]
+        Number of variables to be written into the outlet file(s). Default is
+        `None`.
+    csv_outlet_vars : Union[List[str], str, None]
+        Comma separated list of variable names to be included in the output
+        file(s). Default is `None`.
+    csv_ovrflw_fname : Union[str, None]
+        Filename to be used for recording the overflow details. Default is
+        `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> output = nml.NMLOutput(
+    ...     out_dir="output",
+    ...     out_fn="output_file"
+    ... )
+    >>> output_attrs = {
+    ...     'out_fn': 'output',
+    ...     'nsave': 6,
+    ...     'csv_lake_fname': 'lake',
+    ...     'csv_point_nlevs': 2,
+    ...     'csv_point_fname': 'WQ_' ,
+    ...     'csv_point_at': [5, 30],    
+    ...     'csv_point_nvars': 7,
+    ...     'csv_point_vars': [
+    ...         'temp', 'salt', 'OXY_oxy', 'SIL_rsi', 
+    ...         'NIT_amm', 'NIT_nit', 'PHS_frp'
+    ...     ],
+    ...     'csv_outlet_allinone': False,
+    ...     'csv_outlet_fname': 'outlet_',
+    ...     'csv_outlet_nvars': 4,
+    ...     'csv_outlet_vars': ['flow', 'temp', 'salt', 'OXY_oxy'],
+    ...     'csv_ovrflw_fname': "overflow"
+    ... }
+    >>> output.set_attributes(output_attrs)
+    """
     def __init__(
         self,
         out_dir: Union[str, None] = None,
@@ -982,6 +1475,52 @@ class NMLOutput(NMLBase):
     ) -> dict[
         str, Union[float, int, str, bool, List[float], List[str], None]
     ]:
+        """Consolidate the `&output` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, bool, List[float], List[str], None]
+            A dictionary containing the `&output` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> output = nml.NMLOutput(
+        ...     out_dir="output",
+        ...     out_fn="output_file"
+        ... )
+        >>> print(output(check_errors=False))
+        {
+            'out_dir': 'output', 
+            'out_fn': 'output_file', 
+            'nsave': None, 
+            'csv_lake_fname': None, 
+            'csv_point_nlevs': None, 
+            'csv_point_fname': None, 
+            'csv_point_frombot': None, 
+            'csv_point_at': None, 
+            'csv_point_nvars': None, 
+            'csv_point_vars': None, 
+            'csv_outlet_allinone': None, 
+            'csv_outlet_fname': None, 
+            'csv_outlet_nvars': None, 
+            'csv_outlet_vars': None, 
+            'csv_ovrflw_fname': None
+        }
+        """
 
         self.csv_point_frombot = self._single_value_to_list(
             self.csv_point_frombot
@@ -1014,6 +1553,66 @@ class NMLOutput(NMLBase):
         return output_dict
 
 class NMLInitProfiles(NMLBase):
+    """Construct the `&init_profiles` model parameters.
+
+    The `&init_profiles` parameters define the initial conditions at specific 
+    depths in the water body. `NMLInitProfiles` provides the means to constuct 
+    a dictionary containing these parameters for use in the `nml.NML` class. 
+    Model parameters are set as attributes upon initialising an instance of 
+    the class or using the `set_attributes()` method. Class instances are 
+    callable and return the dictionary of parameters.
+
+    Attributes
+    ----------
+    lake_depth : Union[float, None]
+        Initial lake height/depth (m). Default is `None`.
+    num_depths : Union[int, None]
+        Number of depths provided for initial profiles. Default is `None`.
+    the_depths : Union[List[float], float, None]
+        The depths of the initial profile points (m). Default is `None`.
+    the_temps : Union[List[float], float, None]
+        The temperature (°C) at each of the initial profile points. Default is
+        `None`.
+    the_sals : Union[List[float], float, None]
+        The salinity (ppt) at each of the initial profile points. Default is
+        `None`.
+    num_wq_vars : Union[int, None]
+        Number of non-GLM (i.e., FABM or AED2) variables to be initialised.
+        Default is `None`.
+    wq_names : Union[List[str], str, None]
+        Names of non-GLM (i.e., FABM or AED2) variables to be initialised.
+        Default is `None`.
+    wq_init_vals : Union[List[float], float, None]
+        Array of water quality variable initial data 
+        (rows = vars; cols = depths). Default is `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> init_profiles = nml.NMLInitProfiles(
+    ...     lake_depth=43,
+    ...     num_depths=2
+    ... )
+    >>> init_profiles_attrs = {
+    ...     "num_depths": 3,
+    ...     "the_depths": [1, 20, 40],
+    ...     "the_temps": [18.0, 18.0, 18.0],
+    ...     "the_sals": [ 0.5, 0.5, 0.5],
+    ...     "num_wq_vars": 6,
+    ...     "wq_names": [
+    ...         'OGM_don','OGM_pon','OGM_dop','OGM_pop','OGM_doc','OGM_poc'
+    ...     ],
+    ...     "wq_init_vals": [
+    ...         1.1, 1.2, 1.3, 1.2, 1.3,
+    ...         2.1, 2.2, 2.3, 1.2, 1.3,
+    ...         3.1, 3.2, 3.3, 1.2, 1.3,
+    ...         4.1, 4.2, 4.3, 1.2, 1.3,
+    ...         5.1, 5.2, 5.3, 1.2, 1.3,
+    ...         6.1, 6.2, 6.3, 1.2, 1.3
+    ...     ]
+    ... }
+    >>> init_profiles.set_attributes(init_profiles_attrs)
+    """
     def __init__(
         self,
         lake_depth: Union[float, None] = None,
@@ -1040,6 +1639,45 @@ class NMLInitProfiles(NMLBase):
     ) -> dict[
         str, Union[float, int, str, List[float], List[str], None]
     ]:
+        """Consolidate the `&init_profiles` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `True`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, List[float], List[str], None]
+            A dictionary containing the `&init_profiles` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> init_profiles = nml.NMLInitProfiles(
+        ...     lake_depth=43,
+        ...     num_depths=2
+        ... )
+        >>> print(init_profiles(check_errors=False))
+        {
+            'lake_depth': 43, 
+            'num_depths': 2, 
+            'the_depths': None, 
+            'the_temps': None, 
+            'the_sals': None, 
+            'num_wq_vars': None, 
+            'wq_names': None, 
+            'wq_init_vals': None
+        }
+        """
         self.the_depths = self._single_value_to_list(self.the_depths)
         self.the_temps = self._single_value_to_list(self.the_temps)
         self.the_depths = self._single_value_to_list(self.the_depths)
