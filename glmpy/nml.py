@@ -4,7 +4,121 @@ import warnings
 class NML:
     """Generate .nml files.
 
-    The `.nml` file contains the model parameters needed to run the General Lake Model (GLM). 
+    The General Lake Model (GLM) namelist file (`.nml`) describes the parameter
+    configuration for running a simulation. The `NML` class builds the `.nml` 
+    file by combining dictionaries of parameters that correspond with each 
+    configuration block, e.g., `&glm_setup`, `&morphometry`, and `&time`. Each
+    dictionary of parameters can be created using the respective `nml.NML*`
+    classes, e.g., `nml.NMLGLMSetup`, `nml.NMLMorphometry`, and `nml.NMLTime`.
+    An optional `check_errors` argument can be set to raise errors when 
+    parameters from separate configuration blocks are in conflict. The `.nml`
+    file can be saved using the `write_nml()` method.
+
+    Attributes
+    ----------
+    glm_setup : dict
+        Dictionary of `&glm_setup` parameters. See `nml.NMLGLMSetup`. Required 
+        for every GLM simulation.
+    morphometry : dict
+        Dictionary of `&morphometry` parameters. See `nml.NMLMorphometry`. 
+        Required for every GLM simulation.
+    time : dict
+        Dictionary of `&time` parameters. See `nml.NMLTime`. Required for every 
+        GLM simulation.
+    init_profiles : dict
+        Dictionary of `&init_profiles` parameters. See `nml.NMLInitProfiles`. 
+        Required for every GLM simulation.
+    mixing : Union[dict, None]
+        Dictionary of `&mixing` parameters. See `nml.NMLMixing`. Default is 
+        `None`.
+    output : Union[dict, None]
+        Dictionary of `&output` parameters. See `nml.NMLOutput`. Default is 
+        `None`.
+    meteorology : Union[dict, None]
+        Dictionary of `&meteorology` parameters. See `nml.NMLMeteorology`. 
+        Default is `None`.
+    light : Union[dict, None]
+        Dictionary of `&light` parameters. See `nml.NMLLight`. Default is 
+        `None`.
+    bird_model : Union[dict, None]
+        Dictionary of `&bird_model` parameters. See `nml.NMLBirdModel`. Default 
+        is `None`.
+    inflow : Union[dict, None]
+        Dictionary of `&inflow` parameters. See `nml.NMLInflow`. Default is 
+        `None`.
+    outflow : Union[dict, None]
+        Dictionary of `&outflow` parameters. See `nml.NMLOutflow`. Default is 
+        `None`.
+    sediment : Union[dict, None]
+        Dictionary of `&sediment` parameters. See `nml.NMLSediment`. Default is 
+        `None`.
+    snow_ice : Union[dict, None]
+        Dictionary of `&snow_ice` parameters. See `nml.NMLSnowIce`. Default is 
+        `None`.
+    wq_setup : Union[dict, None]
+        Dictionary of `&wq_setup` parameters. See `nml.NMLWQSetup`. Default is 
+        `None`.
+
+    Examples
+    --------
+    Import the `nml` module:
+    >>> from glmpy import nml
+
+    Initialise `nml.NML*` class instances:
+    >>> glm_setup = nml.NMLGLMSetup()
+    >>> morphometry = nml.NMLMorphometry()
+    >>> time = nml.NMLTime()
+    >>> init_profiles = nml.NMLInitProfiles()
+    >>> mixing = nml.NMLMixing()
+    >>> output = nml.NMLOutput()
+    >>> meteorology = nml.NMLMeteorology()
+    >>> light = nml.NMLLight()
+    >>> bird_model = nml.NMLBirdModel()
+    >>> inflow = nml.NMLInflow()
+    >>> outflow = nml.NMLOutflow()
+    >>> sediment = nml.NMLSediment()
+    >>> snow_ice = nml.NMLSnowIce()
+    >>> wq_setup = nml.NMLWQSetup()
+
+    Set the instance attributes from dictionaries of GLM parameters (omitted 
+    for brevity):
+    >>> glm_setup.set_attributes(glm_setup_attrs)
+    >>> morphometry.set_attributes(morphometry_attrs)
+    >>> time.set_attributes(time_attrs)
+    >>> init_profiles.set_attributes(init_profiles_attrs)
+    >>> mixing.set_attributes(mixing_attrs)
+    >>> output.set_attributes(output_attrs)
+    >>> meteorology.set_attributes(meteorology_attrs)
+    >>> light.set_attributes(light_attrs)
+    >>> bird_model.set_attributes(bird_model_attrs)
+    >>> inflow.set_attributes(inflow_attrs)
+    >>> outflow.set_attributes(outflow_attrs)
+    >>> sediment.set_attributes(sediment_attrs)
+    >>> snow_ice.set_attributes(snow_ice_attrs)
+    >>> wq_setup.set_attributes(wq_setup_attrs)
+
+    Initialise the `NML` class and pass in the consolidated dictionaries (
+    returned by the call method of `nml.NML*` class instances).
+    >>> nml_file = nml.NML(
+    ...     glm_setup=glm_setup(),
+    ...     morphometry=morphometry(),
+    ...     time=time(),
+    ...     init_profiles=init_profiles(),
+    ...     mixing=mixing(),
+    ...     output=output(),
+    ...     meteorology=meteorology(),
+    ...     light=light(),
+    ...     bird_model=bird_model(),
+    ...     inflow=inflow(),
+    ...     outflow=outflow(),
+    ...     sediment=sediment(),
+    ...     snow_ice=snow_ice(),
+    ...     wq_setup=wq_setup()
+    ...     check_errors=False
+    ... )
+
+    Write the `.nml` file with the `write_nml()` method.
+    >>> nml_file.write_nml(nml_file_path="glm3.nml")
     """
     def __init__(
         self,
@@ -22,7 +136,7 @@ class NML:
         sediment: Union[dict, None] = None,
         snow_ice: Union[dict, None] = None,
         wq_setup: Union[dict, None] = None,  
-        check_errors: bool = True      
+        check_errors: bool = False      
     ):
         self.glm_setup = glm_setup
         self.mixing = mixing
@@ -43,7 +157,19 @@ class NML:
             pass
 
     def write_nml(self, nml_file_path: str = "glm3.nml"):
-        
+        """Write the `.nml` file.
+
+        Write the `.nml` of model parameters.
+
+        Parameters
+        ----------
+        nml_file_path : str, optional
+            File path to save .nml file, by default `glm3.nml`.
+
+        Examples
+        --------
+        >>> nml_file.write_nml(nml_file_path="my_lake.nml")
+        """
         nml_string = ""
 
         if self.glm_setup is not None:
@@ -764,7 +890,7 @@ class NMLGLMSetup(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, str, bool, None]]:
         """Consolidate the `&glm_setup` parameters and return them as a 
         dictionary.
@@ -779,7 +905,7 @@ class NMLGLMSetup(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -898,7 +1024,7 @@ class NMLMixing(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, None]]:
         """Consolidate the `&mixing` parameters and return them as a 
         dictionary.
@@ -913,7 +1039,7 @@ class NMLMixing(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1026,7 +1152,7 @@ class NMLWQSetup(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, str, bool, None]]:
         """Consolidate the `&wq_setup` parameters and return them as a 
         dictionary.
@@ -1041,7 +1167,7 @@ class NMLWQSetup(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1180,7 +1306,7 @@ class NMLMorphometry(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, str, List[float], None]]:
         """Consolidate the `&morphometry` parameters and return them as a 
         dictionary.
@@ -1195,7 +1321,7 @@ class NMLMorphometry(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1303,7 +1429,7 @@ class NMLTime(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, str, None]]:
         """Consolidate the `&time` parameters and return them as a 
         dictionary.
@@ -1318,7 +1444,7 @@ class NMLTime(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1471,7 +1597,7 @@ class NMLOutput(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[
         str, Union[float, int, str, bool, List[float], List[str], None]
     ]:
@@ -1488,7 +1614,7 @@ class NMLOutput(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1635,7 +1761,7 @@ class NMLInitProfiles(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[
         str, Union[float, int, str, List[float], List[str], None]
     ]:
@@ -1652,7 +1778,7 @@ class NMLInitProfiles(NMLBase):
         ----------
         check_errors : bool, optional
             If `True`, performs validation checks on the parameters to ensure 
-            compliance with GLM. Default is `True`.
+            compliance with GLM. Default is `False`.
 
         Returns
         -------
@@ -1701,6 +1827,53 @@ class NMLInitProfiles(NMLBase):
         return init_profiles_dict
     
 class NMLLight(NMLBase):
+    """Construct the `&light` model parameters.
+
+    The `&light` parameters define light penertration into the water body. 
+    `NMLLight` provides the means to constuct a dictionary containing these 
+    parameters for use in the `nml.NML` class. Model parameters are set as 
+    attributes upon initialising an instance of the class or using the 
+    `set_attributes()` method. Class instances are callable and return the 
+    dictionary of parameters.
+
+    Attributes
+    ----------
+    light_mode : Union[int, None]
+        Switch to configure the approach to light penetration. Options are `0` 
+        or `1`. Default is `None`.
+    Kw : Union[float, None]
+        Light extinction coefficient (m^{-1}). Used when `light_mode=0`. 
+        Default is `None`
+    Kw_file : Union[str, None]
+        Name of file with Kw time-series included. Default is `None`.
+    n_bands : Union[int, None]
+        Number of light bandwidths to simulate. Used when `light_mode=1`. 
+        Default is `None`.
+    light_extc : Union[List[float], float, None]
+        Comma-separated list of light extinction coefficients for each
+        waveband. Default is `None`.
+    energy_frac : Union[List[float], float, None]
+        Comma-separated list of energy fraction captured by each waveband.
+        Default is None.
+    Benthic_Imin : Union[float, None]
+        Critical fraction of incident light reaching the benthos. Default is
+        `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> light = nml.NMLLight(
+    ...     light_mode=0,
+    ...     Kw=0.5
+    ... )
+    >>> light_attrs = {
+    ...     "n_bands": 4,
+    ...     "light_extc": [1.0, 0.5, 2.0, 4.0],
+    ...     "energy_frac": [0.51, 0.45, 0.035, 0.005],
+    ...     "Benthic_Imin": 10
+    ... }
+    >>> light.set_attributes(light_attrs)
+    """
     def __init__(
         self,
         light_mode: Union[int, None] = None,
@@ -1721,8 +1894,46 @@ class NMLLight(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, str, List[float], None]]:
+        """Consolidate the `&light` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, List[float], None]]
+            A dictionary containing the `&light` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> light = nml.NMLLight(
+        ...    light_mode=0,
+        ...    Kw=0.5
+        ... )
+        >>> print(light(check_errors=False))
+        {
+            'light_mode': 0, 
+            'Kw': 0.5, 
+            'Kw_file': None, 
+            'n_bands': None, 
+            'light_extc': None, 
+            'energy_frac': None, 
+            'Benthic_Imin': None
+        }
+        """        
         self.light_extc = self._single_value_to_list(self.light_extc)   
         self.energy_frac = self._single_value_to_list(self.light_extc)
 
@@ -1742,6 +1953,49 @@ class NMLLight(NMLBase):
         return light_dict
 
 class NMLBirdModel(NMLBase):
+    """Construct the `&bird_model` model parameters.
+
+    The `&bird_model` parameters define the surface irradiance based on the 
+    Bird Clear Sky Model (BCSM) (Bird, 1984). `NMLBirdModel` provides the means 
+    to constuct a dictionary containing these parameters for use in the 
+    `nml.NML` class. Model parameters are set as attributes upon initialising 
+    an instance of the class or using the `set_attributes()` method. Class 
+    instances are callable and return the dictionary of parameters.
+
+    Attributes
+    ----------
+    AP : Union[float, None]
+        Atmospheric pressure (hPa). Default is `None`.
+    Oz : Union[float, None]
+        Ozone concentration (atm-cm). Default is `None`.
+    WatVap : Union[float, None]
+        Total Precipitable water vapor (atm-cm). Default is `None`.
+    AOD500 : Union[float, None]
+        Dimensionless Aerosol Optical Depth at wavelength 500 nm. Default is
+        `None`.
+    AOD380 : Union[float, None]
+        Dimensionless Aerosol Optical Depth at wavelength 380 nm. Default is
+        `None`.
+    Albedo : Union[float, None]
+        Albedo of the surface used for Bird Model insolation calculation.
+        Default is `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> bird_model = nml.NMLBirdModel(
+    ...     AP=973,
+    ...     Oz=0.2
+    ... )
+    >>> bird_model_attrs = {
+    ...     "Oz": 0.279,
+    ...     "WatVap": 1.1,
+    ...     "AOD500": 0.033,
+    ...     "AOD380": 0.038,
+    ...     "Albedo": 0.2
+    ... }
+    >>> bird_model.set_attributes(bird_model_attrs)
+    """
     def __init__(
         self,
         AP: Union[float, None] = None,
@@ -1760,8 +2014,45 @@ class NMLBirdModel(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, None]]:
+        """Consolidate the `&bird_model` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[str, Union[float, None]]
+            A dictionary containing the `&bird_model` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> bird_model = nml.NMLBirdModel(
+        ...     AP=973,
+        ...     Oz=0.2
+        ... )
+        >>> print(bird_model(check_errors=False))
+        {
+            'AP': 973, 
+            'Oz': 0.2, 
+            'WatVap': None, 
+            'AOD500': None, 
+            'AOD380': None, 
+            'Albedo': None
+        }
+        """
         if check_errors:
             pass
 
@@ -1777,6 +2068,67 @@ class NMLBirdModel(NMLBase):
         return bird_model_dict
     
 class NMLSediment(NMLBase):
+    """Construct the `&sediment` model parameters.
+
+    The `&sediment` parameters define the thermal properties of the 
+    soil-sediment. `NMLSediment` provides the means to constuct a dictionary 
+    containing these parameters for use in the `nml.NML` class. Model 
+    parameters are set as attributes upon initialising an instance of the class 
+    or using the `set_attributes()` method. Class instances are callable and 
+    return the dictionary of parameters.
+
+    Attributes
+    ----------
+    sed_heat_Ksoil : Union[float, None]
+        Heat conductivity of soil/sediment. Default is `None`.
+    sed_temp_depth : Union[float, None]
+        Depth of soil/sediment layer below the lake bottom, used for heat flux
+        calculation. Default is `None`.
+    sed_temp_mean : Union[List[float], float, None]
+        Annual mean sediment temperature. A list if `n_zones > 1`. Default is 
+        `None`.
+    sed_temp_amplitude : Union[List[float], float, None]
+        Amplitude of temperature variation experienced in the sediment over one
+        year. A list if `n_zones > 1`. Default is `None`.
+    sed_temp_peak_doy : Union[List[int], int, None]
+        Day of the year where the sediment temperature peaks. A list if 
+        `n_zones > 1`. Default is `None`.
+    benthic_mode : Union[int, None]
+        Switch to configure which mode of benthic interaction to apply. Options 
+        are `0` for bottom layer only, `1` for bottom layer and layer flanks, 
+        `2` for sediment zones, and `3` for an undocumented use case. Default 
+        is `None`.
+    n_zones : Union[int, None]
+        Number of sediment zones to simulate. Required if `benthic_mode=2` or 
+        `benthic_mode=3`. Default is `None`.
+    zone_heights : Union[List[float], float, None]
+        Upper height of zone boundary. Required if `benthic_mode=2` or 
+        `benthic_mode=3`. Default is `None`.
+    sed_reflectivity : Union[List[float], float, None] 
+        Sediment reflectivity. Default is `None`.
+    sed_roughness : Union[List[float], float, None]
+        Undocumented parameter. Default is `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> sediment = nml.NMLSediment(
+    ...     sed_heat_Ksoil=0.0,
+    ...     sed_temp_depth=0.1
+    ... )
+    >>> sediment_attrs = {
+    ...     "sed_temp_depth": 0.2,
+    ...     "sed_temp_mean": [5, 10, 20],
+    ...     "sed_temp_amplitude": [6, 8, 10],
+    ...     "sed_temp_peak_doy": [80, 70, 60],
+    ...     "benthic_mode": 1,
+    ...     "n_zones": 3,
+    ...     "zone_heights": [10.0, 20.0, 50.0],
+    ...     "sed_reflectivity": [0.1, 0.01, 0.01],
+    ...     "sed_roughness": [0.1, 0.01, 0.01]
+    ... }
+    >>> sediment.set_attributes(sediment_attrs)
+    """
     def __init__(
         self,
         sed_heat_Ksoil: Union[float, None] = None,
@@ -1803,8 +2155,49 @@ class NMLSediment(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, List[float], List[int], None]]:
+        """Consolidate the `&sediment` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, List[float], List[int], None]]
+            A dictionary containing the `&sediment` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> sediment = nml.NMLSediment(
+        ...     sed_heat_Ksoil=0.0,
+        ...     sed_temp_depth=0.1
+        >>> )
+        >>> print(sediment(check_errors=False))
+        {
+            'sed_heat_Ksoil': 0.0, 
+            'sed_temp_depth': 0.1, 
+            'sed_temp_mean': None, 
+            'sed_temp_amplitude': None, 
+            'sed_temp_peak_doy': None, 
+            'benthic_mode': None, 
+            'n_zones': None, 
+            'zone_heights': None, 
+            'sed_reflectivity': None, 
+            'sed_roughness': None
+        }
+        """
         self.sed_temp_mean = self._single_value_to_list(self.sed_temp_mean)
         self.sed_temp_amplitude = self._single_value_to_list(
             self.sed_temp_amplitude
@@ -1837,6 +2230,38 @@ class NMLSediment(NMLBase):
         return sediment_dict
 
 class NMLSnowIce(NMLBase):
+    """Construct the `&snowice` model parameters.
+
+    The `&snowice` parameters define the formation of snow and ice cover on the
+    water body. `NMLSnowIce` provides the means to constuct a dictionary 
+    containing these parameters for use in the `nml.NML` class. Model 
+    parameters are set as attributes upon initialising an instance of the 
+    class or using the `set_attributes()` method. Class instances are callable 
+    and return the dictionary of parameters.
+
+    Attributes
+    ----------
+    snow_albedo_factor : Union[float, None]
+        Scaling factor used to as a multiplier to scale the snow/ice albedo
+        estimate. Default is `None`.
+    snow_rho_max : Union[float, None]
+        Minimum snow density allowable (kg m^{-3}). Default is `None`.
+    snow_rho_min : Union[float, None]
+        Maximum snow density allowable (kg m^{-3}). Default is `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> snow_ice = nml.NMLSnowIce(
+    ...     snow_albedo_factor=1.0,
+    ...     snow_rho_min=40
+    ... )
+    >>> snow_ice_attrs = {
+    ...     "snow_rho_min": 50,
+    ...     "snow_rho_max": 300
+    ... }
+    >>> snow_ice.set_attributes(snow_ice_attrs)
+    """
     def __init__(
         self,
         snow_albedo_factor: Union[float, None] = None,
@@ -1849,8 +2274,42 @@ class NMLSnowIce(NMLBase):
     
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, None]]:
+        """Consolidate the `&snowice` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[str, Union[float, None]]
+            A dictionary containing the `&snowice` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> snow_ice = nml.NMLSnowIce(
+        ...     snow_albedo_factor=1.0,
+        ...     snow_rho_min=40
+        ... )
+        >>> print(snow_ice(check_errors=False))
+        {
+            'snow_albedo_factor': 1.0, 
+            'snow_rho_min': 40, 
+            'snow_rho_max': None
+        }
+        """
         if check_errors:
             pass
 
@@ -1863,6 +2322,132 @@ class NMLSnowIce(NMLBase):
         return snowice_dict
 
 class NMLMeteorology(NMLBase):
+    """Construct the `&meteorology` model parameters.
+
+    The `&meteorology` parameters define a variety of meteorological 
+    dynamics, e.g., rainfall, air temperature, radiation, wind, and cloud 
+    cover. `NMLMeteorology` provides the means to constuct a dictionary 
+    containing these parameters for use in the `nml.NML` class. Model
+    parameters are set as attributes upon initialising an instance of the 
+    class or using the `set_attributes()` method. Class instances are callable 
+    and return the dictionary of parameters.
+
+    Attributes
+    ----------
+    met_sw : Union[bool, None]
+        Switch to enable the surface heating module. Default is `None`.
+    meteo_fl : Union[str, None]
+        Filename of the meterological file. Include path and filename. Default 
+        is `None`.
+    subdaily : Union[bool, None]
+        Switch to indicate the meteorological data is provided with sub-daily
+        resolution, at an interval equivalent to `dt` from `nml.NMLTime` (Δt). 
+        Default is `None`.
+    time_fmt : Union[str, None]
+        Time format of the 1st column in the inflow_fl. For example,
+        'YYYY-MM-DD hh:mm:ss'. Default is `None`.
+    rad_mode : Union[int, None]
+        Switch to configure which incoming radiation option to use. Options are
+        `1`, `2`, `3`, `4`, or `5`. Default is `None`.
+    albedo_mode : Union[int, None]
+        Switch to configure which albedo calculation option is used. Options 
+        are `1` for Hamilton & Schladow, `2` for Briegleb et al., or `3` for 
+        Yajima & Yamamoto. Default is `None`.
+    sw_factor : Union[float, None]
+        Scaling factor to adjust the shortwave radiation data provided
+        in the `meteo_fl`. Default is `None`.
+    lw_type : Union[str, None]
+        Switch to configure which input approach is being used for
+        longwave/cloud data in the `meteo_fl`. Options are `'LW_IN'` for 
+        incident longwave, `'LW_NET'` for net longwave, or `'LW_CC'` for cloud 
+        cover. Default is `None`.
+    cloud_mode : Union[int, None]
+        Switch to configure which atmospheric emmissivity calculation
+        option is used. Options are `1` for Idso and Jackson, `2` for Swinbank,
+        `3` for Brutsaert, `4` for Yajima & Yamamoto. Default is `None`.
+    lw_factor : Union[float, None]
+        Scaling factor to adjust the longwave (or cloud) data provided in the
+        `meteo_fl`. Default is `None`.
+    atm_stab : Union[int, None]
+        Switch to configure which approach to atmospheric stability is used. 
+        `0` for neutral conditions, `1` for an undocumented use case, and `2` 
+        for an undocumented use case. Default is `None`.
+    rh_factor : Union[float, None]
+        Scaling factor to adjust the relative humidity data provided in the
+        `meteo_fl`. Default is `None`.
+    at_factor : Union[float, None]
+        Scaling factor to adjust the air temperature data provided in the
+        `meteo_fl`. Default is `None`.
+    ce : Union[float, None]
+        Bulk aerodynamic transfer coefficient for latent heat flux. Default is
+        `None`.
+    ch : Union[float, None]
+        Bulk aerodynamic transfer coefficient for sensible heat flux. Default
+        is `None`.
+    rain_sw : Union[bool, None]
+        Switch to configure rainfall input concentrations. Default is `None`.
+    rain_factor : Union[float, None]
+        Scaling factor to adjust the rainfall data provided in the `meteo_fl`.
+        Default is `None`.
+    catchrain : Union[bool, None]
+        Switch that configures runoff from exposed banks of lake area. Default
+        is `None`.
+    rain_threshold : Union[float, None]
+        Daily rainfall amount (m) required before runoff from exposed banks
+        occurs. Default is `None`.
+    runoff_coef : Union[float, None]
+        Conversion fraction of infiltration excess rainfall to runoff in
+        exposed lake banks. Default is `None`.
+    cd : Union[float, None]
+        Bulk aerodynamic transfer coefficient for momentum. Default is `None`.
+    wind_factor : Union[float, None]
+        Scaling factor to adjust the windspeed data provided in the `meteo_fl`.
+        Default is `None`.
+    fetch_mode : Union[int, None]
+        Switch to configure which wind-sheltering/fetch option to use. Options 
+        are `0` for no sheltering, `1` for area-based scaling, `2` for Markfort 
+        length-scale, or `3` for user input scaling table. Default is `None`.
+    Aws: Union[float, None]
+        Undocumented parameter. Required if `fetch_mode=1`. Default is `None`.
+    Xws: Union[float, None]
+        Undocumented parameter. Required if `fetch_mode=2`. Default is `None`.
+    num_dir : Union[int, None]
+        Number of wind direction reference points being read in. Required if 
+        `fetch_mode=2` or `fetch_mode=3`. Default is `None`.
+    wind_dir : Union[float, None]
+        Wind directions used for wind-sheltering effects. Required if 
+        `fetch_mode=2` or `fetch_mode=3`. Default is `None`.
+    fetch_scale : Union[float, None]
+        Direction specific wind-sheltering scaling factors. Required if 
+        `fetch_mode=2` or `fetch_mode=3`. Default is `None`.
+    
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> meteorology = nml.NMLMeteorology(
+    ...     met_sw=True,
+    ...     lw_type='LW_NET'
+    ... )
+    >>> meteorology_attrs = {
+    ...     "lw_type": "LW_IN",
+    ...     "rain_sw": False,
+    ...     "atm_stab": 0,
+    ...     "fetch_mode": 0,
+    ...     "rad_mode": 1,
+    ...     "albedo_mode": 1,
+    ...     "cloud_mode": 4,
+    ...     "subdaily": True,
+    ...     "meteo_fl": 'bcs/met_hourly.csv',
+    ...     "wind_factor": 0.9,
+    ...     "ce": 0.0013,
+    ...     "ch": 0.0013,
+    ...     "cd": 0.0013,
+    ...     "catchrain": True,
+    ...     "rain_threshold": 0.001,
+    ...     "runoff_coef": 0.0
+    ... }
+    >>> meteorology.set_attributes(meteorology_attrs)
+    """
     def __init__(
         self,
         met_sw: Union[bool, None] = None,
@@ -1925,8 +2510,67 @@ class NMLMeteorology(NMLBase):
 
     def __call__(
         self, 
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[float, int, str, bool, None]]:
+        """Consolidate the `&meteorology` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[str, Union[float, int, str, bool, None]]
+            A dictionary containing the `&meteorology` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> meteorology = nml.NMLMeteorology(
+        ...     met_sw=True,
+        ...     lw_type='LW_NET'
+        ... )
+        >>> print(meteorology(check_errors=False))
+        {
+            'met_sw': True, 
+            'meteo_fl': None, 
+            'subdaily': None, 
+            'time_fmt': None, 
+            'rad_mode': None, 
+            'albedo_mode': None, 
+            'sw_factor': None, 
+            'lw_type': 'LW_NET', 
+            'cloud_mode': None, 
+            'lw_factor': None, 
+            'atm_stab': None, 
+            'rh_factor': None, 
+            'at_factor': None, 
+            'ce': None, 
+            'ch': None, 
+            'rain_sw': None, 
+            'rain_factor': None, 
+            'catchrain': None, 
+            'rain_threshold': None, 
+            'runoff_coef': None, 
+            'cd': None, 
+            'wind_factor': None, 
+            'fetch_mode': None, 
+            'Aws': None, 
+            'Xws': None, 
+            'num_dir': None, 
+            'wind_dir': None, 
+            'fetch_scale': None
+        }
+        """
         if check_errors:
             pass
 
@@ -1964,6 +2608,81 @@ class NMLMeteorology(NMLBase):
         return meteorology_dict
 
 class NMLInflow(NMLBase):
+    """Construct the `&inflow` model parameters.
+
+    The `&inflow` parameters define river inflows and submerged inflows. 
+    `NMLInflow` provides the means to constuct a dictionary containing these 
+    parameters for use in the `nml.NML` class. Model parameters are set as 
+    attributes upon initialising an instance of the class or using the 
+    `set_attributes()` method. Class instances are callable and return the 
+    dictionary of parameters.
+
+    Attributes
+    ----------
+    num_inflows : Union[int, None]
+        Number of inflows to be simulated in this simulation. Default is 
+        `None`.
+    names_of_strms : Union[List[str], str, None]
+        Names of each inflow. A list if `num_inflows > 1`. Default is `None`.
+    subm_flag : Union[List[bool], bool, None]
+        Switch indicating if the inflow is entering as a submerged input. A 
+        list if `num_inflows > 1`. Default is `None`.
+    strm_hf_angle : Union[List[float], float, None]
+        Angle describing the width of an inflow river channel ("half angle"). A 
+        list if `num_inflows > 1`. Default is `None`.
+    strmbd_slope :  Union[List[float], float, None]
+        Slope of the streambed / river thalweg for each river (degrees). A 
+        list if `num_inflows > 1`. Default is `None`.
+    strmbd_drag : Union[List[float], float, None]
+        Drag coefficient of the river inflow thalweg, to calculate entrainment
+        during insertion. A list if `num_inflows > 1`. Default is `None`.
+    coef_inf_entrain : Union[List[float], float, None]
+        Undocumented parameter. A list if `num_inflows > 1`. Default is `None`.
+    inflow_factor : Union[List[float], float, None]
+        Scaling factor that can be applied to adjust the provided input data.
+        A list if `num_inflows > 1`. Default is `None`.
+    inflow_fl : Union[List[str], str, None]
+        Filename(s) of the inflow CSV boundary condition files. A list if 
+        `num_inflows > 1`. Default is `None`.
+    inflow_varnum : Union[int, None]
+        Number of variables being listed in the columns of `inflow_fl`. Can 
+        include GLM variables. Default is `None`.
+    inflow_vars : Union[List[str], str, None]
+        Names of the variables in the `inflow_fl`. Provide variables in the 
+        order as they are in the file. Default is `None`.
+    time_fmt : Union[str, None]
+        Time format of the 1st column in the `inflow_fl`. For example, 
+        `'YYYY-MM-DD hh:mm:ss'`. Default is `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> inflow = nml.NMLInflow(
+    ...     num_inflows=5,
+    ...     names_of_strms= ['Inflow1','Inflow2','Inflow3','Inflow4','Inflow5']
+    ... )
+    >>> inflow_attrs = {
+    ...     "num_inflows": 6,
+    ...     "names_of_strms": [
+    ...         'Inflow1','Inflow2','Inflow3','Inflow4','Inflow5','Inflow6'
+    ...     ],
+    ...     "subm_flag": [False, False, False, True, False, False],
+    ...     "strm_hf_angle": [85.0, 85.0, 85.0, 85.0, 85.0, 85.0],
+    ...     "strmbd_slope": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
+    ...     "strmbd_drag": [0.0160, 0.0160, 0.0160, 0.0160, 0.0160, 0.0160],
+    ...     "inflow_factor": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    ...     "inflow_fl": [
+    ...         'bcs/inflow_1.csv', 'bcs/inflow_2.csv', 'bcs/inflow_3.csv', 
+    ...         'bcs/inflow_4.csv', 'bcs/inflow_5.csv', 'bcs/inflow_6.csv'
+    ...     ],
+    ...     "inflow_varnum": 3,
+    ...     "inflow_vars": ['FLOW', 'TEMP', 'SALT'],
+    ...     "coef_inf_entrain": 0.0,
+    ...     "time_fmt": 'YYYY-MM-DD hh:mm:ss'
+    ... }
+    >>> inflow.set_attributes(inflow_attrs)
+    """
+
     def __init__(
         self,
         num_inflows: Union[int, None] = None,
@@ -1994,12 +2713,64 @@ class NMLInflow(NMLBase):
     
     def __call__(
         self,
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[
         str, Union[
             float, int, str, bool, List[float], List[str], List[bool], None
         ]
     ]:
+        """Consolidate the `&inflow` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[
+        str, 
+        Union[
+        float, int, str, bool, List[float], List[str], List[bool], None
+        ]
+        ]
+            A dictionary containing the `&inflow` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> inflow = nml.NMLInflow(
+        ...     num_inflows=5,
+        ...     names_of_strms= [
+        ...         'Inflow1','Inflow2','Inflow3','Inflow4','Inflow5'
+        ...     ]
+        ... )
+        >>> print(inflow(check_errors=False))
+        {
+            'num_inflows': 5, 
+            'names_of_strms': [
+                'Inflow1', 'Inflow2', 'Inflow3', 'Inflow4', 'Inflow5'
+            ], 
+            'subm_flag': None, 
+            'strm_hf_angle': None, 
+            'strmbd_slope': None, 
+            'strmbd_drag': None, 
+            'coef_inf_entrain': None, 
+            'inflow_factor': None, 
+            'inflow_fl': None, 
+            'inflow_varnum': None, 
+            'inflow_vars': None, 
+            'time_fmt': None
+        }
+        """
         self.names_of_strms = self._single_value_to_list(self.names_of_strms)
         self.subm_flag = self._single_value_to_list(self.subm_flag)
         self.strm_hf_angle = self._single_value_to_list(self.strm_hf_angle)
@@ -2033,6 +2804,115 @@ class NMLInflow(NMLBase):
         return inflow_dict
 
 class NMLOutflow(NMLBase):
+    """Construct the `&outflow` model parameters.
+
+    The `&outflow` parameters define withdrawals, outlets, offtakes, and 
+    seepage. `NMLOutflow` provides the means to constuct a dictionary 
+    containing these parameters for use in the `nml.NML` class. Model 
+    parameters are set as attributes upon initialising an instance of the class 
+    or using the `set_attributes()` method. Class instances are callable and 
+    return the dictionary of parameters.
+
+    Attributes
+    ----------
+    num_outlet : Union[int, None]
+        Number of outflows (including withdrawals, outlets or offtakes) to be
+        included in this simulation. Default is `None`.
+    outflow_fl : Union[str, None]
+        Filename of the file containing the outflow time-series. Default is
+        `None`.
+    time_fmt : Union[str, None]
+        Time format of the 1st column in the `outflow_fl`. Default is `None`.
+    outflow_factor : Union[List[float], float, None]
+        Scaling factor used as a multiplier for outflows. A list if 
+        `num_outlet > 1`. Default is `None`.
+    outflow_thick_limit : Union[List[float], float, None]
+        Maximum vertical limit of withdrawal entrainment. A list if 
+        `num_outlet > 1`. Default is `None`.
+    single_layer_draw : Union[List[bool], bool, None]
+        Switch to only limit withdrawal entrainment and force outflows from
+        layer at the outlet elevation height. A list if `num_outlet > 1`. 
+        Default is `None`.
+    flt_off_sw : Union[List[bool], bool, None]
+        Switch to indicate if the outflows are floating offtakes (taking water 
+        from near the surface). A list if `num_outlet > 1`. Default is `None`.
+    outlet_type : Union[List[int], int, None]
+        Switch to configure approach of each withdrawal. Options are `1` for 
+        fixed outlet height, `2` for floating offtake, `3` for adaptive 
+        offtake/low oxy avoidance, `4` for adaptive offtake/isotherm following, 
+        or `5` for adaptive offtake/temp time-series. A list if 
+        `num_outlet > 1`. Default is `None`.
+    outl_elvs : Union[List[float], float, None]
+        Outlet elevations (m). A list if `num_outlet > 1`. Default is `None`.
+    bsn_len_outl : Union[List[float], float, None]
+        Basin length at the outlet height(s) (m). A list if `num_outlet > 1`. 
+        Default is `None`.
+    bsn_wid_outl : Union[List[float], float, None]
+        Basin width at the outlet heights (m). A list if `num_outlet > 1`. 
+        Default is `None`.
+    crit_O2 : Union[int, None]
+        Undocumented parameter. Default is `None`.
+    crit_O2_dep : Union[int, None]
+        Undocumented parameter. Default is `None`.
+    crit_O2_days : Union[int, None]
+        Undocumented parameter. Default is `None`.
+    outlet_crit : Union[int, None]
+        Undocumented parameter. Default is `None`.
+    O2name : Union[str, None]
+        Undocumented parameter. Default is `None`.
+    O2idx : Union[str, None]
+        Undocumented parameter. Default is `None`.
+    target_temp : Union[float, None]
+        Undocumented parameter. Default is `None`.
+    min_lake_temp : Union[float, None]
+        Undocumented parameter. Default is `None`.
+    fac_range_upper : Union[float, None]
+        Undocumented parameter. Default is `None`.
+    fac_range_lower : Union[float, None
+        Undocumented parameter. Default is `None`.
+    mix_withdraw : Union[bool, None]
+        Undocumented parameter. Default is `None`.
+    coupl_oxy_sw : Union[bool, None]
+        Undocumented parameter. Default is `None`.
+    withdrTemp_fl : Union[str, None]
+        Filename of the file containing the temperature time-series the 
+        adaptive withdrawal is targeting. Required if `outlet_type=5`. Default 
+        is `None`.
+    seepage : Union[bool, None]
+        Switch to enable the seepage of water from the lake bottom. Default is
+        `None`.
+    seepage_rate : Union[float, None]
+        Seepage rate of water, or, soil hydraulic conductivity (m day^{-1}). 
+        Default is `None`.
+    crest_width : Union[float, None]
+        Width of weir (at crest height) where lake overflows (m). Default is
+        `None`.
+    crest_factor : Union[float, None]
+        Drag coefficient associated with the weir crest, used to compute the
+        overflow discharge rate. Applies only when the crest elevation is 
+        configured to be less than the maximum elevation of the domain. Default 
+        is `None`.
+
+    Examples
+    --------
+    >>> from glmpy import nml
+    >>> outflow = nml.NMLOutflow(
+    ...     num_outlet=1,
+    ...     flt_off_sw=True
+    ... )
+    >>> outflow_attrs = {
+    ...     "flt_off_sw": False,
+    ...     "outlet_type": 1,
+    ...     "outl_elvs": -215.5,
+    ...     "bsn_len_outl": 18000,
+    ...     "bsn_wid_outl": 11000,
+    ...     "outflow_fl" : 'bcs/outflow.csv',
+    ...     "outflow_factor": 1.0,
+    ...     "seepage": True,
+    ...     "seepage_rate": 0.01
+    ... }
+    >>> outflow.set_attributes(outflow_attrs)
+    """
     def __init__(
         self,
         num_outlet: Union[int, None] = None,
@@ -2096,11 +2976,73 @@ class NMLOutflow(NMLBase):
 
     def __call__(
         self,
-        check_errors: bool = True
+        check_errors: bool = False
     ) -> dict[str, Union[
                 float, int, str, bool, List[float], List[int], List[bool], None
             ]
         ]:
+        """Consolidate the `&outflow` parameters and return them as a 
+        dictionary.
+
+        The `__call__()` method consolidates model parameters set during class 
+        instance initialisation, or updated through `set_attributes()`, into a 
+        dictionary suitable for use with the `nml.NML` class. If `check_errors` 
+        is `True`, the method performs validation checks on the parameters to 
+        ensure they comply with expected formats and constraints. 
+
+        Parameters
+        ----------
+        check_errors : bool, optional
+            If `True`, performs validation checks on the parameters to ensure 
+            compliance with GLM. Default is `False`.
+
+        Returns
+        -------
+        dict[
+        str, 
+        Union[float, int, str, bool, List[float], List[int], List[bool], None]
+        ]
+            A dictionary containing the `&outflow` parameters.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> outflow = nml.NMLOutflow(
+        ...     num_outlet=1,
+        ...     flt_off_sw=True
+        ... )
+        >>> print(outflow(check_errors=False))
+        {
+            'num_outlet': 1, 
+            'outflow_fl': None, 
+            'time_fmt': None, 
+            'outflow_factor': None, 
+            'outflow_thick_limit': None, 
+            'single_layer_draw': None, 
+            'flt_off_sw': [True], 
+            'outlet_type': None, 
+            'outl_elvs': None, 
+            'bsn_len_outl': None, 
+            'bsn_wid_outl': None, 
+            'crit_O2': None, 
+            'crit_O2_dep': None, 
+            'crit_O2_days': None, 
+            'outlet_crit': None, 
+            'O2name': None, 
+            'O2idx': None, 
+            'target_temp': None, 
+            'min_lake_temp': None, 
+            'fac_range_upper': None, 
+            'fac_range_lower': None, 
+            'mix_withdraw': None, 
+            'coupl_oxy_sw': None, 
+            'withdrTemp_fl': None, 
+            'seepage': None, 
+            'seepage_rate': None, 
+            'crest_width': None, 
+            'crest_factor': None
+        }
+        """
         self.outflow_factor = self._single_value_to_list(self.outflow_factor)
         self.outflow_thick_limit = self._single_value_to_list(
             self.outflow_thick_limit
