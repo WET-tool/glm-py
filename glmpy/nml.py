@@ -1,5 +1,4 @@
 from typing import Union, List, Any, Callable
-import warnings
 
 class NML:
     """Generate .nml files.
@@ -267,27 +266,6 @@ class NML:
             else:
                 return ','.join(str(val) for val in python_list)
 
-
-    def _nml_list_wrapper(
-        self,
-        python_list: List[Any], 
-        func: Union[Callable, None] = None
-    ) -> str:
-        """Wrap `_nml_list()`.
-
-        A wrapper function to process lists with a given nml syntax 
-        conversion function. For internal `nml.NML` use in generating `.nml` 
-        files.
-
-        Parameters
-        ----------
-        python_list : List[Any]
-            A Python list
-        func: Union[Callable, None], optional
-            A function used to format each list item. Default is `None`.
-        """
-        return self._nml_list(python_list, syntax_func=func)
-
     @staticmethod
     def _nml_param_val(
         param_dict: dict, 
@@ -396,12 +374,8 @@ class NML:
             self._nml_param_val(morphometry, "bsn_len") +
             self._nml_param_val(morphometry, "bsn_wid") +
             self._nml_param_val(morphometry, "bsn_vals") +
-            self._nml_param_val(
-                morphometry, "H", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                morphometry, "A", lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(morphometry, "H", self._nml_list) +
+            self._nml_param_val(morphometry, "A", self._nml_list) +
             "/"
         )
 
@@ -438,19 +412,13 @@ class NML:
             self._nml_param_val(output, "csv_lake_fname", self._nml_str) +
             self._nml_param_val(output, "csv_point_nlevs") +
             self._nml_param_val(output, "csv_point_fname", self._nml_str) +
-            self._nml_param_val(
-                output, 
-                "csv_point_frombot", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                output, "csv_point_at",lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(output, "csv_point_frombot", self._nml_list) +
+            self._nml_param_val(output, "csv_point_at", self._nml_list) +
             self._nml_param_val(output, "csv_point_nvars") +
             self._nml_param_val(
                 output, 
                 "csv_point_vars", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(
                 output, "csv_outlet_allinone", self._nml_bool
@@ -460,7 +428,7 @@ class NML:
             self._nml_param_val(
                 output, 
                 "csv_outlet_vars", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(output, "csv_ovrflw_fname", self._nml_str) +
             "/"
@@ -477,29 +445,17 @@ class NML:
             "&init_profiles\n" +
             self._nml_param_val(init_profiles, "lake_depth") +
             self._nml_param_val(init_profiles, "num_depths") +
-            self._nml_param_val(
-                init_profiles, 
-                "the_depths", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                init_profiles, "the_temps", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                init_profiles, 
-                "the_sals", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(init_profiles, "the_depths", self._nml_list) +
+            self._nml_param_val(init_profiles, "the_temps", self._nml_list) +
+            self._nml_param_val(init_profiles, "the_sals", self._nml_list) +
             self._nml_param_val(init_profiles, "num_wq_vars") +
             self._nml_param_val(
                 init_profiles, 
                 "wq_names", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(
-                init_profiles, 
-                "wq_init_vals", 
-                lambda x: self._nml_list_wrapper(x)
+                init_profiles, "wq_init_vals", self._nml_list
             ) +
             "/"
         )
@@ -517,12 +473,8 @@ class NML:
             self._nml_param_val(light, "Kw") +
             self._nml_param_val(light, "Kw_file", self._nml_str) +
             self._nml_param_val(light, "n_bands") +
-            self._nml_param_val(
-                light, "light_extc", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                light, "energy_frac", lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(light, "light_extc", self._nml_list) +
+            self._nml_param_val(light, "energy_frac", self._nml_list) +
             self._nml_param_val(light, "Benthic_Imin") +
             "/"
         )
@@ -556,36 +508,18 @@ class NML:
             "&sediment\n" +
             self._nml_param_val(sediment, "sed_heat_Ksoil") +
             self._nml_param_val(sediment, "sed_temp_depth") +
+            self._nml_param_val(sediment, "sed_temp_mean", self._nml_list) +
             self._nml_param_val(
-                sediment, "sed_temp_mean", lambda x: self._nml_list_wrapper(x)
+                sediment, "sed_temp_amplitude", self._nml_list
             ) +
             self._nml_param_val(
-                sediment, 
-                "sed_temp_amplitude", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                sediment, 
-                "sed_temp_peak_doy", 
-                lambda x: self._nml_list_wrapper(x)
+                sediment, "sed_temp_peak_doy", self._nml_list
             ) +
             self._nml_param_val(sediment, "benthic_mode") +
             self._nml_param_val(sediment, "n_zones") +
-            self._nml_param_val(
-                sediment, 
-                "zone_heights", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                sediment, 
-                "sed_reflectivity", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                sediment, 
-                "sed_roughness", 
-                lambda x: self._nml_list_wrapper(x)
-            ) +            
+            self._nml_param_val(sediment, "zone_heights", self._nml_list) +
+            self._nml_param_val(sediment, "sed_reflectivity", self._nml_list) +
+            self._nml_param_val(sediment, "sed_roughness", self._nml_list) +            
             "/"
         )
 
@@ -657,38 +591,28 @@ class NML:
             self._nml_param_val(
                 inflow, 
                 "names_of_strms", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(
                 inflow, 
                 "subm_flag", 
-                lambda x: self._nml_list_wrapper(x, self._nml_bool)
+                lambda x: self._nml_list(x, self._nml_bool)
             ) +
-            self._nml_param_val(
-                inflow, "strm_hf_angle", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                inflow, "strmbd_slope", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                inflow, "strmbd_drag", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                inflow, "coef_inf_entrain", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                inflow, "inflow_factor", lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(inflow, "strm_hf_angle", self._nml_list) +
+            self._nml_param_val(inflow, "strmbd_slope", self._nml_list) +
+            self._nml_param_val(inflow, "strmbd_drag", self._nml_list) +
+            self._nml_param_val(inflow, "coef_inf_entrain", self._nml_list) +
+            self._nml_param_val(inflow, "inflow_factor", self._nml_list) +
             self._nml_param_val(
                 inflow, 
                 "inflow_fl", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(inflow, "inflow_varnum") +
             self._nml_param_val(
                 inflow, 
                 "inflow_vars", 
-                lambda x: self._nml_list_wrapper(x, self._nml_str)
+                lambda x: self._nml_list(x, self._nml_str)
             ) +
             self._nml_param_val(inflow, "time_fmt", self._nml_str) +
             "/"
@@ -706,36 +630,24 @@ class NML:
             self._nml_param_val(outflow, "num_outlet")+
             self._nml_param_val(outflow, "outflow_fl", self._nml_str) +
             self._nml_param_val(outflow, "time_fmt", self._nml_str) +
+            self._nml_param_val(outflow, "outflow_factor", self._nml_list) +
             self._nml_param_val(
-                outflow, "outflow_factor", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                outflow, 
-                "outflow_thick_limit", 
-                lambda x: self._nml_list_wrapper(x)
+                outflow, "outflow_thick_limit", self._nml_list
             ) +
             self._nml_param_val(
                 outflow, 
                 "single_layer_draw", 
-                lambda x: self._nml_list_wrapper(x, self._nml_bool)
+                lambda x: self._nml_list(x, self._nml_bool)
             ) +
             self._nml_param_val(
                 outflow, 
                 "flt_off_sw", 
-                lambda x: self._nml_list_wrapper(x, self._nml_bool)
+                lambda x: self._nml_list(x, self._nml_bool)
             ) +
-            self._nml_param_val(
-                outflow, "outlet_type", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                outflow, "outl_elvs", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                outflow, "bsn_len_outl", lambda x: self._nml_list_wrapper(x)
-            ) +
-            self._nml_param_val(
-                outflow, "bsn_wid_outl", lambda x: self._nml_list_wrapper(x)
-            ) +
+            self._nml_param_val(outflow, "outlet_type", self._nml_list) +
+            self._nml_param_val(outflow, "outl_elvs", self._nml_list) +
+            self._nml_param_val(outflow, "bsn_len_outl", self._nml_list) +
+            self._nml_param_val(outflow, "bsn_wid_outl", self._nml_list) +
             self._nml_param_val(outflow, "crit_O2") +
             self._nml_param_val(outflow, "crit_O2_dep") +
             self._nml_param_val(outflow, "crit_O2_days") +
@@ -1935,7 +1847,7 @@ class NMLLight(NMLBase):
         }
         """        
         self.light_extc = self._single_value_to_list(self.light_extc)   
-        self.energy_frac = self._single_value_to_list(self.light_extc)
+        self.energy_frac = self._single_value_to_list(self.energy_frac)
 
         if check_errors:
             pass
