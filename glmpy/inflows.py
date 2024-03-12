@@ -1,10 +1,10 @@
 from typing import Union
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 class CatchmentRunoffInflows:
-    """
-    Calculate runoff inflows from a catchment.
+    """Calculate runoff inflows from a catchment.
 
     Generates an inflows timeseries by calculating catchment runoff from
     a pandas Dataframe of precipitation data. Requires a catchment area, a
@@ -16,14 +16,14 @@ class CatchmentRunoffInflows:
 
     Attributes
     ----------
-    met_data : Union[pd.DataFrame, None]
+    met_data : pd.DataFrame
         A pandas DataFrame of meteorological data.
     precip_col : str
         Name of the column in the DataFrame containing precipitation data in
         m/day or m/hour.
     date_time_col : str
         Name of the column in the DataFrame containing datetime data.
-    catchment_area : float
+    catchment_area : Union[float, int]
         Area of the catchment in square meters.
     runoff_coef : Union[float, None]
         Runoff coefficient for the catchment. The fraction of rainfall that
@@ -34,16 +34,15 @@ class CatchmentRunoffInflows:
         generate runoff. Either `runoff_coef` or `runoff_threshold` must be
         provided.
 
-
     Examples
     --------
     Generate a daily timeseries of rainfall:
     >>> daily_met_data = pd.DataFrame({
-    ... 'Date': pd.date_range(
-    ...     start='1997-01-01',
-    ...     end='2004-12-31',
-    ...     freq='24H'),
-    ... 'Rain': 0.024 #m per day
+    ...     'Date': pd.date_range(
+    ...         start='1997-01-01',
+    ...         end='2004-12-31',
+    ...         freq='24h'),
+    ...     'Rain': 0.024 #m per day
     ... })
 
     Calculate inflows with a 50% runoff coefficient and a 1000 m^2 catchment
@@ -59,11 +58,11 @@ class CatchmentRunoffInflows:
 
     Generate a hourly timeseries of rainfall:
     >>> hourly_met_data = pd.DataFrame({
-    ... 'Date': pd.date_range(
-    ...     start='1997-01-01',
-    ...     end='2004-12-31',
-    ...     freq='1H'),
-    ... 'Rain': 0.001
+    ...     'Date': pd.date_range(
+    ...         start='1997-01-01',
+    ...         end='2004-12-31',
+    ...         freq='1h'),
+    ...     'Rain': 0.001
     ... })
 
     Calculate inflows with a 50% runoff coefficient and a 1000 m^2 catchment
@@ -84,42 +83,61 @@ class CatchmentRunoffInflows:
         precip_col: str,
         date_time_col: str,
         catchment_area: Union[float, int],
-        runoff_coef: Union[float, int, None] = None,
+        runoff_coef: Union[float, None] = None,
         runoff_threshold: Union[float, None] = None,
     ):
         if not isinstance(met_data, pd.DataFrame):
             raise ValueError(
-                f"met_data must be a pandas DataFrame, but got {type(met_data)}."
+                 "met_data must be a pandas DataFrame. " 
+                 f"Got type {type(met_data)}."
             )
         if not isinstance(catchment_area, (int, float)):
             raise ValueError(
-                f"catchment_area must be a numeric value, but got {type(catchment_area)}."
+                "catchment_area must be a numeric value. "
+                f"Got type {type(catchment_area)}."
             )
         if not isinstance(runoff_coef, (int, float, type(None))):
             raise ValueError(
-                f"runoff_coef must be a numeric value, but got {type(runoff_coef)}."
+                "runoff_coef must be a numeric value. "
+                f"Got type {type(runoff_coef)}."
             )
         if not isinstance(runoff_threshold, (int, float, type(None))):
             raise ValueError(
-                f"runoff_threshold must be a numeric value, but got {type(runoff_threshold)}."
+                "runoff_threshold must be a numeric value. "
+                f"Got type {type(runoff_threshold)}."
             )
         if not isinstance(precip_col, str):
             raise ValueError(
-                f"precip_col must be a string, but got {type(precip_col)}."
+                "precip_col must be a string. "
+                f"Got type {type(precip_col)}."
             )
         if not isinstance(date_time_col, str):
             raise ValueError(
-                f"date_time_col must be a string, but got {type(date_time_col)}."
+                "date_time_col must be a string. "
+                f"Got type {type(date_time_col)}."
             )
 
         if catchment_area < 0:
-            raise ValueError("catchment_area must be a positive value.")
+            raise ValueError(
+                "catchment_area must be a positive value."
+            )
         if precip_col not in met_data.columns:
-            raise ValueError(f"{precip_col} not in {met_data} columns.")
+            raise ValueError(
+                f"{precip_col} not in DataFrame columns."
+            )
         if date_time_col not in met_data.columns:
-            raise ValueError(f"{date_time_col} not in {met_data} columns.")
+            raise ValueError(
+                f"{date_time_col} not in DataFrame columns."
+            )
+        if not is_numeric_dtype(met_data[precip_col]):
+            raise ValueError(
+                f"The {precip_col} column must be numeric. "
+                f"Got type {met_data.dtypes[precip_col]}."
+            )
         if runoff_coef is None and runoff_threshold is None:
-            raise ValueError("Either runoff_coef or runoff_threshold must be provided.")
+            raise ValueError(
+                "Either runoff_coef or runoff_threshold must be provided."
+            )
         if runoff_coef is not None and runoff_threshold is not None:
             raise ValueError(
                 "Only one of runoff_coef or runoff_threshold can be provided."
@@ -130,13 +148,17 @@ class CatchmentRunoffInflows:
             )
         except Exception as e:
             raise ValueError(
-                f"{date_time_col} is not a valid datetime column. Error:{str(e)}"
+                f"{date_time_col} is not a valid datetime column."
             )
 
-        time_diff = met_data[date_time_col][1] - met_data[date_time_col][0]
-        if time_diff != pd.Timedelta(days=1) and time_diff != pd.Timedelta(hours=1):
+        time_diff = pd.Timedelta(
+            met_data[date_time_col][1] - met_data[date_time_col][0]
+        )
+        if (time_diff != pd.Timedelta(days=1) and 
+            time_diff != pd.Timedelta(hours=1)):
             raise ValueError(
-                "Precipitation data must be hourly or daily timesteps.vConsider resampling your data."
+                "Precipitation data must be hourly or daily timesteps. "
+                "Consider resampling your data."
             )
 
         self.precip_col = precip_col
@@ -146,42 +168,55 @@ class CatchmentRunoffInflows:
         self.date_time_col = date_time_col
         self.met_data = met_data
         self.catchment_runoff_inflows = None
+        self.time_diff = time_diff
 
-    def _calculate_inflows(self):
+    @staticmethod
+    def _calculate_inflows(
+            time_diff: pd.Timedelta,
+            met_data: pd.DataFrame,
+            precip_col: str,
+            date_time_col: str,
+            catchment_area: Union[float, int],
+            runoff_coef: Union[float, int, None] = None,
+            runoff_threshold: Union[float, int, None] = None,
+        ) -> pd.DataFrame:
+        """ Calculate inflows
+
+        Internal method for calculating inflows from catchment runoff.
         """
-        Calculates inflows from catchment runoff.
-        """
-        self.time_diff = (
-            self.met_data[self.date_time_col][1] - self.met_data[self.date_time_col][0]
-        )
 
-        if self.time_diff == pd.Timedelta(hours=1):
-            self.num_seconds = 3600
-        elif self.time_diff == pd.Timedelta(days=1):
-            self.num_seconds = 86400
+        if time_diff == pd.Timedelta(hours=1):
+            num_seconds = 3600
+        elif time_diff == pd.Timedelta(days=1):
+            num_seconds = 86400
 
-        if self.runoff_coef is not None:
-            self.inflow_data = (
-                self.met_data[self.precip_col] * self.catchment_area * self.runoff_coef
+        met_data[precip_col] = pd.to_numeric(met_data[precip_col])
+        if runoff_coef is not None:
+            inflow_data = (
+                met_data[precip_col] * catchment_area * runoff_coef
             )
-            self.inflow_data[self.inflow_data < 0] = 0
-        else:
-            self.runoff_threshold /= 1000
-            self.inflow_data = (
-                self.met_data[self.precip_col] - self.runoff_threshold
-            ) * self.catchment_area
-            self.inflow_data[self.inflow_data < 0] = 0
+        elif runoff_threshold is not None:
+            runoff_threshold /= 1000
+            inflow_data = (
+                met_data[precip_col] - runoff_threshold
+            ) * catchment_area
+        
+        inflow_data[inflow_data < 0] = 0
 
-        self.inflow_data = self.inflow_data / self.num_seconds
+        inflow_data = inflow_data.div(num_seconds)
 
-        self.catchment_runoff_inflows = pd.DataFrame(
-            {"time": self.met_data[self.date_time_col], "flow": self.inflow_data}
+        catchment_runoff_inflows = pd.DataFrame(
+            {
+                "time": met_data[date_time_col], 
+                "flow": inflow_data
+            }
         )
-        self.catchment_runoff_inflows.set_index("time", inplace=True)
+        catchment_runoff_inflows.set_index("time", inplace=True)
 
-    def get_inflows(self):
-        """
-        Get the inflows timeseries.
+        return catchment_runoff_inflows
+
+    def get_inflows(self) -> pd.DataFrame:
+        """Get the inflows timeseries.
 
         Returns a pandas dataframe of the calculated catchment runoff inflows.
 
@@ -194,11 +229,12 @@ class CatchmentRunoffInflows:
         --------
         Generate a hourly timeseries of rainfall:
         >>> hourly_met_data = pd.DataFrame({
-        ... 'Date': pd.date_range(
-        ...     start='1997-01-01',
-        ...     end='2004-12-31',
-        ...     freq='1H'),
-        ... 'Rain': 0.001
+        ...     'Date': pd.date_range(
+        ...         start='1997-01-01',
+        ...         end='2004-12-31',
+        ...         freq='1h'
+        ...     ),
+        ...     'Rain': 0.001
         ... })
 
         Calculate inflows with a 50% runoff coefficient and a 1000 m^2
@@ -211,15 +247,23 @@ class CatchmentRunoffInflows:
         ...     date_time_col = 'Date'
         ... )
 
-        Call `get_inflows` to return the inflows timeseries:
+        Call `get_inflows()` to return the inflows timeseries:
         >>> inflows_data.get_inflows()
         """
 
-        if self.catchment_runoff_inflows is None:
-            self._calculate_inflows()
+        self.catchment_runoff_inflows = self._calculate_inflows(
+            time_diff=self.time_diff,
+            met_data=self.met_data,
+            precip_col=self.precip_col,
+            date_time_col=self.date_time_col,
+            catchment_area=self.catchment_area,
+            runoff_coef=self.runoff_coef,
+            runoff_threshold=self.runoff_threshold
+        )
         return self.catchment_runoff_inflows
 
-    def write_inflows(self, file_path: str):
+
+    def write_inflows(self, file_path: str) -> None:
         """
         Write the inflow timeseries to a CSV file.
 
@@ -237,7 +281,7 @@ class CatchmentRunoffInflows:
         ...     'Date': pd.date_range(
         ...         start='1997-01-01',
         ...         end='2004-12-31',
-        ...         freq='24H'),
+        ...         freq='24h'),
         ...     'Rain': 0.024
         ... })
         >>> inflows_data = inflows.CatchmentRunoffInflows(
@@ -253,5 +297,13 @@ class CatchmentRunoffInflows:
         """
 
         if self.catchment_runoff_inflows is None:
-            self._calculate_inflows()
+            self.catchment_runoff_inflows = self._calculate_inflows(
+                time_diff=self.time_diff,
+                met_data=self.met_data,
+                precip_col=self.precip_col,
+                date_time_col=self.date_time_col,
+                catchment_area=self.catchment_area,
+                runoff_coef=self.runoff_coef,
+                runoff_threshold=self.runoff_threshold
+            )
         self.catchment_runoff_inflows.to_csv(file_path)
