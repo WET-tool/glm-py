@@ -1,86 +1,101 @@
 import math
 from typing import Union
+import numpy as np
 
+class InvertedTruncatedSquarePyramid:
+    """Calculates the volume and surface area of an inverted truncated square 
+    pyramid.
 
-class SimpleTruncatedPyramidWaterBody:
-    """Calculates the volume and surface area of a truncated square pyramid.
-
-    Assumes only the height (i.e., depth), slope, and surface length of a 
-    square truncated pyramidal water body are known. Enables calculation of the 
-    volume and surface area of the water body at each height increment. Useful 
-    for constructing the `A` and `H` parameters of the `&morphometry` block 
-    with `nml.NMLMorphometry()`.
+    Useful for calculating the `A` and `H` morphometry parameters for simple 
+    water bodies such as on-farm reservoirs. Assumes only the height 
+    (i.e., depth), side slope, and surface length of the water body are known. 
 
     Attributes
     ----------
-    height : float
+    height : Union[float, int]
         Height of water body from the base to surface in metres.
-    surface_length : float
-        Surface length of the water body in metres.
-    side_slope : float
-        Side slope of water body - the rise over run (metres/metre). By 
-        default, 1/3.
+    surface_length : Union[float, int]
+        Surface length of the water body in metres. Assumes surface width and 
+        length are equal.
+    num_vals: int
+        The number of values to be returned by the `get_volumes()`, 
+        `get_surface_areas()`, and `get_heights()` methods. `num_vals` should 
+        be the same as the `bsn_vals` parameter from the `&morphometry` 
+        configuration block (see `bsn_vals` in `nml.NMLMorphometry()`).
+    side_slope : Union[float, int]
+        Side slope of water body - the rise over run (metre/metre). Default is 
+        1/3.
+    surface_elevation: float
+        Elevation at the water body surface. Shifts the values returned by
+        `get_heights()` up or down. Default is 0.0.
 
     Examples
     --------
     Import the `dimensions` and `nml` modules:
     >>> from glmpy import dimensions, nml
 
-    Consider a square on-farm reservoir that is 40m long, 40m wide, 5m deep, 
-    and has a side slope of 1/3:
-    >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
+    Consider a square on-farm reservoir (OFR) that is 40m long, 40m wide, 6m 
+    deep, and has a side slope of 1/3:
+    >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
     ...     height=6,
     ...     surface_length=40,
-    ...     side_slope=1/3
+    ...     num_vals=7,
+    ...     side_slope=1/3,
+    ...     surface_elevation=0
     ... )
 
-    Get the total volume at each metre increment of the reservoir profile:
-    >>> ofr.get_volumes()
-    [0.0, 52.0, 224.0, 588.0, 1216.0, 2180.0, 3552.0]
+    Get a list of height values to use for the `H` parameter in the 
+    `&morphometry` configuration block. The length of the list is determined by
+    the `num_vals` attribute:
+    >>> print(ofr.get_heights())
+    [-6.0, -5.0, -4.0, -3.0, -2.0, -1.0, 0.0]
 
-    Get the surface water area at each metre increment of the reservoir
-    profile:
-    >>> ofr.get_surface_areas()
+    Get the water surface area at each of these heights:
+    >>> print(ofr.get_surface_areas())
     [16.0, 100.0, 256.0, 484.0, 784.0, 1156.0, 1600.0]
 
-    Get the each metre increment of the reservoirs profile formatted as per GLM
-    requirements:
-    >>> ofr.get_heights()
-    [-6, -5, -4, -3, -2, -1, 0]
+    Get the volumes at each of these heights:
+    >>> print(ofr.get_volumes())
+    [0.0, 52.0, 224.0, 588.0, 1216.0, 2180.0, 3552.0]
 
-    Combine the surface area and height values into a dictionary for setting
-    the `A` and `H` attributes of `NMLMorphometry()`:
-    >>> dimensions_dict = {
-    ...     "A": ofr.get_surface_areas(),
-    ...     "H": ofr.get_heights(),
-    ... }
-    >>> morphometry = nml.NMLMorphometry()
-    >>> morphometry.set_attributes(dimensions_dict)
-
-    Print the &morphometry block:
-    >>> print(morphometry)
-
+    Set the `A`, `H`, and `bsn_vals` attributes of `nml.NMLMorphometry()`:
+    >>> morphometry = nml.NMLMorphometry(
+    ...     A=ofr.get_surface_areas(),
+    ...     H=ofr.get_heights(),
+    ...     bsn_vals=7
+    ... )
     """
-
     def __init__(
         self,
         height: Union[float, int],
         surface_length: Union[float, int],
-        side_slope: Union[float, int] = 3,
+        num_vals: int,
+        side_slope: Union[float, int] = 1/3,
+        surface_elevation: float = 0.0
     ):
 
         if not isinstance(height, (float, int)):
             raise ValueError(
-                f"height must be a numeric value, but got {type(height)}."
+                f"height must be a numeric value. Got type {type(height)}."
             )
         if not isinstance(surface_length, (float, int)):
             raise ValueError(
-                "surface_length must be a numeric value, but got "
+                "surface_length must be a numeric value. Got type "
                 f"{type(surface_length)}."
+            )
+        if not isinstance(num_vals, int):
+            raise ValueError(
+                "num_vals must be an integer value. Got type "
+                f"{type(num_vals)}."
+            )
+        if not isinstance(surface_elevation, (float, int)):
+            raise ValueError(
+                "surface_elevation must be a numeric value. Got type "
+                f"{type(surface_elevation)}."
             )
         if not isinstance(side_slope, (float, int)):
             raise ValueError(
-                "side_slope must be a numeric value, but got "
+                "side_slope must be a numeric value. Got type "
                 f"{type(side_slope)}."
             )
         if height < 0:
@@ -91,6 +106,10 @@ class SimpleTruncatedPyramidWaterBody:
             raise ValueError(
                 "surface_length must be a positive value."
             )
+        if num_vals < 2:
+            raise ValueError(
+                "num_vals must be greater than or equal 2."
+            )
         if side_slope < 0:
             raise ValueError(
                 "side_slope must be a positive value."
@@ -98,13 +117,13 @@ class SimpleTruncatedPyramidWaterBody:
 
         base_length = (
             surface_length - (height / side_slope) * 2
-        )
+            )
 
         if base_length <= 0:
             raise ValueError(
                 "Invalid combination of height, surface_length, and "
                 "side_slope parameters. The calculated base_length of the "
-                "polyhedron is currently <=0. base_width is calculated by "
+                "water body is currently <= 0. base_length is calculated by "
                 "(surface_length-(height/side_slope)*2). Adjust your input "
                 "parameters to calculate a positive base_length value."
             )
@@ -112,15 +131,68 @@ class SimpleTruncatedPyramidWaterBody:
         self.height = height
         self.surface_length = surface_length
         self.side_slope = side_slope
+        self.num_vals = num_vals
         self.base_length = base_length
+        self.surface_elevation = surface_elevation
 
-    def get_volumes(self):
+    @staticmethod
+    def _calc_volumes(
+            height: Union[float, int],
+            base_length,
+            side_slope,
+            num_vals
+    ) -> list[float]:
+        """Calculate volumes.
+
+        Internal method for calculating volumes.
+        """
+        volumes = []
+        for i in np.linspace(start=0, stop=height, num=num_vals):
+            volume = (
+                ((base_length**2) * i) + 
+                (2 * (i**2) * (base_length/side_slope)) +
+                ((4 * (i**3)) / (3 * (side_slope**2)))
+            )
+            volumes.append(volume)
+        return volumes
+    
+    @staticmethod
+    def _calc_areas(
+        height,
+        base_length,
+        side_slope,
+        num_vals
+    ) -> list[float]:
+        """Calculate areas.
+
+        Internal method for calculating areas.
+        """
+        areas = []
+        for i in np.linspace(start=0, stop=height, num=num_vals):
+            area = (base_length + ((2*i)/side_slope))**2
+            areas.append(area)
+        return areas
+    
+    @staticmethod
+    def _calc_heights(surface_elevation, height, num_vals) -> list[float]:
+        """Calculate heights.
+
+        Internal method for calculating heights.
+        """
+        heights = np.linspace(0, -height, num_vals)
+        heights = heights.tolist()
+        heights = heights[::-1]
+        heights = [height + surface_elevation for height in heights]
+        return heights
+            
+    def get_volumes(self) -> list[float]:
         """Calculates volumes.
 
-        Calculates the total volume of the water body at each metre increment
-        of its profile. Volumes are returned as a list of floats where the
-        first item is the volume at the bottom of the water body and the last 
-        is the volume at the surface.
+        Returns a list of volumes (m^3) that correspond with the heights 
+        returned by `get_heights()`. The length of the list is determined by 
+        the `num_vals` attribute. Volumes are returned as a list of floats 
+        where the first item is the volume at the bottom of the water body and 
+        the last is the volume at the surface.
 
         Parameters
         ----------
@@ -129,52 +201,53 @@ class SimpleTruncatedPyramidWaterBody:
         Returns
         -------
         volume : list
-            The volume of water body (m^3) at each metre height increment.
+            The water body volumes (m^3).
 
         Examples
         --------
-        Import the `dimensions` module:
-        >>> from glmpy import dimensions
 
-        Consider a square on-farm reservoir that is 40m long, 40m wide, 5m 
-        deep, and has a side slope of 1/3:
-        >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
+        Get a list of 7 volumes at each height in `get_heights()`:
+        >>> from glmpy import dimensions
+        >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
         ...     height=6,
         ...     surface_length=40,
-        ...     side_slope=1/3
+        ...     num_vals=7,
+        ...     side_slope=1/3,
+        ...     surface_elevation=0
         ... )
-
-        Get the total volume at each metre increment of the reservoir profile:
-        >>> ofr.get_volumes()
+        >>> print(ofr.get_heights())
+        [-6.0, -5.0, -4.0, -3.0, -2.0, -1.0, 0.0]
+        >>> print(ofr.get_volumes())
         [0.0, 52.0, 224.0, 588.0, 1216.0, 2180.0, 3552.0]
 
-        Get the total volume of the reservoir at 1m from the bottom:
-        >>> ofr.get_volumes()[1]
-        52.0
-
-        Get the total volume of the entire reservoir, i.e., from the top of the
-        water body:
-        >>> ofr.get_volumes()[-1]
-        3552.0
+        Get a list of 4 volumes at each height in `get_heights()`:
+        >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
+        ...     height=6,
+        ...     surface_length=40,
+        ...     num_vals=4,
+        ...     side_slope=1/3
+        ... )
+        >>> print(ofr.get_heights())
+        [-6.0, -4.0, -2.0, 0.0]
+        >>> print(ofr.get_volumes())
+        [0.0, 224.0, 1216.0, 3552.0]
         """
+        self.volumes = self._calc_volumes(
+            height=self.height,
+            base_length=self.base_length,
+            side_slope=self.side_slope,
+            num_vals=self.num_vals
+        )
+        return self.volumes
 
-        return [
-            (
-                ((self.base_length**2)*i) +
-                (2*(i**2)*((self.base_length)/(self.side_slope))) +
-                ((4*(i**3))/(3*(self.side_slope**2)))
-            )
-            for i in range(0, int(self.height) + 1)
-        ]
-
-    def get_surface_areas(self):
+    def get_surface_areas(self) -> list[float]:
         """Calculates surface areas.
 
-        Returns the surface area of the water body at each metre increment of
-        its profile. Surfacea are returned as a list of floats where the
-        first item is the area at the bottom of the water body
-        and the last is the area at the top.
-
+        Returns a list of surface areas (m^2) that correspond with the heights 
+        returned by `get_heights()`. The length of the list is determined by 
+        the `num_vals` attribute. Surface areas are returned as a list of 
+        floats where the first item is the area at the bottom of the water body 
+        and the last is the area at the surface.
 
         Parameters
         ----------
@@ -183,44 +256,51 @@ class SimpleTruncatedPyramidWaterBody:
         Returns
         -------
         surface_areas : list
-            Surface area of water body (m^2) at each metre height increment.
+            Surface areas of water body (m^2).
 
         Examples
         --------
-        Import the `dimensions` module:
+        Get a list of 7 surface areas at each height in `get_heights()`:
         >>> from glmpy import dimensions
-
-        Consider a square on-farm reservoir that is 40m long, 40m wide, 5m 
-        deep, and has a side slope of 1/3:
-        >>> ofr = dimensions.SimpleTruncatedPyramidWaterBody(
+        >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
         ...     height=6,
         ...     surface_length=40,
-        ...     side_slope=1/3
+        ...     num_vals=7,
+        ...     side_slope=1/3,
+        ...     surface_elevation=0
         ... )
-
-        Get the surface water area at each metre increment of the reservoir
-        profile:
-        >>> ofr.get_surface_areas()
+        >>> print(ofr.get_heights())
+        [-6.0, -5.0, -4.0, -3.0, -2.0, -1.0, 0.0]
+        >>> print(ofr.get_surface_areas())
         [16.0, 100.0, 256.0, 484.0, 784.0, 1156.0, 1600.0]
 
-        Get the surface area of the reservoir at 1m from the bottom:
-        >>> ofr.get_surface_areas()[1]
-        100.0
-
-        Get the surface area at the surface of the reservoir:
-        >>> ofr.get_surface_areas()[-1]
-        1600.0
+        Get a list of 4 surface areas at each height in `get_heights()`:
+        >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
+        ...     height=6,
+        ...     surface_length=40,
+        ...     num_vals=4,
+        ...     side_slope=1/3
+        ... )
+        >>> print(ofr.get_heights())
+        [-6.0, -4.0, -2.0, 0.0]
+        >>> print(ofr.get_surface_areas())
+        [16.0, 256.0, 784.0, 1600.0]
         """
+        self.areas = self._calc_areas(
+            height=self.height,
+            base_length=self.base_length,
+            side_slope=self.side_slope,
+            num_vals=self.num_vals
+        )
+        return self.areas
 
-        return [
-            ((self.base_length + ((2*i)/(self.side_slope)))**2)
-            for i in range(0, int(self.height) + 1)
-        ]
-
-    def get_heights(self,):
+    def get_heights(self) -> list[float]:
         """Calculates heights.
 
-        Returns a list of heights from base to surface.
+        Returns a list of heights (m) from base to surface. The number of 
+        heights is determined by the `num_vals` attribute. Heights can be 
+        adjusted for different surface elevations by increasing or decreasing
+        the `surface_elevation` attribute.
 
         Parameters
         ----------
@@ -230,75 +310,28 @@ class SimpleTruncatedPyramidWaterBody:
         -------
         heights : list
             Heights (m) from base to surface.
+        
+        Examples
+        --------
+
+        Get the height values for a water body that has a surface elevation of
+        -3m:
+        >>> from glmpy import dimensions
+        >>> ofr = dimensions.InvertedTruncatedSquarePyramid(
+        ...     height=6,
+        ...     surface_length=40,
+        ...     num_vals=7,
+        ...     side_slope=1/3,
+        ...     surface_elevation=-3
+        ... )
+        >>> print(ofr.get_heights())
+        [-9.0, -8.0, -7.0, -6.0, -5.0, -4.0, -3.0]
         """
-
-        return list(range(0, -abs(int(self.height) + 1), -1))[::-1]
-
-
-class SimpleCircularWaterBody:
-    """Calculates the volume and surface area of a circular water body.
-
-    Assumes only the height, radius, and surface radius are known. Enables
-    calculation of the volume and surface area of the water body at each
-    height increment.
-
-    Attributes
-    ----------
-    height : float
-        height of dam, metres
-    surface_radius : float
-        surface radius of dam, metres
-    side_slope : float
-        side slope of dam, by default 3
-
-    Examples
-    --------
-    >>> my_dam = SimpleCircularWaterBody(3, 5)
-    >>> my_dam.get_volumes()
-    [0.0, 11.148148148148149, 27.185185185185183, 49.0]
-    >>> my_dam.get_surface_areas()
-    [9.0, 13.444444444444443, 18.777777777777775, 25.0]
-    """
-
-    def __init__(
-        self, height: float, surface_radius: float, side_slope: float = 3.0
-    ):
-        try:
-            self.height = float(height)
-            self.surface_radius = float(surface_radius)
-            self.side_slope = float(side_slope)
-        except:
-            raise ValueError("Height, radius, and side slope must be numeric")
-
-        self.surface_diameter = self.surface_radius * 2
-        self.base_diameter = (
-            self.surface_diameter - (self.height / self.side_slope) * 2
+        self.heights = self._calc_heights(
+            surface_elevation=self.surface_elevation,
+            height=self.height, 
+            num_vals=self.num_vals
         )
-        self.base_radius = self.base_diameter / 2
+        return self.heights
 
-    def get_volumes(self):
-        """Calculates volumes.
 
-        Returns the volume of the water body at each height increment.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        volume : list
-            The volume of water body (m^3) at each metre height increment.
-        """
-
-        return [
-            (1 / 3)
-            * math.pi
-            * i
-            * (
-                (self.base_radius**2)
-                + (self.base_radius * self.surface_radius)
-                + (self.surface_radius**2)
-            )
-            for i in range(0, int(self.height) + 1)
-        ]
