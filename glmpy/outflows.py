@@ -1,36 +1,33 @@
-from datetime import datetime
-
 import pandas as pd
+import datetime as dt
 
-from typing import Dict, Union
+from typing import Mapping, Union
 
 class CustomOutflows:
     """
     Create a simple outflow timeseries for GLM.
 
-    Generates a outflow timeseries between a given start and end date
-    using a specified base flow (m^3). The timeseries can be updated in
-    two ways:
-    1. By providing a dictionary with specific dates and their corresponding
-    outflows.
-    2. By specifying a fixed outflow value between two dates.
-    Once updated, the outflow data can be exported to a CSV file in units of
-    m^3/second.
+    Generates a outflow timeseries in m^3/second between a given start and end
+    datetime. The timeseries can be updated in two ways:
+    1. By providing a dictionary with specific datetimes and their 
+    corresponding outflows.
+    2. By specifying a fixed outflow value between two datetimes.
+    The outflow timeseries can be returned as a pandas DataFrame or exported to 
+    a CSV file.
 
     Attributes
     ----------
-    start_datetime : str
-        Start datetime of the outflow timeseries. Must be in either
-        'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.
+    start_datetime : Union[str, pd.Timestamp, dt.datetime]
+        The start datetime of the outflow timeseries. Must be of type 
+        Timestamp, datetime, or a valid datetime string.
     end_datetime : str
-        End datetime of the outflow timeseries. Must be in either 'YYYY-MM-DD'
-        or 'YYYY-MM-DD HH:MM:SS' format.
+        The end datetime of the outflow timeseries. Must be of type 
+        Timestamp, datetime, or a valid datetime string.
     frequency : str
-        Frequency of the outflow timeseries. Must be either 'daily' or
-        'hourly'. Defaults to 'daily'.
+        Frequency of the outflow timeseries. Must be either '24h' (daily) or
+        '1h' (hourly). Default is '24h'.
     base_outflow : Union[int, float]
-        Base flow of the outflow timeseries in m^3/day or m^3/hour depending on
-        `frequency`. Defaults to 0.0.
+        Base flow of the outflow timeseries in m^3. Default is 0.0.
 
     Examples
     --------
@@ -40,236 +37,347 @@ class CustomOutflows:
     >>> outflows = outflows.CustomOutflows(
     ...     start_datetime="2020-01-01",
     ...     end_datetime="2020-01-10",
-    ...     frequency="daily",
+    ...     frequency="24h",
     ...     base_outflow=0.0
     ... )
-
     Update the timeseries with a dictionary of specific dates and their
-    corresponding outflows:
+    corresponding outflows in m^3/day:
     >>> outflows_dict = {
-    ...     "2020-01-01 00:00:00": 10,
-    ...     "2020-01-02 00:00:00": 11,
-    ...     "2020-01-03 00:00:00": 12
+    ...     "2020-01-02": 2, # 2m^3/day
+    ...     "2020-01-03": 4, # 4m^3/day
+    ...     "2020-01-04": 6 # 6m^3/day
     ... }
-    >>> outflows.set_discrete_outflows(outflows_dict)
+    >>> outflows.set_on_datetime(outflows_dict)
 
-    Return the outflows timeseries as a pandas DataFrame:
-    >>> outflows.get_outflows()
+    Return and print the outflows timeseries as a pandas DataFrame. Note, the
+    outflow units have been converted to m^3/second as expected by GLM:
+    >>> print(outflows.get_outflows())
+            time      flow
+    0 2020-01-01  0.000000
+    1 2020-01-02  0.000023
+    2 2020-01-03  0.000046
+    3 2020-01-04  0.000069
+    4 2020-01-05  0.000000
+    5 2020-01-06  0.000000
+    6 2020-01-07  0.000000
+    7 2020-01-08  0.000000
+    8 2020-01-09  0.000000
+    9 2020-01-10  0.000000
 
     Update the timeseries with a fixed outflow between two dates:
-    >>> outflows.set_continuous_outflows(
+    >>> outflows.set_over_datetime(
     ...     from_datetime="2020-01-05",
     ...     to_datetime = "2020-01-09",
-    ...     continuous_outflow = 9
+    ...     outflow = 5 # 5m^3/day
     ... )
 
-    Return the updated timeseries:
-    >>> outflows.get_outflows()
+    Return and print the outflows timeseries as a pandas DataFrame:
+    >>> print(outflows.get_outflows())
+            time      flow
+    0 2020-01-01  0.000000
+    1 2020-01-02  0.000023
+    2 2020-01-03  0.000046
+    3 2020-01-04  0.000069
+    4 2020-01-05  0.000058
+    5 2020-01-06  0.000058
+    6 2020-01-07  0.000058
+    7 2020-01-08  0.000058
+    8 2020-01-09  0.000058
+    9 2020-01-10  0.000000
+
+    Write the outflows to a CSV without the index:
+    >>> outflows.write_outflows(file_path="outflows.csv")
     """
+    def __init__(
+        self,
+        start_datetime: Union[str, pd.Timestamp, dt.datetime],
+        end_datetime: Union[str, pd.Timestamp, dt.datetime],
+        frequency: str = "24h",
+        base_outflow: Union[int, float] = 0.0
+    ):
 
-    def __init__(self, start_datetime: str, end_datetime: str, frequency: str = "daily", base_outflow: Union[int, float] = 0.0):
-        if not isinstance(start_datetime, str):
+        self._check_datetime_type(start_datetime)
+        self._check_datetime_type(end_datetime)
+        start_datetime = self._to_pd_timestamp(start_datetime)
+        end_datetime = self._to_pd_timestamp(end_datetime)
+        self._check_start_preceeds_end(
+            start_datetime=start_datetime,
+            end_datetime=end_datetime
+        )
+        if frequency not in ["24h", "1h"]:
             raise ValueError(
-                f"start_datetime must be a string, but got {type(start_datetime)}."
+                "Invalid frequency. frequency must be '24h' (daily) or '1h' "
+                f"(hourly). Got {frequency}."
             )
-        if not isinstance(end_datetime, str):
-            raise ValueError(
-                f"end_datetime must be a string, but got {type(end_datetime)}."
-            )
-        if not CustomOutflows.is_valid_datetime(start_datetime):
-            raise ValueError(
-                f"'{start_datetime}' is not a valid datetime string. Must be provided in the format '%Y-%m-%d %H:%M:%S' or '%Y-%m-%d'"
-            )
-        if not CustomOutflows.is_valid_datetime(end_datetime):
-            raise ValueError(
-                f"'{end_datetime}' is not a valid datetime string. Must be provided in the format '%Y-%m-%d %H:%M:%S' or '%Y-%m-%d'"
-            )
-        if not CustomOutflows.is_valid_datetime_order(start_dt_string=start_datetime, end_dt_string=end_datetime):
-            raise ValueError(
-                f"start_datetime must occur before end_datetime. Currently {start_datetime} >= {end_datetime}."
-            )
-        if not isinstance(frequency, str):
-            raise ValueError(
-                f"frequency must be a string, but got {type(frequency)}."
-            )
-        if frequency != "daily" and frequency != "hourly":
-            raise ValueError(
-                f"frequency must be either `daily` or `hourly, got {frequency}."
-            )
-        if not isinstance(base_outflow, (int, float)):
-            raise ValueError(
-                f"base_outflow must be numeric, but got {type(base_outflow)}."
-            )
-        if base_outflow < 0:
-            raise ValueError(
-                f"base_outflow must be a positive value, got {base_outflow}."
-            )
+        self._check_datetime_alignment(
+            timestamp=start_datetime, frequency=frequency
+        )
+        self._check_datetime_alignment(
+            timestamp=end_datetime, frequency=frequency
+        )
 
-        self.start_datetime = CustomOutflows.to_datetime_format(start_datetime)
-        self.end_datetime = CustomOutflows.to_datetime_format(end_datetime)
+        self._check_valid_outflow(outflow_value=base_outflow)
+
+        self.start_datetime = start_datetime
+        self.end_datetime = end_datetime
         self.frequency = frequency
         self.base_outflow = base_outflow
 
-        if self.frequency == "daily":
-            freq = "24H"
+        if self.frequency == "24h":
             self.num_seconds = 86400
-        elif self.frequency == "hourly":
-            freq = "1H"
+        elif self.frequency == "1h":
             self.num_seconds = 3600
-
-        self.custom_outflows = pd.DataFrame({
+        
+        self.outflows = pd.DataFrame({
             "time": pd.date_range(
                 start=self.start_datetime,
                 end=self.end_datetime,
-                freq=freq
+                freq=self.frequency
             ),
             "flow": self.base_outflow/self.num_seconds
         })
+    
+    def _to_pd_timestamp(
+        self,
+        datetime: Union[str, dt.datetime]
+    ) -> pd.Timestamp:
+        if isinstance(datetime, str):
+            datetime = pd.Timestamp(datetime)
+        if isinstance(datetime, dt.datetime):
+            datetime = pd.Timestamp(datetime)
+        return datetime
 
-    def set_discrete_outflows(self, outflows_dict: Dict[str, Union[int, float]]):
+    def _check_datetime_type(
+        self, datetime: Union[str, pd.Timestamp, dt.datetime]
+    ) -> None:
+        if not isinstance(datetime, (str, pd.Timestamp, dt.datetime)):
+            raise ValueError(
+                f"Unknown datetime format. {datetime} must be type "
+                "Timestamp, datetime, or a valid datetime string format. Got "
+                f"type {type(datetime)}."
+            )
+        
+    def _check_datetime_alignment(
+        self, timestamp: pd.Timestamp, frequency: str
+    ) -> None:
+        if frequency == '1h' and (
+            timestamp.minute != 0 or 
+            timestamp.second != 0
+        ):
+            raise ValueError(
+                f"Unaligned date time. For hourly frequency, {timestamp} must "
+                "align with the start of an hour."
+            )
+        if frequency == '24h' and (
+            timestamp.hour != 0 or
+            timestamp.minute != 0 or 
+            timestamp.second != 0         
+        ):
+            raise ValueError(
+                f"Unaligned date time. For daily frequency, {timestamp} must "
+                "align with the start of a day."
+            )
+
+    def _check_valid_outflow(self, outflow_value: Union[int, float]) -> None:
+        if not isinstance(outflow_value, (int, float)):
+            raise ValueError(
+                f"Invalid outflow type. {outflow_value} must be numeric. "
+                f"Got type {type(outflow_value)}."
+            )
+        if outflow_value < 0.0:
+            raise ValueError(
+                f"Invalid outflow value. {outflow_value} must be positive."
+            )
+    
+    def _check_timestamp_is_within_range(
+        self,
+        timestamp: pd.Timestamp,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
+        outflows_df: pd.DataFrame
+    ) -> None:
+        if timestamp not in outflows_df['time'].values:
+            raise ValueError(
+                f"{timestamp} is not within {start_datetime} and "
+                f"{end_datetime}."
+            )    
+    
+    def _check_start_preceeds_end(
+        self,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp
+    ) -> None:
+        if not start_datetime < end_datetime:
+            raise ValueError(
+                f"{start_datetime} must preceed {end_datetime}."
+            )
+
+    def set_on_datetime(
+        self,
+        datetime_outflows: dict
+    ):
         """
         Set the outflow volume for specific datetimes.
 
         The outflow volume for specific datetimes can be set by providing a
-        dictionary with datetimes as keys and outflow volumes as values. The
-        dictionary keys must be in 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS.
-        Outflow volumes must be provided in the same units as the base outflow
-        (m^3/day or m^3/hour).
+        dictionary with datetimes as keys and outflow volumes as values.
+        Outflow volumes will be treated as having the same units as the base 
+        outflow (m^3/day or m^3/hour depending on `frequency`).
 
         Parameters
         ----------
-        outflows_dict : Dict[str, Union[int, float]]
-            Dictionary with datetimes as keys and outflow volumes as values.
+        datetime_outflows : Dict[Union[str, pd.Timestamp, dt.datetime], 
+        Union[float, int]]
+            Dictionary with valid datetimes as keys and outflow volumes as 
+            values.
 
         Examples
         --------
         >>> from glmpy import outflows
         >>> outflows = outflows.CustomOutflows(
         ...     start_datetime="2020-01-01 00:00:00",
-        ...     end_datetime="2020-01-01 23:00:00",
-        ...     frequency="hourly",
+        ...     end_datetime="2020-01-01 10:00:00",
+        ...     frequency="1h",
         ...     base_outflow=0.0
         ... )
         >>> outflows_dict = {
         ...     "2020-01-01 01:00:00": 10,
-        ...     "2020-01-01 02:00:00": 11,
-        ...     "2020-01-01 03:00:00": 12
+        ...     "2020-01-01 03:00:00": 12,
+        ...     "2020-01-01 05:00:00": 14
         ... }
-        >>> outflows.set_discrete_outflows(outflows_dict)
-        >>> outflows.get_outflows()
+        >>> outflows.set_on_datetime(outflows_dict)
+        >>> print(outflows.get_outflows())
+                          time      flow
+        0  2020-01-01 00:00:00  0.000000
+        1  2020-01-01 01:00:00  0.002778
+        2  2020-01-01 02:00:00  0.000000
+        3  2020-01-01 03:00:00  0.003333
+        4  2020-01-01 04:00:00  0.000000
+        5  2020-01-01 05:00:00  0.003889
+        6  2020-01-01 06:00:00  0.000000
+        7  2020-01-01 07:00:00  0.000000
+        8  2020-01-01 08:00:00  0.000000
+        9  2020-01-01 09:00:00  0.000000
+        10 2020-01-01 10:00:00  0.000000
         """
-
-        if not isinstance(outflows_dict, dict):
+        if not isinstance(datetime_outflows, dict):
             raise ValueError(
-                f"outflows_dict must be a dictionary, but got {type(outflows_dict)}."
-                )
-        if not all(isinstance(key, str) for key in outflows_dict.keys()):
-            raise ValueError(
-                f"outflows_dict.keys() must be strings, but got {type(outflows_dict.keys())}."
-            )
-        if not all(CustomOutflows.is_valid_datetime(dt_string=key) for key in outflows_dict.keys()):
-            raise ValueError(
-                 "outflows_dict keys must be in either '%Y-%m-%d' or '%Y-%m-%d %H:%M:%S' format."
-            )
-        if not all(CustomOutflows.is_within_date_range(dt_string=CustomOutflows.to_datetime_format(dt_string=key), start_dt_string=self.start_datetime, end_dt_string=self.end_datetime) for key in outflows_dict.keys()):
-            raise ValueError(
-                f"outflows_dict keys must be within start_datetime and end_datetime. Check {self.start_datetime} <= outflows_dict.keys() <= {self.end_datetime}."
-            )
-        if not all(pd.to_datetime(pd.Series(list(outflows_dict.keys()))).isin(self.custom_outflows["time"])):
-            raise ValueError(
-                f"One or more outflows_dict.keys() does not exist in the {self.frequency} timeseries between {self.start_datetime} and {self.end_datetime}."
-            )
-        if not all(isinstance(value, (int, float)) for value in outflows_dict.values()):
-            raise ValueError(
-                 f"outflows_dict.values() must be numeric, but got {type(outflows_dict.values())}."
-            )
-        if not all(value > 0 for value in outflows_dict.values()):
-            raise ValueError(
-                 f"outflows_dict.values() must be positive."
+                "datetime_outflows must be type dict. Got type "
+                f"{datetime_outflows}."
             )
 
-        self.outflows_dict = outflows_dict
+        validated_datetime_outflows = {}
+        for key, val in datetime_outflows.items():
+            self._check_valid_outflow(outflow_value=val)
+            self._check_datetime_type(datetime=key)
+            timestamp = self._to_pd_timestamp(datetime=key)
+            self._check_datetime_alignment(
+                timestamp=timestamp,
+                frequency=self.frequency
+            )
+            self._check_timestamp_is_within_range(
+                timestamp=timestamp,
+                start_datetime=self.start_datetime,
+                end_datetime=self.end_datetime,
+                outflows_df=self.outflows
+            )
 
-        self.custom_outflows.set_index("time", inplace=True)
+            validated_datetime_outflows[timestamp] = val
 
-        for key, value in outflows_dict.items():
-            self.custom_outflows.at[pd.to_datetime(key), 'flow'] = value/self.num_seconds
+        for key, val in validated_datetime_outflows.items():
+            self.outflows.loc[
+                self.outflows['time'] == key, 'flow'
+            ] = val/self.num_seconds
 
-        self.custom_outflows.reset_index(inplace=True)
-
-    def set_continuous_outflows(self, from_datetime: str, to_datetime: str, continuous_outflow: Union[float, int]):
+    def set_over_datetime(
+        self,
+        from_datetime: Union[str, pd.Timestamp, dt.datetime],
+        to_datetime: Union[str, pd.Timestamp, dt.datetime],
+        outflow: Union[float, int]
+    ):
         """
         Set the outflow volume between two datetimes.
 
         Outflow volumes between two datetimes can be set by providing a start
-        datetime, end datetime and an outflow volume.
+        datetime, end datetime, and an outflow volume. Outflows are updated on
+        the start and end datetime.
 
         Parameters
         ----------
-        from_datetime : str
-            Update the outflow timeseries from this datetime. Must be in
-            'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.
-        to_datetime : str
-             Update the outflow timeseries to this datetime. Must be in
-             'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format.
-        continuous_outflow : float
+        from_datetime : Union[str, pd.Timestamp, dt.datetime]
+            The datetime to update the outflow timeseries from.
+        to_datetime : Union[str, pd.Timestamp, dt.datetime]
+            The datetime to update the outflow timeseries to.
+        continuous_outflow : Union[float, int]
             The outflow volume to set between the `from_datetime` and
-            `to_datetime` in m^3/day or m^3/hour.
+            `to_datetime` in m^3/day or m^3/hour (depending on `frequency`).
 
         Examples
         --------
         >>> from glmpy import outflows
         >>> outflows = outflows.CustomOutflows(
         ...     start_datetime="2020-01-01 00:00:00",
-        ...     end_datetime="2020-01-01 23:00:00",
-        ...     frequency="hourly",
+        ...     end_datetime="2020-01-01 10:00:00",
+        ...     frequency="1h",
         ...     base_outflow=0.0
         ... )
-        >>> outflows.set_continuous_outflows(
+        >>> outflows.set_over_datetime(
         ...     from_datetime="2020-01-01 01:00:00",
-        ...     to_datetime = "2020-01-01 10:00:00",
-        ...     continuous_outflow = 9
+        ...     to_datetime = "2020-01-01 09:00:00",
+        ...     outflow = 5
         ... )
-        >>> outflows.get_outflows()
+        >>> print(outflows.get_outflows())
+                          time      flow
+        0  2020-01-01 00:00:00  0.000000
+        1  2020-01-01 01:00:00  0.001389
+        2  2020-01-01 02:00:00  0.001389
+        3  2020-01-01 03:00:00  0.001389
+        4  2020-01-01 04:00:00  0.001389
+        5  2020-01-01 05:00:00  0.001389
+        6  2020-01-01 06:00:00  0.001389
+        7  2020-01-01 07:00:00  0.001389
+        8  2020-01-01 08:00:00  0.001389
+        9  2020-01-01 09:00:00  0.001389
+        10 2020-01-01 10:00:00  0.000000
         """
-        if not isinstance(from_datetime, str):
-            raise ValueError(
-                f"from_datetime must be a string, but got {type(from_datetime)}."
-            )
-        if not isinstance(to_datetime, str):
-            raise ValueError(
-                f"to_datetime must be a string, but got {type(to_datetime)}."
-            )
-        if not CustomOutflows.is_valid_datetime(from_datetime):
-            raise ValueError(
-                f"'{from_datetime}' is not a valid datetime string. Must be provided in the format '%Y-%m-%d %H:%M:%S' or '%Y-%m-%d'"
-            )
-        if not CustomOutflows.is_valid_datetime(to_datetime):
-            raise ValueError(
-                f"'{to_datetime}' is not a valid datetime string. Must be provided in the format '%Y-%m-%d %H:%M:%S' or '%Y-%m-%d'"
-            )
-        if not isinstance(continuous_outflow, (int, float)):
-            raise ValueError(
-                f"continuous_outflow must be numeric, but got {type(continuous_outflow)}."
-            )
-        if continuous_outflow < 0:
-            raise ValueError(
-                f"continuous_outflow must be a positive value, got {continuous_outflow}."
-            )
+        self._check_valid_outflow(outflow_value=outflow)
+        self._check_datetime_type(from_datetime)
+        self._check_datetime_type(to_datetime)
+        from_datetime = self._to_pd_timestamp(from_datetime)
+        to_datetime = self._to_pd_timestamp(to_datetime)
 
-        self.from_datetime = from_datetime
-        self.to_datetime = to_datetime
-        self.continuous_outflow = continuous_outflow
+        self._check_start_preceeds_end(
+            start_datetime=from_datetime,
+            end_datetime=to_datetime
+        )
+        self._check_datetime_alignment(
+            timestamp=from_datetime, frequency=self.frequency
+        )
+        self._check_datetime_alignment(
+            timestamp=to_datetime, frequency=self.frequency
+        )
 
-        self.custom_outflows.set_index("time", inplace=True)
+        self._check_timestamp_is_within_range(
+            timestamp=from_datetime,
+            start_datetime=self.start_datetime,
+            end_datetime=self.end_datetime,
+            outflows_df=self.outflows
+        )
+        self._check_timestamp_is_within_range(
+            timestamp=to_datetime,
+            start_datetime=self.start_datetime,
+            end_datetime=self.end_datetime,
+            outflows_df=self.outflows
+        )
 
-        self.custom_outflows.loc[
-            pd.to_datetime(self.from_datetime) : pd.to_datetime(self.to_datetime)
-        ] = self.continuous_outflow/self.num_seconds
+        mask = (
+            self.outflows['time'] >= from_datetime
+        ) & (
+            self.outflows['time'] <= to_datetime
+        )
+        self.outflows.loc[mask, 'flow'] = outflow / self.num_seconds
 
-        self.custom_outflows.reset_index(inplace=True)
-
-    def get_outflows(self):
+    def get_outflows(self) -> pd.DataFrame:
         """
         Get the outflow timeseries.
 
@@ -281,24 +389,24 @@ class CustomOutflows:
         >>> outflows = outflows.CustomOutflows(
         ...     start_datetime="2020-01-01",
         ...     end_datetime="2020-01-10",
-        ...     frequency="daily",
+        ...     frequency="24h",
         ...     base_outflow=0.0
         ... )
         >>> outflows.get_outflows()
         """
-        return self.custom_outflows
-
-    def write_outflows(self, file_path: str,):
+        return self.outflows
+    
+    def write_outflows(self, file_path: str):
         """
-        Write the outflow timeseries to a csv file.
+        Write the outflow timeseries to a CSV file.
 
-        The outflow timeseries can be written to a csv file by providing a
-        path to the csv file.
+        The outflow timeseries can be written to a CSV file by providing a
+        path to the CSV file. Removes the DataFrame index.
 
         Parameters
         ----------
         file_path : str
-            Path to the csv file to which the outflow timeseries will be
+            Path to the CSV file to which the outflow timeseries will be
             written.
 
         Examples
@@ -307,59 +415,9 @@ class CustomOutflows:
         >>> outflows = outflows.CustomOutflows(
         ...     start_datetime="2020-01-01",
         ...     end_datetime="2020-01-10",
-        ...     frequency="daily",
+        ...     frequency="24h",
         ...     base_outflow=10
         ... )
         >>> outflows.write_outflows(file_path="outflows.csv")
         """
-        self.file_path = file_path
-        self.custom_outflows.to_csv(self.file_path, index=False)
-
-    @staticmethod
-    def is_valid_datetime(dt_string: str, dt_formats: list[str] =["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]):
-        for fmt in dt_formats:
-            try:
-                datetime.strptime(dt_string, fmt)
-                return True
-            except ValueError:
-                continue
-        return False
-
-    @staticmethod
-    def is_valid_datetime_order(start_dt_string: str, end_dt_string: str, dt_formats: list[str] =["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]):
-        for fmt in dt_formats:
-            try:
-                if datetime.strptime(start_dt_string, fmt) < datetime.strptime(end_dt_string, fmt):
-                    return True
-            except ValueError:
-                continue
-        return False
-
-    @staticmethod
-    def is_within_date_range(dt_string: str, start_dt_string: str, end_dt_string: str, dt_formats: list[str] =["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]):
-        for fmt in dt_formats:
-            try:
-                if datetime.strptime(start_dt_string, fmt) <= datetime.strptime(dt_string, fmt) <= datetime.strptime(end_dt_string, fmt):
-                    return True
-            except ValueError:
-                continue
-        return False
-
-    @staticmethod
-    def to_datetime_format(dt_string: str, to_format: str = "%Y-%m-%d %H:%M:%S"):
-        for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]:
-            try:
-                return datetime.strptime(dt_string, fmt).strftime(to_format)
-            except ValueError:
-                continue
-        return dt_string
-
-    @staticmethod
-    def to_datetime_format(dt_string: str, from_format: str = "%Y-%m-%d", to_format: str = "%Y-%m-%d %H:%M:%S") -> str:
-        try:
-            dt = datetime.strptime(dt_string, from_format)
-            return dt.strftime(to_format)
-        except ValueError:
-            return dt_string
-
-
+        self.outflows.to_csv(file_path, index=False)

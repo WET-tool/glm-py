@@ -1,178 +1,429 @@
-# import pandas as pd
-# import pytest
-# from glmpy.outflows import Outflows
+import pytest
+import datetime as dt
+import pandas as pd
 
+from glmpy import outflows
+from pandas.testing import assert_frame_equal
 
-# def test_start_date():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='foo',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         )
-#     assert str(
-#         outflows_info.value) == "start_date and end_date must be in valid 'YYYY-MM-DD' format."
+@pytest.fixture
+def empty_hourly_data():
+    outflows = pd.DataFrame({
+        "time": pd.date_range(
+            start=pd.Timestamp("2020-01-01 00:00:00"),
+            end=pd.Timestamp("2020-01-01 23:00:00"),
+            freq="1h"
+        ),
+        "flow": 0.0
+    })
+    return outflows
 
+@pytest.fixture
+def empty_daily_data():
+    outflows = pd.DataFrame({
+        "time": pd.date_range(
+            start=pd.Timestamp("2020-01-01 00:00:00"),
+            end=pd.Timestamp("2020-01-10 00:00:00"),
+            freq="24h"
+        ),
+        "flow": 0.0
+    })
+    return outflows
 
-# def test_date_order():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-11',
-#             end_date='1997-01-01',
-#             base_flow=0.0
-#         )
-#     assert str(
-#         outflows_info.value) == "start_date must be before end_date."
+@pytest.fixture
+def constant_hourly_data():
+    outflows = pd.DataFrame({
+        "time": pd.date_range(
+            start=pd.Timestamp("2020-01-01 00:00:00"),
+            end=pd.Timestamp("2020-01-01 23:00:00"),
+            freq="1h"
+        ),
+        "flow": 10/3600
+    })
+    return outflows
 
+@pytest.fixture
+def constant_daily_data():
+    outflows = pd.DataFrame({
+        "time": pd.date_range(
+            start=pd.Timestamp("2020-01-01 00:00:00"),
+            end=pd.Timestamp("2020-01-10 00:00:00"),
+            freq="24h"
+        ),
+        "flow": 240/86400
+    })
+    return outflows
 
-# def test_negative_base_flow():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=-1.0
-#         )
-#     assert str(
-#         outflows_info.value) == "base_flow must be positive."
+@pytest.fixture
+def variable_daily_data():
+    time = [
+        pd.Timestamp("2020-01-01"), pd.Timestamp("2020-01-02"),
+        pd.Timestamp("2020-01-03"), pd.Timestamp("2020-01-04"),
+        pd.Timestamp("2020-01-05"), pd.Timestamp("2020-01-06"),
+        pd.Timestamp("2020-01-07"), pd.Timestamp("2020-01-08"),
+        pd.Timestamp("2020-01-09"), pd.Timestamp("2020-01-10")
+    ]
+    flow = [
+        10/86400, 10/86400, 10/86400, 10/86400, 5/86400, 
+        5/86400, 10/86400, 10/86400, 10/86400, 10/86400
+    ]
+    outflows = pd.DataFrame({
+        "time": time,
+        "flow": flow
+    })
+    return outflows   
 
+@pytest.fixture
+def variable_hourly_data():
+    time = [
+        pd.Timestamp("2020-01-01 00:00:00"), 
+        pd.Timestamp("2020-01-01 01:00:00"),
+        pd.Timestamp("2020-01-01 02:00:00"), 
+        pd.Timestamp("2020-01-01 03:00:00"),
+        pd.Timestamp("2020-01-01 04:00:00"), 
+        pd.Timestamp("2020-01-01 05:00:00"),
+        pd.Timestamp("2020-01-01 06:00:00"), 
+        pd.Timestamp("2020-01-01 07:00:00"),
+        pd.Timestamp("2020-01-01 08:00:00"), 
+        pd.Timestamp("2020-01-01 09:00:00"),
+        pd.Timestamp("2020-01-01 10:00:00"),
+    ]
+    flow = [
+        10/3600, 10/3600, 10/3600, 10/3600, 10/3600, 
+        5/3600, 5/3600, 10/3600, 10/3600, 10/3600, 
+        10/3600
+    ]
+    outflows = pd.DataFrame({
+        "time": time,
+        "flow": flow
+    })
+    return outflows   
 
-# def test_empty_outflows_dict():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_discrete_outflows(
-#             outflows_dict={}
-#         )
-#     assert str(
-#         outflows_info.value) == "outflows_dict cannot be empty."
+def test_invalid_frequency():
+     frequencies = ["48h", 24, 1.0, None]
+     for i in frequencies:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime="2020-01-01",
+                end_datetime="2020-01-10",
+                frequency=i,
+                base_outflow=0.0
+            )
+        assert (
+            str(error.value) == 
+            "Invalid frequency. frequency must be '24h' (daily) or '1h' "
+            f"(hourly). Got {i}."            
+        )
 
+def test_non_numeric_outflow_type():
+    outflow = ["abc", [10], {"1": 12.2}, None]
+    for i in outflow:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime="2020-01-01",
+                end_datetime="2020-01-10",
+                frequency="24h",
+                base_outflow=i
+            )
+        assert (
+            str(error.value) == 
+            f"Invalid outflow type. {i} must be numeric. "
+            f"Got type {type(i)}."            
+        )
 
-# def test_invalid_outflows_dict_keys():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_discrete_outflows(
-#             outflows_dict={
-#                 "1997/01/02": 1.5,
-#                 "1997/01/03": 0.5,
-#                 "1997/01/05": 0.5
-#             }
-#         )
-#     assert str(
-#         outflows_info.value) == "outflows_dict keys must be in valid 'YYYY-MM-DD' format."
+def test_negative_outflow():
+    with pytest.raises(ValueError) as error:
+        negative_outflow = -0.1
+        outflows.CustomOutflows(
+            start_datetime="2020-01-01",
+            end_datetime="2020-01-10",
+            frequency="24h",
+            base_outflow=negative_outflow
+        )
+    assert (
+        str(error.value) == 
+        f"Invalid outflow value. {negative_outflow} must be positive."           
+    )
 
+def test_str_daily_start_datetime(empty_daily_data):
+    start_datetime = "2020-01-01"
+    test = outflows.CustomOutflows(
+        start_datetime=start_datetime,
+        end_datetime=pd.Timestamp("2020-01-10"),
+        frequency="24h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_daily_data)
 
-# def test_invalid_outflows_dict_key_prder():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_discrete_outflows(
-#             outflows_dict={
-#                 "1994-01-02": 1.5,
-#                 "1997-01-03": 0.5,
-#                 "1997-01-05": 0.5
-#             }
-#         )
-#     assert str(
-#         outflows_info.value) == "outflows_dict keys must be between 1997-01-01 and 1997-01-11."
+def test_str_daily_end_datetime(empty_daily_data):
+    end_datetime = "2020-01-10"
+    test = outflows.CustomOutflows(
+        start_datetime=pd.Timestamp("2020-01-01"),
+        end_datetime=end_datetime,
+        frequency="24h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_daily_data)
 
+def test_datetime_daily_start_datetime(empty_daily_data):
+    start_datetime = dt.datetime(2020, 1, 1)
+    test = outflows.CustomOutflows(
+        start_datetime=start_datetime,
+        end_datetime=pd.Timestamp("2020-01-10"),
+        frequency="24h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_daily_data)
 
-# def test_negative_outflows_dict_values():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_discrete_outflows(
-#             outflows_dict={
-#                 "1997-01-02": 1.5,
-#                 "1997-01-03": -0.5,
-#                 "1997-01-05": 0.5
-#             }
-#         )
-#     assert str(
-#         outflows_info.value) == "outflows_dict values must be positive."
+def test_datetime_daily_end_datetime(empty_daily_data):
+    end_datetime = dt.datetime(2020, 1, 10)
+    test = outflows.CustomOutflows(
+        start_datetime=pd.Timestamp("2020-01-01"),
+        end_datetime=end_datetime,
+        frequency="24h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_daily_data)
 
+def test_str_hourly_start_datetime(empty_hourly_data):
+    start_datetime = "2020-01-01 00:00:00"
+    test = outflows.CustomOutflows(
+        start_datetime=start_datetime,
+        end_datetime=pd.Timestamp("2020-01-01 23:00:00"),
+        frequency="1h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_hourly_data)
 
-# def test_overflow_start_date():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_continuous_outflows(
-#             outflow_start_date='foo',
-#             outflow_end_date='1997-01-11',
-#             outflow_volume=1.5
-#         )
+def test_str_hourly_end_datetime(empty_hourly_data):
+    end_datetime = "2020-01-01 23:00:00"
+    test = outflows.CustomOutflows(
+        start_datetime=pd.Timestamp("2020-01-01 00:00:00"),
+        end_datetime=end_datetime,
+        frequency="1h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_hourly_data)
 
-#     assert str(
-#         outflows_info.value) == "outflow_start_date and outflow_end_date must be in valid 'YYYY-MM-DD' format."
+def test_datetime_hourly_start_datetime(empty_hourly_data):
+    start_datetime = dt.datetime(2020, 1, 1, 0, 0, 0)
+    test = outflows.CustomOutflows(
+        start_datetime=start_datetime,
+        end_datetime=pd.Timestamp("2020-01-01 23:00:00"),
+        frequency="1h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_hourly_data)
 
+def test_datetime_hourly_end_datetime(empty_hourly_data):
+    end_datetime = dt.datetime(2020, 1, 1, 23, 0, 0)
+    test = outflows.CustomOutflows(
+        start_datetime=pd.Timestamp("2020-01-01 00:00:00"),
+        end_datetime=end_datetime,
+        frequency="1h",
+        base_outflow=0.0
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, empty_hourly_data)
 
-# def test_negative_overflow_volume():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_continuous_outflows(
-#             outflow_start_date='1997-01-07',
-#             outflow_end_date='1997-01-11',
-#             outflow_volume=-1.5
-#         )
+def test_start_datetime_preceeds_end_datetime():
+    start = "2020-01-10 00:00:00"
+    end = "2020-01-01 00:00:00"
+    with pytest.raises(ValueError) as error:
+        outflows.CustomOutflows(
+            start_datetime=start,
+            end_datetime=end,
+            frequency="1h",
+            base_outflow=0.0
+        )
+    assert (
+        str(error.value) == 
+        f"{start} must preceed {end}."
+    )
 
-#     assert str(
-#         outflows_info.value) == "outflow_volume must be positive."
+def test_unaligned_daily_start_datetime():
+    start = [
+        "2020-01-01 10:00:00",
+        "2020-01-01 00:10:00",
+        "2020-01-01 00:00:10",
+        "2020-01-01 10:10:10"
+    ]
+    end = "2020-01-10 00:00:00"
+    for i in start:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime=i,
+                end_datetime=end,
+                frequency="24h",
+                base_outflow=0.0
+            )
+        assert (
+            str(error.value) == 
+            f"Unaligned date time. For daily frequency, {i} must "
+            "align with the start of a day."
+        )
 
+def test_unaligned_daily_end_datetime():
+    end = [
+        "2020-01-10 10:00:00",
+        "2020-01-10 00:10:00",
+        "2020-01-10 00:00:10",
+        "2020-01-10 10:10:10"
+    ]
+    start = "2020-01-10 00:00:00"
+    for i in end:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime=start,
+                end_datetime=i,
+                frequency="24h",
+                base_outflow=0.0
+            )
+        assert (
+            str(error.value) == 
+            f"Unaligned date time. For daily frequency, {i} must "
+            "align with the start of a day."
+        )
 
-# def test_overflow_date_order():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_continuous_outflows(
-#             outflow_start_date='1997-01-11',
-#             outflow_end_date='1997-01-07',
-#             outflow_volume=1.5
-#         )
+def test_unaligned_hourly_start_datetime():
+    start = [
+        "2020-01-01 00:10:00",
+        "2020-01-01 00:00:10",
+        "2020-01-01 00:10:10"
+    ]
+    end = "2020-01-01 23:00:00"
+    for i in start:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime=i,
+                end_datetime=end,
+                frequency="1h",
+                base_outflow=0.0
+            )
+        assert (
+            str(error.value) == 
+            f"Unaligned date time. For hourly frequency, {i} must "
+            "align with the start of an hour."
+        )
 
-#     assert str(
-#         outflows_info.value) == "outflow_start_date must be before outflow_end_date."
+def test_unaligned_hourly_end_datetime():
+    end = [
+        "2020-01-01 23:10:00",
+        "2020-01-01 23:00:10",
+        "2020-01-01 23:10:10",
+    ]
+    start = "2020-01-01 00:00:00"
+    for i in end:
+        with pytest.raises(ValueError) as error:
+            outflows.CustomOutflows(
+                start_datetime=start,
+                end_datetime=i,
+                frequency="1h",
+                base_outflow=0.0
+            )
+        assert (
+            str(error.value) == 
+            f"Unaligned date time. For hourly frequency, {i} must "
+            "align with the start of an hour."
+        )
 
+def test_constant_hourly_outflows(constant_hourly_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01 00:00:00",
+        end_datetime="2020-01-01 23:00:00",
+        frequency="1h",
+        base_outflow=10
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, constant_hourly_data)
 
-# def test_overflow_date_range():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).set_continuous_outflows(
-#             outflow_start_date='1997-01-07',
-#             outflow_end_date='1997-01-12',
-#             outflow_volume=1.5
-#         )
+def test_constant_daily_outflows(constant_daily_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01",
+        end_datetime="2020-01-10",
+        frequency="24h",
+        base_outflow=240
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, constant_daily_data)
 
-#     assert str(
-#         outflows_info.value) == "outflow_start_date and outflow_end_date must be within 1997-01-01 and 1997-01-11."
+def test_set_on_datetime_daily(variable_daily_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01",
+        end_datetime="2020-01-10",
+        frequency="24h",
+        base_outflow=10
+    )
+    discrete_outflows = {
+        "2020-01-05": 5,
+        "2020-01-06": 5,
+    }
+    test.set_on_datetime(discrete_outflows)
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, variable_daily_data)
 
+def test_set_over_datetime_daily(variable_daily_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01",
+        end_datetime="2020-01-10",
+        frequency="24h",
+        base_outflow=10
+    )
+    test.set_over_datetime(
+        from_datetime="2020-01-05",
+        to_datetime="2020-01-06",
+        outflow=5
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, variable_daily_data)
 
-# def test_non_string_file_path():
-#     with pytest.raises(ValueError) as outflows_info:
-#         Outflows(
-#             start_date='1997-01-01',
-#             end_date='1997-01-11',
-#             base_flow=0.0
-#         ).write_outflows(
-#             path_to_outflows_csv=1
-#         )
+def test_set_on_datetime_hourly(variable_hourly_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01 00:00:00",
+        end_datetime="2020-01-01 10:00:00",
+        frequency="1h",
+        base_outflow=10
+    )
+    discrete_outflows = {
+        "2020-01-01 05:00:00": 5,
+        "2020-01-01 06:00:00": 5,
+    }
+    test.set_on_datetime(discrete_outflows)
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, variable_hourly_data)
 
-#     assert str(
-#         outflows_info.value) == "path_to_outflows_csv must be a string."
+def test_set_over_datetime_hourly(variable_hourly_data):
+    test = outflows.CustomOutflows(
+        start_datetime="2020-01-01 00:00:00",
+        end_datetime="2020-01-01 10:00:00",
+        frequency="1h",
+        base_outflow=10
+    )
+    test.set_over_datetime(
+        from_datetime="2020-01-01 05:00:00",
+        to_datetime="2020-01-01 06:00:00",
+        outflow=5
+    )
+    test_outflows = test.get_outflows()
+    assert_frame_equal(test_outflows, variable_hourly_data)
+
+def test_invalid_discrete_outflows():
+    with pytest.raises(ValueError) as error:
+        test = outflows.CustomOutflows(
+            start_datetime="2020-01-01 00:00:00",
+            end_datetime="2020-01-01 10:00:00",
+            frequency="1h",
+            base_outflow=10
+        )
+        discrete_outflows = "foo"
+        test.set_on_datetime(discrete_outflows)
+    assert (
+        str(error.value) ==
+        f"datetime_outflows must be type dict. Got type {discrete_outflows}."
+    )
