@@ -7,7 +7,7 @@ class CustomOutflows:
     """
     Create a simple outflow timeseries for GLM.
 
-    Generates a outflow timeseries in m^3/second between a given start and end
+    Generates an outflow timeseries in m^3/second between a given start and end
     datetime. The timeseries can be updated in two ways:
     1. By providing a dictionary with specific datetimes and their 
     corresponding outflows.
@@ -20,14 +20,15 @@ class CustomOutflows:
     start_datetime : Union[str, pd.Timestamp, dt.datetime]
         The start datetime of the outflow timeseries. Must be of type 
         Timestamp, datetime, or a valid datetime string.
-    end_datetime : str
+    end_datetime : Union[str, pd.Timestamp, dt.datetime]
         The end datetime of the outflow timeseries. Must be of type 
         Timestamp, datetime, or a valid datetime string.
     frequency : str
         Frequency of the outflow timeseries. Must be either '24h' (daily) or
         '1h' (hourly). Default is '24h'.
     base_outflow : Union[int, float]
-        Base flow of the outflow timeseries in m^3. Default is 0.0.
+        Base flow of the outflow timeseries in "m^3/day" or "m^3/hour depending 
+        on `frequency`. Default is 0.0.
 
     Examples
     --------
@@ -141,6 +142,10 @@ class CustomOutflows:
         self,
         datetime: Union[str, dt.datetime]
     ) -> pd.Timestamp:
+        """
+        Private method for converting strings and datetime objects to pandas
+        Timestamp.
+        """
         if isinstance(datetime, str):
             datetime = pd.Timestamp(datetime)
         if isinstance(datetime, dt.datetime):
@@ -150,6 +155,10 @@ class CustomOutflows:
     def _check_datetime_type(
         self, datetime: Union[str, pd.Timestamp, dt.datetime]
     ) -> None:
+        """
+        Private method for checking if a date is either a string, Timestamp,
+        or datetime object.
+        """
         if not isinstance(datetime, (str, pd.Timestamp, dt.datetime)):
             raise ValueError(
                 f"Unknown datetime format. {datetime} must be type "
@@ -160,6 +169,11 @@ class CustomOutflows:
     def _check_datetime_alignment(
         self, timestamp: pd.Timestamp, frequency: str
     ) -> None:
+        """
+        Private method for ensuring that datetimes align with the start of a
+        day (when `frequency='24h'`) or the start of an hour 
+        (when `frequency='1h'`).
+        """
         if frequency == '1h' and (
             timestamp.minute != 0 or 
             timestamp.second != 0
@@ -179,6 +193,10 @@ class CustomOutflows:
             )
 
     def _check_valid_outflow(self, outflow_value: Union[int, float]) -> None:
+        """
+        Private method for checking that an outflow value is numeric and is
+        positive.
+        """
         if not isinstance(outflow_value, (int, float)):
             raise ValueError(
                 f"Invalid outflow type. {outflow_value} must be numeric. "
@@ -196,6 +214,10 @@ class CustomOutflows:
         end_datetime: pd.Timestamp,
         outflows_df: pd.DataFrame
     ) -> None:
+        """
+        Private method for checking that a datetime is one of the datetimes in 
+        the initialised outflows DataFrame.
+        """
         if timestamp not in outflows_df['time'].values:
             raise ValueError(
                 f"{timestamp} is not within {start_datetime} and "
@@ -207,6 +229,10 @@ class CustomOutflows:
         start_datetime: pd.Timestamp,
         end_datetime: pd.Timestamp
     ) -> None:
+        """
+        Private method for checking a start datetime occurs before an end 
+        datetime.
+        """
         if not start_datetime < end_datetime:
             raise ValueError(
                 f"{start_datetime} must preceed {end_datetime}."
@@ -308,7 +334,7 @@ class CustomOutflows:
             The datetime to update the outflow timeseries from.
         to_datetime : Union[str, pd.Timestamp, dt.datetime]
             The datetime to update the outflow timeseries to.
-        continuous_outflow : Union[float, int]
+        outflow : Union[float, int]
             The outflow volume to set between the `from_datetime` and
             `to_datetime` in m^3/day or m^3/hour (depending on `frequency`).
 
