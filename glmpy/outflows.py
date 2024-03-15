@@ -9,9 +9,9 @@ class CustomOutflows:
 
     Generates an outflow timeseries in m^3/second between a given start and end
     datetime. The timeseries can be updated in two ways:
-    1. By providing a dictionary with specific datetimes and their 
+    1. Providing a dictionary with specific datetimes and their 
     corresponding outflows.
-    2. By specifying a fixed outflow value between two datetimes.
+    2. Specifying a fixed outflow value between two datetimes.
     The outflow timeseries can be returned as a pandas DataFrame or exported to 
     a CSV file.
 
@@ -27,7 +27,7 @@ class CustomOutflows:
         Frequency of the outflow timeseries. Must be either '24h' (daily) or
         '1h' (hourly). Default is '24h'.
     base_outflow : Union[int, float]
-        Base flow of the outflow timeseries in "m^3/day" or "m^3/hour depending 
+        Base flow of the outflow timeseries in m^3/day or m^3/hour depending 
         on `frequency`. Default is 0.0.
 
     Examples
@@ -427,7 +427,8 @@ class CustomOutflows:
         Write the outflow timeseries to a CSV file.
 
         The outflow timeseries can be written to a CSV file by providing a
-        path to the CSV file. Removes the DataFrame index.
+        path to the CSV file. The index of the DataFrame is not included in the 
+        CSV file.
 
         Parameters
         ----------

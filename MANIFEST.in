@@ -1,2 +1,2 @@
 include glmpy/bin/*
-include glmpy/dummy.c
+include glmpy/glmpy.c

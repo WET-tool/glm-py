@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import zipfile
-
 import pandas as pd
 
 from typing import Union
@@ -32,7 +31,7 @@ class GlmSim:
     `files` is a FastAPI `UploadFile` object.
 
     >>> import glmpy.simulation as sim
-    >>> glm_sim = sim.GlmSim(files, True, "/inputs)
+    >>> glm_sim = sim.GlmSim(files, True, "/inputs")
     >>> inputs_dir = glm_sim.prepare_inputs()
     >>> glm_sim.glm_run(inputs_dir, "/glm/glm")
 
@@ -44,12 +43,11 @@ class GlmSim:
     >>>    "glm3.nml": "/path/to/glm3.nml",
     >>>    "met.csv": "/path/to/met.csv"
     >>> }
-    >>> glm_sim = sim.GlmSim(files, False, "/inputs)
+    >>> glm_sim = sim.GlmSim(files, False, "/inputs")
     >>> inputs_dir = glm_sim.prepare_inputs()
     >>> glm_sim.glm_run(inputs_dir, "/glm/glm")
 
     """
-
     def __init__(
         self, input_files: Union[UploadFile, dict], api: bool, inputs_dir: str
     ):
@@ -80,7 +78,8 @@ class GlmSim:
 
         Returns
         -------
-        str     File path to directory with input files required for a GLM
+        str     
+            File path to directory with input files required for a GLM 
             simulation.
         """
         if self.fast_api:
@@ -318,7 +317,7 @@ class GlmPostProcessor:
     def csv_to_json(self, csv_lake_fname: str, variables: list):
         """Converts outputs of GLM simulation in csv format to JSON.
 
-        Can be used to as step before saving GLM results to JSON files or
+        Can be used as a step before saving GLM results to JSON files or
         to generate JSON formatted data that can be returned to clients for
         rendering in web browers; for example, if GLM is being used as part
         of a web application.

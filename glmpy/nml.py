@@ -1,10 +1,12 @@
+import warnings
+
 from typing import Union, List, Any, Callable
 
 class NML:
     """Generate .nml files.
 
     The General Lake Model (GLM) namelist file (`.nml`) describes the parameter
-    configuration for running a simulation. The `NML` class builds the `.nml` 
+    configuration for running simulations. The `NML` class builds an `.nml` 
     file by combining dictionaries of parameters that correspond with each 
     configuration block, e.g., `&glm_setup`, `&morphometry`, and `&time`. Each
     dictionary of parameters can be created using the respective `nml.NML*`
@@ -153,7 +155,12 @@ class NML:
         self.wq_setup = wq_setup
 
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
     def write_nml(self, nml_file_path: str = "glm3.nml"):
         """Write the `.nml` file.
@@ -206,16 +213,23 @@ class NML:
             file.write(nml_string)
 
     @staticmethod
-    def _nml_bool(python_bool: bool) -> str:
+    def nml_bool(python_bool: bool) -> str:
         """Python boolean to Fortran boolean.
 
         Convert a Python boolean to a string representation of a Fortran 
-        boolean. For internal `nml.NML` use in generating `.nml` files.
+        boolean. 
 
         Parameters
         ----------
         python_bool : bool
             A Python boolean
+
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> bool = nml.NML.nml_bool(True)
+        >>> print(bool)
+        .true.
         """
         if python_bool is True:
             return '.true.'
@@ -223,21 +237,27 @@ class NML:
             return '.false.'
 
     @staticmethod    
-    def _nml_str(python_str: str) -> str:
+    def nml_str(python_str: str) -> str:
         """Python string to Fortran string.
 
         Convert a Python string to a Fortran string by adding inverted commas.
-        For internal `nml.NML` use in generating `.nml` files.
 
         Parameters
         ----------
         python_str : str
             A Python string
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> string = nml.NML.nml_str("GLM")
+        >>> print(string)
+        'GLM'
         """
         return f"'{python_str}'"
 
     @staticmethod
-    def _nml_list(
+    def nml_list(
             python_list: List[Any], 
             syntax_func: Union[Callable, None] = None
         ) -> str:
@@ -245,8 +265,7 @@ class NML:
 
         Convert a Python list to a comma-separated list. A function can be 
         optionally passed to the `syntax_func` parameter to format the syntax 
-        of each list item, e.g., `_nml_str()` and `_nml_bool()`. For internal 
-        `nml.NML` use in generating `.nml` files.
+        of each list item, e.g., `nml_str()` and `nml_bool()`.
 
         Parameters
         ----------
@@ -254,6 +273,19 @@ class NML:
             A Python list
         syntax_func: Union[Callable, None], optional
             A function used to format each list item. Default is `None`.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> list = nml.NML.nml_list([1, 2, 3])
+        >>> print(list)
+        1,2,3
+        >>> list = nml.NML.nml_list(
+        ...     [True, False, True], 
+        ...     syntax_func=nml.NML.nml_bool
+        ... )
+        >>> print(list)
+        .true.,.false.,.true.
         """
         if len(python_list) == 1:
             if syntax_func is not None:
@@ -267,7 +299,7 @@ class NML:
                 return ','.join(str(val) for val in python_list)
 
     @staticmethod
-    def _nml_param_val(
+    def nml_param_val(
         param_dict: dict, 
         param: str, 
         syntax_func: Union[Callable, None] = None
@@ -275,8 +307,7 @@ class NML:
         """GLM parameter/value string.
 
         Construct a string containing a GLM parameter and value with the 
-        correct`.nml` syntax formatting. For internal `nml.NML` use in 
-        generating `.nml` files.
+        correct`.nml` syntax formatting.
 
         Parameters
         ----------
@@ -289,6 +320,26 @@ class NML:
         syntax_func: Union[Callable, None], optional
             A function used to format the syntax of the value. Default is 
             `None`.
+        
+        Examples
+        --------
+        >>> from glmpy import nml
+        >>> light_params = {
+        ...     "light_mode": 0,
+        ...     "Kw": 0.4,
+        ...     "n_bands": 4,
+        ...     "light_extc": [1.0, 0.5, 2.0, 4.0],
+        ...     "energy_frac": [0.51, 0.45, 0.035, 0.005],
+        ...     "Benthic_Imin": 10
+        ... }
+        >>> formatted_param = nml.NML.nml_param_val(
+        ...     param_dict=light_params,
+        ...     param="energy_frac",
+        ...     syntax_func=nml.NML.nml_list
+        ... )
+        >>> print(formatted_param)
+           energy_frac = 0.51,0.45,0.035,0.005
+
         """
         if param_dict[param] is not None:
             if syntax_func is not None:
@@ -300,18 +351,18 @@ class NML:
     
     def _write_nml_glm_setup(self, glm_setup: dict) -> str:
         """
-        Construct a string of the `&glm_setup` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&glm_setup` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         glm_setup_str = (
             "&glm_setup\n" +
-            self._nml_param_val(glm_setup, "sim_name", self._nml_str) +
-            self._nml_param_val(glm_setup, "max_layers") +
-            self._nml_param_val(glm_setup, "min_layer_vol") +
-            self._nml_param_val(glm_setup, "min_layer_thick") +
-            self._nml_param_val(glm_setup, "max_layer_thick") +
-            self._nml_param_val(glm_setup, "density_model") +
-            self._nml_param_val(glm_setup, "non_avg", self._nml_bool) +
+            self.nml_param_val(glm_setup, "sim_name", self.nml_str) +
+            self.nml_param_val(glm_setup, "max_layers") +
+            self.nml_param_val(glm_setup, "min_layer_vol") +
+            self.nml_param_val(glm_setup, "min_layer_thick") +
+            self.nml_param_val(glm_setup, "max_layer_thick") +
+            self.nml_param_val(glm_setup, "density_model") +
+            self.nml_param_val(glm_setup, "non_avg", self.nml_bool) +
             "/"
         )
 
@@ -319,20 +370,20 @@ class NML:
     
     def _write_nml_mixing(self, mixing: dict) -> str:
         """
-        Construct a string of the `&mixing` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&mixing` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         mixing_str = (
             "&mixing\n" +
-            self._nml_param_val(mixing, "surface_mixing") +
-            self._nml_param_val(mixing, "coef_mix_conv") +
-            self._nml_param_val(mixing, "coef_wind_stir") +
-            self._nml_param_val(mixing, "coef_mix_shear") +
-            self._nml_param_val(mixing, "coef_mix_turb") +
-            self._nml_param_val(mixing, "coef_mix_KH") +
-            self._nml_param_val(mixing, "deep_mixing") +
-            self._nml_param_val(mixing, "coef_mix_hyp") +
-            self._nml_param_val(mixing, "diff") +
+            self.nml_param_val(mixing, "surface_mixing") +
+            self.nml_param_val(mixing, "coef_mix_conv") +
+            self.nml_param_val(mixing, "coef_wind_stir") +
+            self.nml_param_val(mixing, "coef_mix_shear") +
+            self.nml_param_val(mixing, "coef_mix_turb") +
+            self.nml_param_val(mixing, "coef_mix_KH") +
+            self.nml_param_val(mixing, "deep_mixing") +
+            self.nml_param_val(mixing, "coef_mix_hyp") +
+            self.nml_param_val(mixing, "diff") +
             "/"
         )
 
@@ -340,20 +391,20 @@ class NML:
 
     def _write_nml_wq_setup(self, wq_setup: dict) -> str:
         """
-        Construct a string of the `&wq_setup` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&wq_setup` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         wq_setup_str = (
             "&wq_setup\n" +
-            self._nml_param_val(wq_setup, "wq_lib", self._nml_str) +
-            self._nml_param_val(wq_setup, "wq_nml_file", self._nml_str) +
-            self._nml_param_val(
-                wq_setup, "bioshade_feedback", self._nml_bool
+            self.nml_param_val(wq_setup, "wq_lib", self.nml_str) +
+            self.nml_param_val(wq_setup, "wq_nml_file", self.nml_str) +
+            self.nml_param_val(
+                wq_setup, "bioshade_feedback", self.nml_bool
             ) +
-            self._nml_param_val(wq_setup, "mobility_off", self._nml_bool)+
-            self._nml_param_val(wq_setup, "ode_method") +
-            self._nml_param_val(wq_setup, "split_factor") +
-            self._nml_param_val(wq_setup, "repair_state", self._nml_bool) +
+            self.nml_param_val(wq_setup, "mobility_off", self.nml_bool)+
+            self.nml_param_val(wq_setup, "ode_method") +
+            self.nml_param_val(wq_setup, "split_factor") +
+            self.nml_param_val(wq_setup, "repair_state", self.nml_bool) +
             "/"
         )
 
@@ -361,21 +412,21 @@ class NML:
     
     def _write_nml_morphometry(self, morphometry: dict) -> str:
         """
-        Construct a string of the `&morphometry` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&morphometry` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         morphometry_str = (
             "&morphometry\n" +
-            self._nml_param_val(morphometry, "lake_name", self._nml_str) +
-            self._nml_param_val(morphometry, "latitude") +
-            self._nml_param_val(morphometry, "longitude") +
-            self._nml_param_val(morphometry, "base_elev") +
-            self._nml_param_val(morphometry, "crest_elev") +
-            self._nml_param_val(morphometry, "bsn_len") +
-            self._nml_param_val(morphometry, "bsn_wid") +
-            self._nml_param_val(morphometry, "bsn_vals") +
-            self._nml_param_val(morphometry, "H", self._nml_list) +
-            self._nml_param_val(morphometry, "A", self._nml_list) +
+            self.nml_param_val(morphometry, "lake_name", self.nml_str) +
+            self.nml_param_val(morphometry, "latitude") +
+            self.nml_param_val(morphometry, "longitude") +
+            self.nml_param_val(morphometry, "base_elev") +
+            self.nml_param_val(morphometry, "crest_elev") +
+            self.nml_param_val(morphometry, "bsn_len") +
+            self.nml_param_val(morphometry, "bsn_wid") +
+            self.nml_param_val(morphometry, "bsn_vals") +
+            self.nml_param_val(morphometry, "H", self.nml_list) +
+            self.nml_param_val(morphometry, "A", self.nml_list) +
             "/"
         )
 
@@ -383,17 +434,17 @@ class NML:
 
     def _write_nml_time(self, time: dict) -> str:
         """
-        Construct a string of the `&time` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&time` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         time_str = (
             "&time\n" +
-            self._nml_param_val(time, "timefmt") +
-            self._nml_param_val(time, "start", self._nml_str) +
-            self._nml_param_val(time, "stop", self._nml_str) +
-            self._nml_param_val(time, "dt") +
-            self._nml_param_val(time, "num_days") +
-            self._nml_param_val(time, "timezone") +
+            self.nml_param_val(time, "timefmt") +
+            self.nml_param_val(time, "start", self.nml_str) +
+            self.nml_param_val(time, "stop", self.nml_str) +
+            self.nml_param_val(time, "dt") +
+            self.nml_param_val(time, "num_days") +
+            self.nml_param_val(time, "timezone") +
             "/"
         )
 
@@ -401,36 +452,36 @@ class NML:
 
     def _write_nml_output(self, output: dict) -> str:
         """
-        Construct a string of the `&output` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&output` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         output_str = (
             "&output\n" +
-            self._nml_param_val(output, "out_dir", self._nml_str) +
-            self._nml_param_val(output, "out_fn", self._nml_str) +
-            self._nml_param_val(output, "nsave") +
-            self._nml_param_val(output, "csv_lake_fname", self._nml_str) +
-            self._nml_param_val(output, "csv_point_nlevs") +
-            self._nml_param_val(output, "csv_point_fname", self._nml_str) +
-            self._nml_param_val(output, "csv_point_frombot", self._nml_list) +
-            self._nml_param_val(output, "csv_point_at", self._nml_list) +
-            self._nml_param_val(output, "csv_point_nvars") +
-            self._nml_param_val(
+            self.nml_param_val(output, "out_dir", self.nml_str) +
+            self.nml_param_val(output, "out_fn", self.nml_str) +
+            self.nml_param_val(output, "nsave") +
+            self.nml_param_val(output, "csv_lake_fname", self.nml_str) +
+            self.nml_param_val(output, "csv_point_nlevs") +
+            self.nml_param_val(output, "csv_point_fname", self.nml_str) +
+            self.nml_param_val(output, "csv_point_frombot", self.nml_list) +
+            self.nml_param_val(output, "csv_point_at", self.nml_list) +
+            self.nml_param_val(output, "csv_point_nvars") +
+            self.nml_param_val(
                 output, 
                 "csv_point_vars", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(
-                output, "csv_outlet_allinone", self._nml_bool
+            self.nml_param_val(
+                output, "csv_outlet_allinone", self.nml_bool
             ) +
-            self._nml_param_val(output, "csv_outlet_fname", self._nml_str) +
-            self._nml_param_val(output, "csv_outlet_nvars") +
-            self._nml_param_val(
+            self.nml_param_val(output, "csv_outlet_fname", self.nml_str) +
+            self.nml_param_val(output, "csv_outlet_nvars") +
+            self.nml_param_val(
                 output, 
                 "csv_outlet_vars", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(output, "csv_ovrflw_fname", self._nml_str) +
+            self.nml_param_val(output, "csv_ovrflw_fname", self.nml_str) +
             "/"
         )
 
@@ -439,23 +490,23 @@ class NML:
     def _write_nml_init_profiles(self, init_profiles: dict) -> str:
         """
         Construct a string of the `&init_profiles` model configuration block.
-        For internal `nml.NML` use in generating `.nml` files.
+        Private method for use in generating `.nml` files.
         """
         init_profiles_str = (
             "&init_profiles\n" +
-            self._nml_param_val(init_profiles, "lake_depth") +
-            self._nml_param_val(init_profiles, "num_depths") +
-            self._nml_param_val(init_profiles, "the_depths", self._nml_list) +
-            self._nml_param_val(init_profiles, "the_temps", self._nml_list) +
-            self._nml_param_val(init_profiles, "the_sals", self._nml_list) +
-            self._nml_param_val(init_profiles, "num_wq_vars") +
-            self._nml_param_val(
+            self.nml_param_val(init_profiles, "lake_depth") +
+            self.nml_param_val(init_profiles, "num_depths") +
+            self.nml_param_val(init_profiles, "the_depths", self.nml_list) +
+            self.nml_param_val(init_profiles, "the_temps", self.nml_list) +
+            self.nml_param_val(init_profiles, "the_sals", self.nml_list) +
+            self.nml_param_val(init_profiles, "num_wq_vars") +
+            self.nml_param_val(
                 init_profiles, 
                 "wq_names", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(
-                init_profiles, "wq_init_vals", self._nml_list
+            self.nml_param_val(
+                init_profiles, "wq_init_vals", self.nml_list
             ) +
             "/"
         )
@@ -464,18 +515,18 @@ class NML:
 
     def _write_nml_light(self, light: dict) -> str:
         """
-        Construct a string of the `&light` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&light` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         light_str = (
             "&light\n" +
-            self._nml_param_val(light, "light_mode") +
-            self._nml_param_val(light, "Kw") +
-            self._nml_param_val(light, "Kw_file", self._nml_str) +
-            self._nml_param_val(light, "n_bands") +
-            self._nml_param_val(light, "light_extc", self._nml_list) +
-            self._nml_param_val(light, "energy_frac", self._nml_list) +
-            self._nml_param_val(light, "Benthic_Imin") +
+            self.nml_param_val(light, "light_mode") +
+            self.nml_param_val(light, "Kw") +
+            self.nml_param_val(light, "Kw_file", self.nml_str) +
+            self.nml_param_val(light, "n_bands") +
+            self.nml_param_val(light, "light_extc", self.nml_list) +
+            self.nml_param_val(light, "energy_frac", self.nml_list) +
+            self.nml_param_val(light, "Benthic_Imin") +
             "/"
         )
 
@@ -483,17 +534,17 @@ class NML:
     
     def _write_nml_bird_model(self, bird_model: dict) -> str:
         """
-        Construct a string of the `&bird_model` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&bird_model` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         bird_model_str = (
             "&bird_model\n" +
-            self._nml_param_val(bird_model, "AP") +
-            self._nml_param_val(bird_model, "Oz") +
-            self._nml_param_val(bird_model, "WatVap") +
-            self._nml_param_val(bird_model, "AOD500") +
-            self._nml_param_val(bird_model, "AOD380") +
-            self._nml_param_val(bird_model, "Albedo") +
+            self.nml_param_val(bird_model, "AP") +
+            self.nml_param_val(bird_model, "Oz") +
+            self.nml_param_val(bird_model, "WatVap") +
+            self.nml_param_val(bird_model, "AOD500") +
+            self.nml_param_val(bird_model, "AOD380") +
+            self.nml_param_val(bird_model, "Albedo") +
             "/"
         )
 
@@ -501,25 +552,25 @@ class NML:
     
     def _write_nml_sediment(self, sediment: dict) -> str:
         """
-        Construct a string of the `&sediment` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&sediment` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         sediment_str = (
             "&sediment\n" +
-            self._nml_param_val(sediment, "sed_heat_Ksoil") +
-            self._nml_param_val(sediment, "sed_temp_depth") +
-            self._nml_param_val(sediment, "sed_temp_mean", self._nml_list) +
-            self._nml_param_val(
-                sediment, "sed_temp_amplitude", self._nml_list
+            self.nml_param_val(sediment, "sed_heat_Ksoil") +
+            self.nml_param_val(sediment, "sed_temp_depth") +
+            self.nml_param_val(sediment, "sed_temp_mean", self.nml_list) +
+            self.nml_param_val(
+                sediment, "sed_temp_amplitude", self.nml_list
             ) +
-            self._nml_param_val(
-                sediment, "sed_temp_peak_doy", self._nml_list
+            self.nml_param_val(
+                sediment, "sed_temp_peak_doy", self.nml_list
             ) +
-            self._nml_param_val(sediment, "benthic_mode") +
-            self._nml_param_val(sediment, "n_zones") +
-            self._nml_param_val(sediment, "zone_heights", self._nml_list) +
-            self._nml_param_val(sediment, "sed_reflectivity", self._nml_list) +
-            self._nml_param_val(sediment, "sed_roughness", self._nml_list) +            
+            self.nml_param_val(sediment, "benthic_mode") +
+            self.nml_param_val(sediment, "n_zones") +
+            self.nml_param_val(sediment, "zone_heights", self.nml_list) +
+            self.nml_param_val(sediment, "sed_reflectivity", self.nml_list) +
+            self.nml_param_val(sediment, "sed_roughness", self.nml_list) +            
             "/"
         )
 
@@ -527,14 +578,14 @@ class NML:
 
     def _write_nml_snow_ice(self, snow_ice: dict) -> str:
         """
-        Construct a string of the `&snowice` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&snowice` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         snow_ice_str = (
             "&snowice\n" +
-            self._nml_param_val(snow_ice, "snow_albedo_factor") +
-            self._nml_param_val(snow_ice, "snow_rho_min") +
-            self._nml_param_val(snow_ice, "snow_rho_max") +
+            self.nml_param_val(snow_ice, "snow_albedo_factor") +
+            self.nml_param_val(snow_ice, "snow_rho_min") +
+            self.nml_param_val(snow_ice, "snow_rho_max") +
             "/"
         )
 
@@ -542,39 +593,39 @@ class NML:
 
     def _write_nml_meteorology(self, meteorology: dict) -> str:
         """
-        Construct a string of the `&meteorology` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&meteorology` model configuration block. 
+        Private method for use in generating `.nml` files.
         """
         meteorology_str = (
             "&meteorology\n" +
-            self._nml_param_val(meteorology, "met_sw", self._nml_bool) +
-            self._nml_param_val(meteorology, "meteo_fl", self._nml_str) +
-            self._nml_param_val(meteorology, "subdaily", self._nml_bool) +
-            self._nml_param_val(meteorology, "time_fmt", self._nml_str) +
-            self._nml_param_val(meteorology, "rad_mode") +
-            self._nml_param_val(meteorology, "albedo_mode") +
-            self._nml_param_val(meteorology, "sw_factor") +
-            self._nml_param_val(meteorology, "lw_type", self._nml_str) +
-            self._nml_param_val(meteorology, "cloud_mode") +
-            self._nml_param_val(meteorology, "lw_factor") +
-            self._nml_param_val(meteorology, "atm_stab") +
-            self._nml_param_val(meteorology, "rh_factor") +
-            self._nml_param_val(meteorology, "at_factor") +
-            self._nml_param_val(meteorology, "ce") +
-            self._nml_param_val(meteorology, "ch") +
-            self._nml_param_val(meteorology, "rain_sw", self._nml_bool) +
-            self._nml_param_val(meteorology, "rain_factor") +
-            self._nml_param_val(meteorology, "catchrain", self._nml_bool) +
-            self._nml_param_val(meteorology, "rain_threshold") +
-            self._nml_param_val(meteorology, "runoff_coef") +
-            self._nml_param_val(meteorology, "cd") +
-            self._nml_param_val(meteorology, "wind_factor") +
-            self._nml_param_val(meteorology, "fetch_mode") +
-            self._nml_param_val(meteorology, "Aws") +
-            self._nml_param_val(meteorology, "Xws") +
-            self._nml_param_val(meteorology, "num_dir") +
-            self._nml_param_val(meteorology, "wind_dir") +
-            self._nml_param_val(meteorology, "fetch_scale") +
+            self.nml_param_val(meteorology, "met_sw", self.nml_bool) +
+            self.nml_param_val(meteorology, "meteo_fl", self.nml_str) +
+            self.nml_param_val(meteorology, "subdaily", self.nml_bool) +
+            self.nml_param_val(meteorology, "time_fmt", self.nml_str) +
+            self.nml_param_val(meteorology, "rad_mode") +
+            self.nml_param_val(meteorology, "albedo_mode") +
+            self.nml_param_val(meteorology, "sw_factor") +
+            self.nml_param_val(meteorology, "lw_type", self.nml_str) +
+            self.nml_param_val(meteorology, "cloud_mode") +
+            self.nml_param_val(meteorology, "lw_factor") +
+            self.nml_param_val(meteorology, "atm_stab") +
+            self.nml_param_val(meteorology, "rh_factor") +
+            self.nml_param_val(meteorology, "at_factor") +
+            self.nml_param_val(meteorology, "ce") +
+            self.nml_param_val(meteorology, "ch") +
+            self.nml_param_val(meteorology, "rain_sw", self.nml_bool) +
+            self.nml_param_val(meteorology, "rain_factor") +
+            self.nml_param_val(meteorology, "catchrain", self.nml_bool) +
+            self.nml_param_val(meteorology, "rain_threshold") +
+            self.nml_param_val(meteorology, "runoff_coef") +
+            self.nml_param_val(meteorology, "cd") +
+            self.nml_param_val(meteorology, "wind_factor") +
+            self.nml_param_val(meteorology, "fetch_mode") +
+            self.nml_param_val(meteorology, "Aws") +
+            self.nml_param_val(meteorology, "Xws") +
+            self.nml_param_val(meteorology, "num_dir") +
+            self.nml_param_val(meteorology, "wind_dir") +
+            self.nml_param_val(meteorology, "fetch_scale") +
             "/"
         )
 
@@ -582,39 +633,39 @@ class NML:
 
     def _write_nml_inflow(self, inflow: dict) -> str:
         """
-        Construct a string of the `&inflow` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&inflow` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         inflow_str = (
             "&inflow\n" +
-            self._nml_param_val(inflow, "num_inflows") +
-            self._nml_param_val(
+            self.nml_param_val(inflow, "num_inflows") +
+            self.nml_param_val(
                 inflow, 
                 "names_of_strms", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(
+            self.nml_param_val(
                 inflow, 
                 "subm_flag", 
-                lambda x: self._nml_list(x, self._nml_bool)
+                lambda x: self.nml_list(x, self.nml_bool)
             ) +
-            self._nml_param_val(inflow, "strm_hf_angle", self._nml_list) +
-            self._nml_param_val(inflow, "strmbd_slope", self._nml_list) +
-            self._nml_param_val(inflow, "strmbd_drag", self._nml_list) +
-            self._nml_param_val(inflow, "coef_inf_entrain", self._nml_list) +
-            self._nml_param_val(inflow, "inflow_factor", self._nml_list) +
-            self._nml_param_val(
+            self.nml_param_val(inflow, "strm_hf_angle", self.nml_list) +
+            self.nml_param_val(inflow, "strmbd_slope", self.nml_list) +
+            self.nml_param_val(inflow, "strmbd_drag", self.nml_list) +
+            self.nml_param_val(inflow, "coef_inf_entrain", self.nml_list) +
+            self.nml_param_val(inflow, "inflow_factor", self.nml_list) +
+            self.nml_param_val(
                 inflow, 
                 "inflow_fl", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(inflow, "inflow_varnum") +
-            self._nml_param_val(
+            self.nml_param_val(inflow, "inflow_varnum") +
+            self.nml_param_val(
                 inflow, 
                 "inflow_vars", 
-                lambda x: self._nml_list(x, self._nml_str)
+                lambda x: self.nml_list(x, self.nml_str)
             ) +
-            self._nml_param_val(inflow, "time_fmt", self._nml_str) +
+            self.nml_param_val(inflow, "time_fmt", self.nml_str) +
             "/"
         )
 
@@ -622,49 +673,49 @@ class NML:
 
     def _write_nml_outflow(self, outflow: dict) -> str:
         """
-        Construct a string of the `&outflow` model configuration block. For 
-        internal `nml.NML` use in generating `.nml` files.
+        Construct a string of the `&outflow` model configuration block. Private 
+        method for use in generating `.nml` files.
         """
         outflow_str = (
             "&outflow\n" +
-            self._nml_param_val(outflow, "num_outlet")+
-            self._nml_param_val(outflow, "outflow_fl", self._nml_str) +
-            self._nml_param_val(outflow, "time_fmt", self._nml_str) +
-            self._nml_param_val(outflow, "outflow_factor", self._nml_list) +
-            self._nml_param_val(
-                outflow, "outflow_thick_limit", self._nml_list
+            self.nml_param_val(outflow, "num_outlet")+
+            self.nml_param_val(outflow, "outflow_fl", self.nml_str) +
+            self.nml_param_val(outflow, "time_fmt", self.nml_str) +
+            self.nml_param_val(outflow, "outflow_factor", self.nml_list) +
+            self.nml_param_val(
+                outflow, "outflow_thick_limit", self.nml_list
             ) +
-            self._nml_param_val(
+            self.nml_param_val(
                 outflow, 
                 "single_layer_draw", 
-                lambda x: self._nml_list(x, self._nml_bool)
+                lambda x: self.nml_list(x, self.nml_bool)
             ) +
-            self._nml_param_val(
+            self.nml_param_val(
                 outflow, 
                 "flt_off_sw", 
-                lambda x: self._nml_list(x, self._nml_bool)
+                lambda x: self.nml_list(x, self.nml_bool)
             ) +
-            self._nml_param_val(outflow, "outlet_type", self._nml_list) +
-            self._nml_param_val(outflow, "outl_elvs", self._nml_list) +
-            self._nml_param_val(outflow, "bsn_len_outl", self._nml_list) +
-            self._nml_param_val(outflow, "bsn_wid_outl", self._nml_list) +
-            self._nml_param_val(outflow, "crit_O2") +
-            self._nml_param_val(outflow, "crit_O2_dep") +
-            self._nml_param_val(outflow, "crit_O2_days") +
-            self._nml_param_val(outflow, "outlet_crit") +
-            self._nml_param_val(outflow, "O2name", self._nml_str) +
-            self._nml_param_val(outflow, "O2idx", self._nml_str) +
-            self._nml_param_val(outflow, "target_temp") +
-            self._nml_param_val(outflow, "min_lake_temp") +
-            self._nml_param_val(outflow, "fac_range_upper") +
-            self._nml_param_val(outflow, "fac_range_lower") +
-            self._nml_param_val(outflow, "mix_withdraw", self._nml_bool) +
-            self._nml_param_val(outflow, "coupl_oxy_sw", self._nml_bool) +
-            self._nml_param_val(outflow, "withdrTemp_fl", self._nml_str) +
-            self._nml_param_val(outflow, "seepage", self._nml_bool) +
-            self._nml_param_val(outflow, "seepage_rate") +
-            self._nml_param_val(outflow, "crest_width") +
-            self._nml_param_val(outflow, "crest_factor") +
+            self.nml_param_val(outflow, "outlet_type", self.nml_list) +
+            self.nml_param_val(outflow, "outl_elvs", self.nml_list) +
+            self.nml_param_val(outflow, "bsn_len_outl", self.nml_list) +
+            self.nml_param_val(outflow, "bsn_wid_outl", self.nml_list) +
+            self.nml_param_val(outflow, "crit_O2") +
+            self.nml_param_val(outflow, "crit_O2_dep") +
+            self.nml_param_val(outflow, "crit_O2_days") +
+            self.nml_param_val(outflow, "outlet_crit") +
+            self.nml_param_val(outflow, "O2name", self.nml_str) +
+            self.nml_param_val(outflow, "O2idx", self.nml_str) +
+            self.nml_param_val(outflow, "target_temp") +
+            self.nml_param_val(outflow, "min_lake_temp") +
+            self.nml_param_val(outflow, "fac_range_upper") +
+            self.nml_param_val(outflow, "fac_range_lower") +
+            self.nml_param_val(outflow, "mix_withdraw", self.nml_bool) +
+            self.nml_param_val(outflow, "coupl_oxy_sw", self.nml_bool) +
+            self.nml_param_val(outflow, "withdrTemp_fl", self.nml_str) +
+            self.nml_param_val(outflow, "seepage", self.nml_bool) +
+            self.nml_param_val(outflow, "seepage_rate") +
+            self.nml_param_val(outflow, "crest_width") +
+            self.nml_param_val(outflow, "crest_factor") +
             "/"
         )
 
@@ -720,7 +771,7 @@ class NMLBase:
         respectively. When setting attributes of `NMLOutput()`, 
         `csv_point_vars='temp'` is preferrable to `csv_point_vars=['temp']`. 
         The `_single_value_to_list` method will convert the value to a python 
-        list providing it is not `None`. For internal use in `nml.NML*` 
+        list providing it is not `None`. Private method for use in `nml.NML*` 
         classes.
 
         Parameters
@@ -740,7 +791,7 @@ class NMLGLMSetup(NMLBase):
 
     The `&glm_setup` parameters define the vertical series of layers that GLM 
     resolves when modelling a water body. `NMLGLMSetup` provides the means to
-    constuct a dictionary containing these parameters for use in the `nml.NML`
+    construct a dictionary containing these parameters for use in the `nml.NML`
     class. Model parameters are set as attributes upon initialising an instance
     of the class or using the `set_attributes()` method. Class instances are 
     callable and return the dictionary of parameters.
@@ -843,7 +894,12 @@ class NMLGLMSetup(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         glm_setup_dict = {
             "sim_name": self.sim_name,
@@ -861,7 +917,7 @@ class NMLMixing(NMLBase):
     """Construct the `&mixing` model parameters.
 
     The `&mixing` parameters define the dynamics of layer mixing in the 
-    modelled water body. `NMLMixing` provides the means to constuct a 
+    modelled water body. `NMLMixing` provides the means to construct a 
     dictionary containing these parameters for use in the `nml.NML` class. 
     Model parameters are set as attributes upon initialising an instance of the
     class or using the `set_attributes()` method. Class instances are callable 
@@ -979,7 +1035,12 @@ class NMLMixing(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         mixing_dict = {
             "surface_mixing": self.surface_mixing,
@@ -1000,7 +1061,7 @@ class NMLWQSetup(NMLBase):
 
     The `&wq_setup` parameters define the coupling of GLM with water quality 
     and biogeochemical model libraries, e.g., AED2. `NMLWQSetup` provides the 
-    means to constuct a dictionary containing these parameters for use in the 
+    means to construct a dictionary containing these parameters for use in the 
     `nml.NML` class. Model parameters are set as attributes upon initialising 
     an instance of the class or using the `set_attributes()` method. Class 
     instances are callable and return the dictionary of parameters.
@@ -1105,7 +1166,12 @@ class NMLWQSetup(NMLBase):
         }
         """
         if check_errors:
-            pass        
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         wq_setup_dict = {
             "wq_lib": self.wq_lib,
@@ -1123,7 +1189,7 @@ class NMLMorphometry(NMLBase):
     """Construct the `&morphometry` model parameters.
 
     The `&morphometry` parameters define the physical dimensions and location 
-    of the water body. `NMLMorphometry` provides the means to constuct a 
+    of the water body. `NMLMorphometry` provides the means to construct a 
     dictionary containing these parameters for use in the `nml.NML` class. 
     Model parameters are set as attributes upon initialising an instance of the
     class or using the `set_attributes()` method. Class instances are callable 
@@ -1262,7 +1328,12 @@ class NMLMorphometry(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         morphometry_dict = {
             "lake_name": self.lake_name,
@@ -1283,7 +1354,7 @@ class NMLTime(NMLBase):
     """Construct the `&time` model parameters.
 
     The `&time` parameters define the duration and timestep of a GLM 
-    simulation. `NMLTime` provides the means to constuct a dictionary 
+    simulation. `NMLTime` provides the means to construct a dictionary 
     containing these parameters for use in the `nml.NML` class. Model 
     parameters are set as attributes upon initialising an instance of the class 
     or using the `set_attributes()` method. Class instances are callable and 
@@ -1381,7 +1452,12 @@ class NMLTime(NMLBase):
         ... }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         time_dict = {
             "timefmt": self.timefmt,
@@ -1398,7 +1474,7 @@ class NMLOutput(NMLBase):
     """Construct the `&output` model parameters.
 
     The `&output` parameters define the contents and location of GLM output 
-    files. `NMLOutput` provides the means to constuct a dictionary containing 
+    files. `NMLOutput` provides the means to construct a dictionary containing 
     these parameters for use in the `nml.NML` class. Model parameters are set 
     as attributes upon initialising an instance of the class or using the 
     `set_attributes()` method. Class instances are callable and return the 
@@ -1568,7 +1644,12 @@ class NMLOutput(NMLBase):
         self.csv_outlet_vars = self._single_value_to_list(self.csv_outlet_vars)       
 
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         output_dict = {
             "out_dir": self.out_dir,
@@ -1594,7 +1675,7 @@ class NMLInitProfiles(NMLBase):
     """Construct the `&init_profiles` model parameters.
 
     The `&init_profiles` parameters define the initial conditions at specific 
-    depths in the water body. `NMLInitProfiles` provides the means to constuct 
+    depths in the water body. `NMLInitProfiles` provides the means to construct 
     a dictionary containing these parameters for use in the `nml.NML` class. 
     Model parameters are set as attributes upon initialising an instance of 
     the class or using the `set_attributes()` method. Class instances are 
@@ -1723,7 +1804,12 @@ class NMLInitProfiles(NMLBase):
         self.wq_init_vals = self._single_value_to_list(self.wq_init_vals)
 
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         init_profiles_dict = {
             "lake_depth": self.lake_depth,
@@ -1742,7 +1828,7 @@ class NMLLight(NMLBase):
     """Construct the `&light` model parameters.
 
     The `&light` parameters define light penertration into the water body. 
-    `NMLLight` provides the means to constuct a dictionary containing these 
+    `NMLLight` provides the means to construct a dictionary containing these 
     parameters for use in the `nml.NML` class. Model parameters are set as 
     attributes upon initialising an instance of the class or using the 
     `set_attributes()` method. Class instances are callable and return the 
@@ -1850,7 +1936,12 @@ class NMLLight(NMLBase):
         self.energy_frac = self._single_value_to_list(self.energy_frac)
 
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         light_dict = {
             "light_mode": self.light_mode,
@@ -1869,7 +1960,7 @@ class NMLBirdModel(NMLBase):
 
     The `&bird_model` parameters define the surface irradiance based on the 
     Bird Clear Sky Model (BCSM) (Bird, 1984). `NMLBirdModel` provides the means 
-    to constuct a dictionary containing these parameters for use in the 
+    to construct a dictionary containing these parameters for use in the 
     `nml.NML` class. Model parameters are set as attributes upon initialising 
     an instance of the class or using the `set_attributes()` method. Class 
     instances are callable and return the dictionary of parameters.
@@ -1966,7 +2057,12 @@ class NMLBirdModel(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         bird_model_dict = {
             "AP": self.AP,
@@ -1983,7 +2079,7 @@ class NMLSediment(NMLBase):
     """Construct the `&sediment` model parameters.
 
     The `&sediment` parameters define the thermal properties of the 
-    soil-sediment. `NMLSediment` provides the means to constuct a dictionary 
+    soil-sediment. `NMLSediment` provides the means to construct a dictionary 
     containing these parameters for use in the `nml.NML` class. Model 
     parameters are set as attributes upon initialising an instance of the class 
     or using the `set_attributes()` method. Class instances are callable and 
@@ -2124,7 +2220,12 @@ class NMLSediment(NMLBase):
         self.sed_roughness = self._single_value_to_list(self.sed_roughness)
 
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         sediment_dict = {
             "sed_heat_Ksoil": self.sed_heat_Ksoil,
@@ -2145,7 +2246,7 @@ class NMLSnowIce(NMLBase):
     """Construct the `&snowice` model parameters.
 
     The `&snowice` parameters define the formation of snow and ice cover on the
-    water body. `NMLSnowIce` provides the means to constuct a dictionary 
+    water body. `NMLSnowIce` provides the means to construct a dictionary 
     containing these parameters for use in the `nml.NML` class. Model 
     parameters are set as attributes upon initialising an instance of the 
     class or using the `set_attributes()` method. Class instances are callable 
@@ -2223,7 +2324,12 @@ class NMLSnowIce(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         snowice_dict = {
             "snow_albedo_factor": self.snow_albedo_factor,
@@ -2238,7 +2344,7 @@ class NMLMeteorology(NMLBase):
 
     The `&meteorology` parameters define a variety of meteorological 
     dynamics, e.g., rainfall, air temperature, radiation, wind, and cloud 
-    cover. `NMLMeteorology` provides the means to constuct a dictionary 
+    cover. `NMLMeteorology` provides the means to construct a dictionary 
     containing these parameters for use in the `nml.NML` class. Model
     parameters are set as attributes upon initialising an instance of the 
     class or using the `set_attributes()` method. Class instances are callable 
@@ -2484,7 +2590,12 @@ class NMLMeteorology(NMLBase):
         }
         """
         if check_errors:
-            pass
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         meteorology_dict = {
             "met_sw": self.met_sw,
@@ -2523,7 +2634,7 @@ class NMLInflow(NMLBase):
     """Construct the `&inflow` model parameters.
 
     The `&inflow` parameters define river inflows and submerged inflows. 
-    `NMLInflow` provides the means to constuct a dictionary containing these 
+    `NMLInflow` provides the means to construct a dictionary containing these 
     parameters for use in the `nml.NML` class. Model parameters are set as 
     attributes upon initialising an instance of the class or using the 
     `set_attributes()` method. Class instances are callable and return the 
@@ -2696,7 +2807,12 @@ class NMLInflow(NMLBase):
         self.inflow_vars = self._single_value_to_list(self.inflow_vars)
 
         if check_errors:
-            pass        
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )     
 
         inflow_dict = {
             "num_inflows": self.num_inflows,
@@ -2719,7 +2835,7 @@ class NMLOutflow(NMLBase):
     """Construct the `&outflow` model parameters.
 
     The `&outflow` parameters define withdrawals, outlets, offtakes, and 
-    seepage. `NMLOutflow` provides the means to constuct a dictionary 
+    seepage. `NMLOutflow` provides the means to construct a dictionary 
     containing these parameters for use in the `nml.NML` class. Model 
     parameters are set as attributes upon initialising an instance of the class 
     or using the `set_attributes()` method. Class instances are callable and 
@@ -2969,7 +3085,12 @@ class NMLOutflow(NMLBase):
         self.bsn_wid_outl = self._single_value_to_list(self.bsn_wid_outl)
 
         if check_errors:
-            pass    
+            warnings.warn(
+                "Error checking is not stable and lacks complete coverage. "
+                "Erroneous parameters may not be raised.",
+                category=FutureWarning,
+                stacklevel=2
+            )
 
         outflow_dict = {
             "num_outlet": self.num_outlet,
