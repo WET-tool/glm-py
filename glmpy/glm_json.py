@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import List
+from typing import List, Union
 
 class JSONToNML:
     """Supports the reading of GLM configuration blocks in a JSON format or
@@ -25,7 +25,7 @@ class JSONToNML:
     >>> json_to_nml = glm_json.JSONToNML("sparkling_lake.json")
     """
     def __init__(
-        self, json_file: str | os.PathLike, nml_file: str = "sim.nml"
+        self, json_file: Union[str, os.PathLike], nml_file: str = "sim.nml"
     ):
         if (not isinstance(json_file, str)) and (
             not isinstance(json_file, dict)
