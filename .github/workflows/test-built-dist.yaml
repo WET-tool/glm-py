@@ -32,7 +32,7 @@ jobs:
     - name: Run glmpy
       run: python run_glmpy.py
   
-  test-linux-wheels-arm64:
+  test-macos-wheels-arm64:
     strategy:
       matrix:
         python-version: ["3.12"]
@@ -51,12 +51,13 @@ jobs:
         mkdir bcs
         curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv --output bcs/nldas_driver.csv
 
-    - name: Install and run in Linux container
+    - name: Install glmpy
       run: |
-        docker run --platform linux/arm64/v8 --rm -v $(pwd):/workplace ubuntu bash -c "\
-          pip3 install fastapi==0.88.0 && \
-          pip3 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver && \
-          python3 workplace/run_glmpy.py"
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
 
 
 
