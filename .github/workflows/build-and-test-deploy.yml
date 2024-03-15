@@ -7,7 +7,6 @@ on:
 
 jobs:
   build-source-dist:
-    strategy:
     runs-on: ubuntu-latest
 
     steps:
