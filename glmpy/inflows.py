@@ -1,13 +1,14 @@
+import pandas as pd
+
+from pandas.api.types import is_numeric_dtype
 from typing import Union
 
-import pandas as pd
-from pandas.api.types import is_numeric_dtype
 
 class CatchmentRunoffInflows:
     """Calculate runoff inflows from a catchment.
 
     Generates an inflows timeseries by calculating catchment runoff from
-    a pandas Dataframe of precipitation data. Requires a catchment area, a
+    a pandas DataFrame of precipitation data. Requires a catchment area, a
     runoff coefficient or threshold, and a precipitation timeseries in either
     hourly or daily timesteps. Inflows are calculated at the same timestep as
     the precipitation data but in units of m^3/s. `CatchmentRunoffInflows`
@@ -36,6 +37,8 @@ class CatchmentRunoffInflows:
 
     Examples
     --------
+    >>> from glmpy import inflows
+
     Generate a daily timeseries of rainfall:
     >>> daily_met_data = pd.DataFrame({
     ...     'Date': pd.date_range(
@@ -76,7 +79,6 @@ class CatchmentRunoffInflows:
     ... )
     >>> inflows_data.get_inflows()
     """
-
     def __init__(
         self,
         met_data: pd.DataFrame,
@@ -170,8 +172,8 @@ class CatchmentRunoffInflows:
         self.catchment_runoff_inflows = None
         self.time_diff = time_diff
 
-    @staticmethod
     def _calculate_inflows(
+            self,
             time_diff: pd.Timedelta,
             met_data: pd.DataFrame,
             precip_col: str,
@@ -180,11 +182,9 @@ class CatchmentRunoffInflows:
             runoff_coef: Union[float, int, None] = None,
             runoff_threshold: Union[float, int, None] = None,
         ) -> pd.DataFrame:
-        """ Calculate inflows
-
-        Internal method for calculating inflows from catchment runoff.
         """
-
+        Private method for calculating inflows from catchment runoff.
+        """
         if time_diff == pd.Timedelta(hours=1):
             num_seconds = 3600
         elif time_diff == pd.Timedelta(days=1):
@@ -227,7 +227,10 @@ class CatchmentRunoffInflows:
 
         Examples
         --------
-        Generate a hourly timeseries of rainfall:
+        >>> from glmpy import inflows
+        >>> import pandas as pd
+
+        Generate an hourly timeseries of rainfall:
         >>> hourly_met_data = pd.DataFrame({
         ...     'Date': pd.date_range(
         ...         start='1997-01-01',
@@ -250,7 +253,6 @@ class CatchmentRunoffInflows:
         Call `get_inflows()` to return the inflows timeseries:
         >>> inflows_data.get_inflows()
         """
-
         self.catchment_runoff_inflows = self._calculate_inflows(
             time_diff=self.time_diff,
             met_data=self.met_data,
@@ -261,7 +263,6 @@ class CatchmentRunoffInflows:
             runoff_threshold=self.runoff_threshold
         )
         return self.catchment_runoff_inflows
-
 
     def write_inflows(self, file_path: str) -> None:
         """
@@ -277,6 +278,7 @@ class CatchmentRunoffInflows:
         Examples
         --------
         >>> from glmpy import inflows
+        >>> import pandas as pd
         >>> daily_met_data = pd.DataFrame({
         ...     'Date': pd.date_range(
         ...         start='1997-01-01',
@@ -295,7 +297,6 @@ class CatchmentRunoffInflows:
         Call `write_inflows` to write the inflows timeseries to a CSV:
         >>> inflows_data.write_inflows(file_path='runoff.csv')
         """
-
         if self.catchment_runoff_inflows is None:
             self.catchment_runoff_inflows = self._calculate_inflows(
                 time_diff=self.time_diff,

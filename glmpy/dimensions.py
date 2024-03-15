@@ -1,6 +1,7 @@
 import math
-from typing import Union
 import numpy as np
+
+from typing import Union
 
 class InvertedTruncatedSquarePyramid:
     """Calculates the volume and surface area of an inverted truncated square 
@@ -135,16 +136,16 @@ class InvertedTruncatedSquarePyramid:
         self.base_length = base_length
         self.surface_elevation = surface_elevation
 
-    @staticmethod
     def _calc_volumes(
-            height: Union[float, int],
-            base_length,
-            side_slope,
-            num_vals
+        self,
+        height: Union[float, int],
+        base_length: Union[float, int],
+        side_slope: Union[float, int],
+        num_vals: int
     ) -> list[float]:
         """Calculate volumes.
 
-        Internal method for calculating volumes.
+        Private method for calculating volumes.
         """
         volumes = []
         for i in np.linspace(start=0, stop=height, num=num_vals):
@@ -156,16 +157,16 @@ class InvertedTruncatedSquarePyramid:
             volumes.append(volume)
         return volumes
     
-    @staticmethod
     def _calc_areas(
-        height,
-        base_length,
-        side_slope,
-        num_vals
+        self,
+        height: Union[float, int],
+        base_length: Union[float, int],
+        side_slope: Union[float, int],
+        num_vals: int
     ) -> list[float]:
         """Calculate areas.
 
-        Internal method for calculating areas.
+        Private method for calculating areas.
         """
         areas = []
         for i in np.linspace(start=0, stop=height, num=num_vals):
@@ -173,11 +174,15 @@ class InvertedTruncatedSquarePyramid:
             areas.append(area)
         return areas
     
-    @staticmethod
-    def _calc_heights(surface_elevation, height, num_vals) -> list[float]:
+    def _calc_heights(
+        self,
+        surface_elevation: Union[float, int], 
+        height: Union[float, int], 
+        num_vals: int
+    ) -> list[float]:
         """Calculate heights.
 
-        Internal method for calculating heights.
+        Private method for calculating heights.
         """
         heights = np.linspace(0, -height, num_vals)
         heights = heights.tolist()

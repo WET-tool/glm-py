@@ -2,28 +2,28 @@ import pytest
 from glmpy import nml
 
 def test_nml_bool():
-    assert nml.NML._nml_bool(True) == ".true."
-    assert nml.NML._nml_bool(False) == ".false."
+    assert nml.NML.nml_bool(True) == ".true."
+    assert nml.NML.nml_bool(False) == ".false."
 
 def test_nml_str():
     python_str = 'temp'
-    assert nml.NML._nml_str(python_str) == f"'{python_str}'"
+    assert nml.NML.nml_str(python_str) == f"'{python_str}'"
 
 @pytest.mark.parametrize("python_syntax, nml_syntax, syntax_func", [
-    ([True], ".true.", nml.NML._nml_bool),
-    ([True, False, True], ".true.,.false.,.true.", nml.NML._nml_bool),
-    (['temp'], f"'{'temp'}'", nml.NML._nml_str),
+    ([True], ".true.", nml.NML.nml_bool),
+    ([True, False, True], ".true.,.false.,.true.", nml.NML.nml_bool),
+    (['temp'], f"'{'temp'}'", nml.NML.nml_str),
     (
         ['temp', 'salt', 'oxy'], 
         f"'{'temp'}','{'salt'}','{'oxy'}'", 
-        nml.NML._nml_str
+        nml.NML.nml_str
     ),
     ([12.3], "12.3", None),
     ([12.3, 32.4, 64.2], "12.3,32.4,64.2", None)
 ])
 
 def test_nml_list(python_syntax, nml_syntax, syntax_func):
-    assert nml.NML._nml_list(
+    assert nml.NML.nml_list(
         python_list=python_syntax,
         syntax_func=syntax_func
     ) == nml_syntax
@@ -44,61 +44,61 @@ def example_glmpy_parameters():
     }
 
 def test_nml_param_val(example_glmpy_parameters):
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param1",
-        syntax_func=nml.NML._nml_bool
+        syntax_func=nml.NML.nml_bool
     ) == f"   param1 = .true.\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param2",
-        syntax_func=lambda x: nml.NML._nml_list(x, nml.NML._nml_bool)
+        syntax_func=lambda x: nml.NML.nml_list(x, nml.NML.nml_bool)
     ) == f"   param2 = .true.\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param3",
-        syntax_func=lambda x: nml.NML._nml_list(x, nml.NML._nml_bool)
+        syntax_func=lambda x: nml.NML.nml_list(x, nml.NML.nml_bool)
     ) == f"   param3 = .true.,.false.,.true.\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param4",
-        syntax_func=nml.NML._nml_str
+        syntax_func=nml.NML.nml_str
     ) == f"   param4 = 'temp'\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param5",
-        syntax_func=lambda x: nml.NML._nml_list(x, nml.NML._nml_str)
+        syntax_func=lambda x: nml.NML.nml_list(x, nml.NML.nml_str)
     ) == f"   param5 = 'temp'\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param6",
-        syntax_func=lambda x: nml.NML._nml_list(x, nml.NML._nml_str)
+        syntax_func=lambda x: nml.NML.nml_list(x, nml.NML.nml_str)
     ) == f"   param6 = 'temp','salt','oxy'\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param7",
         syntax_func=None
     ) == f"   param7 = 12.3\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param8",
-        syntax_func=nml.NML._nml_list
+        syntax_func=nml.NML.nml_list
     ) == f"   param8 = 12.3\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param9",
-        syntax_func=nml.NML._nml_list
+        syntax_func=nml.NML.nml_list
     ) == f"   param9 = 12.3,32.4,64.2\n"
 
-    assert nml.NML._nml_param_val(
+    assert nml.NML.nml_param_val(
         param_dict=example_glmpy_parameters,
         param="param10",
         syntax_func=None
