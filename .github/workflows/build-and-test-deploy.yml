@@ -8,9 +8,7 @@ on:
 jobs:
   build-source-dist:
     strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, windows-2022, macos-12]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out code
@@ -36,7 +34,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: dist-${{ matrix.os }}
+        name: source-dist
         path: dist/
 
   build-wheels-manylinux-aarch64:
@@ -241,109 +239,37 @@ jobs:
         with:
           name: wheels-windows-x86_64
           path: ./wheelhouse/*.whl
-    
-  publish-to-testpypi:
-      name: Publish distributions to TestPyPI
-      needs: [build-source-dist, build-wheels-manylinux-aarch64, build-wheels-manylinux-x86_64, build-wheels-macos-x86_64, build-wheels-macos-ARM64, build-wheel-windows-x86_64]
-      runs-on: ubuntu-latest
-      environment:
-        name: testpypi
-        url: https://test.pypi.org/p/glm-py  
-      permissions:
-        id-token: write  
-    
-      steps:
-        - name: Download ubuntu-22.04 source distribution artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: dist-ubuntu-22.04
-            path: dist/
-
-        - name: Download ubuntu-20.04 source distribution artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: dist-ubuntu-20.04
-            path: dist/
-        
-        - name: Download windows-2022 source distribution artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: dist-windows-2022
-            path: dist/
-        
-        - name: Download macos-12 source distribution artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: dist-macos-12
-            path: dist/
-        
-        - name: Download manylinux aarch64 wheels artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: wheels-manylinux2014-aarch64
-            path: dist/ 
-        
-        - name: Download manylinux x86_64 wheels artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: wheels-manylinux2014-x86_64
-            path: dist/ 
-        
-        - name: Download MacOS x86_64 wheels artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: wheels-macos-x86_64
-            path: dist/ 
-        
-        - name: Download MacOS ARM64 wheels artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: wheels-macos-arm64
-            path: dist/ 
-
-        - name: Download Windows x86_64 wheels artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: wheels-windows-x86_64
-            path: dist/ 
-
-        - name: Publish all distributions to TestPyPI
-          uses: pypa/gh-action-pypi-publish@release/v1
-          with:
-            repository-url: https://test.pypi.org/legacy/  
-  # publish-to-testpypi:
-  #   name: Publish distributions to TestPyPI
-  #   needs: [build-source-dist, build-wheels-manylinux-aarch64, build-wheels-manylinux-x86_64, build-wheels-macos-x86_64, build-wheels-macos-ARM64, build-wheel-windows-x86_64]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       distribution:
-  #         - dist-ubuntu-22.04
-  #         - dist-ubuntu-20.04
-  #         - dist-windows-2022
-  #         - dist-macos-12
-  #         - wheels-manylinux2014-aarch64
-  #         - wheels-manylinux2014-x86_64
-  #         - wheels-macos-x86_64
-  #         - wheels-macos-arm64
-  #         - wheels-windows-x86_64
-
-  #   environment:
-  #     name: testpypi
-  #     url: https://test.pypi.org/p/glm-py  
-  #   permissions:
-  #     id-token: write  
   
-  #   steps:
-  #     - name: Download distribution artifact
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: ${{ matrix.distribution}}
-  #         path: dist/
+  publish-to-testpypi:
+    name: Publish distributions to TestPyPI
+    needs: [build-source-dist, build-wheels-manylinux-aarch64, build-wheels-manylinux-x86_64, build-wheels-macos-x86_64, build-wheels-macos-ARM64, build-wheel-windows-x86_64]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distribution:
+          - source-dist
+          - wheels-manylinux2014-aarch64
+          - wheels-manylinux2014-x86_64
+          - wheels-macos-x86_64
+          - wheels-macos-arm64
+          - wheels-windows-x86_64
 
-  #     - name: Publish all distributions to TestPyPI
-  #       uses: pypa/gh-action-pypi-publish@release/v1
-  #       with:
-  #         repository-url: https://test.pypi.org/legacy/
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/glm-py  
+    permissions:
+      id-token: write  
+  
+    steps:
+      - name: Download distribution artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.distribution}}
+          path: dist/
+
+      - name: Publish all distributions to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
 
 
