@@ -199,8 +199,8 @@ jobs:
           name: wheels-macos-arm64
           path: ./wheelhouse/*.whl
         
-  build-wheel-windows-x86_64:
-    name: Build wheels on Windows for x86_64 and AMD64
+  build-wheel-windows-amd64:
+    name: Build wheels on Windows for AMD64
     runs-on: windows-2022
 
     steps:
@@ -215,7 +215,7 @@ jobs:
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
           git clone --recursive https://github.com/WET-tool/glm-aed.git
     
-      - name: Compile GLM for x84_64
+      - name: Compile GLM for AMD64
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/Sources
@@ -227,7 +227,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/binaries/windows/glm_latest/glm.exe" "$GITHUB_WORKSPACE/glmpy/bin/"
           cp "$GITHUB_WORKSPACE/glm-aed/glm-source/ancillary/windows/msys/bin/"*.dll "$GITHUB_WORKSPACE/glmpy/bin/"
   
-      - name: Build wheels for x86_64 and AMD64
+      - name: Build wheels for AMD64
         uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_BUILD: 'cp39-* cp310-* cp311-* cp312-* pp39-* pp310-*'
@@ -236,12 +236,12 @@ jobs:
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wheels-windows-x86_64
+          name: wheels-windows-amd64
           path: ./wheelhouse/*.whl
   
   publish-to-testpypi:
     name: Publish distributions to TestPyPI
-    needs: [build-source-dist, build-wheels-manylinux-aarch64, build-wheels-manylinux-x86_64, build-wheels-macos-x86_64, build-wheels-macos-ARM64, build-wheel-windows-x86_64]
+    needs: [build-source-dist, build-wheels-manylinux-aarch64, build-wheels-manylinux-x86_64, build-wheels-macos-x86_64, build-wheels-macos-ARM64, build-wheel-windows-amd64]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -251,7 +251,7 @@ jobs:
           - wheels-manylinux2014-x86_64
           - wheels-macos-x86_64
           - wheels-macos-arm64
-          - wheels-windows-x86_64
+          - wheels-windows-amd64
 
     environment:
       name: testpypi
@@ -271,4 +271,128 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
 
+  wait-for-testpypi-to-update:
+    name: Wait for TestPyPI to update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+
+  test-linux-wheels-x86_64:
+    name: Test Linux wheels x86_64
+    needs: wait-for-testpypi-to-update
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Download files to run
+      run: |
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/run_glmpy.py --output run_glmpy.py
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/glm3.nml --output glm3.nml
+        mkdir bcs
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv --output bcs/nldas_driver.csv
+
+    - name: Install glmpy
+      run: |
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
+
+  test-macos-wheels-x86_64:
+    name: Test MacOS wheels x86_64
+    needs: wait-for-testpypi-to-update
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    runs-on: macos-12
+
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Download files to run
+      run: |
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/run_glmpy.py --output run_glmpy.py
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/glm3.nml --output glm3.nml
+        mkdir bcs
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv --output bcs/nldas_driver.csv
+
+    - name: Install glmpy
+      run: |
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
+
+  test-macos-wheels-arm64:
+    name: Test MacOS wheels ARM64
+    needs: wait-for-testpypi-to-update
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    runs-on: macos-14
+
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Download files to run
+      run: |
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/run_glmpy.py --output run_glmpy.py
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/glm3.nml --output glm3.nml
+        mkdir bcs
+        curl https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv --output bcs/nldas_driver.csv
+
+    - name: Install glmpy
+      run: |
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
+
+  test-windows-wheels-amd64:
+    name: Test Windows wheels AMD64
+    needs: wait-for-testpypi-to-update
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    runs-on: windows-2022
+
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version}}
+    
+    - name: Download files to run
+      run: |
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/run_glmpy.py -OutFile run_glmpy.py
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/glm3.nml -OutFile glm3.nml
+        New-Item -ItemType Directory -Force -Path bcs
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv -OutFile bcs/nldas_driver.csv
+
+    - name: Install glmpy
+      run: |
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
+    
 
