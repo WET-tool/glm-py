@@ -87,8 +87,30 @@ jobs:
     - name: Run glmpy
       run: python run_glmpy.py
 
+  test-windows-wheels-x86_64:
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    runs-on: windows-2022
 
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version}}
+    
+    - name: Download files to run
+      run: |
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/run_glmpy.py -OutFile run_glmpy.py
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/glm3.nml -OutFile glm3.nml
+        New-Item -ItemType Directory -Force -Path bcs
+        Invoke-WebRequest -Uri https://raw.githubusercontent.com/WET-tool/glm-py/main/notebooks/glmpy-demo/bcs/nldas_driver.csv -OutFile bcs/nldas_driver.csv
 
-
-  
+    - name: Install glmpy
+      run: |
+        pip install fastapi==0.88.0
+        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple glm-py --use-deprecated=legacy-resolver
+    
+    - name: Run glmpy
+      run: python run_glmpy.py
     
