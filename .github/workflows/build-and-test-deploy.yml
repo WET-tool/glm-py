@@ -273,6 +273,7 @@ jobs:
 
   wait-for-testpypi-to-update:
     name: Wait for TestPyPI to update
+    needs: publish-to-testpypi
     runs-on: ubuntu-latest
     steps:
       - name: Sleep for 30 seconds
