@@ -8,7 +8,7 @@ jobs:
   test-linux-wheels-x86_64:
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "pypy3.9", "pypy3.10"]
     runs-on: ubuntu-latest
 
     steps:
@@ -35,7 +35,7 @@ jobs:
   test-macos-wheels-x86_64:
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "pypy3.9", "pypy3.10"]
     runs-on: macos-12
 
     steps:
@@ -58,7 +58,6 @@ jobs:
     
     - name: Run glmpy
       run: python run_glmpy.py
-
 
   test-macos-wheels-arm64:
     strategy:
@@ -90,7 +89,7 @@ jobs:
   test-windows-wheels-x86_64:
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12",  "pypy3.9", "pypy3.10"]
     runs-on: windows-2022
 
     steps:
