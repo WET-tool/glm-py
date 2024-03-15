@@ -127,7 +127,7 @@ class GlmSim:
         base_path = os.path.dirname(os.path.abspath(__file__))
 
         if os.name == 'nt':
-            exe_name = 'glm'
+            exe_name = 'glm.exe'
         else:
             exe_name = "glm"
         
