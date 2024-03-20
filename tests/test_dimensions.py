@@ -136,10 +136,10 @@ def test_negative_base_length():
         )
     assert str(error.value) == (
         "Invalid combination of height, surface_length, and "
-        "side_slope parameters. The calculated base_length of the "
+        "side_slope attributes. The calculated base_length of the "
         "water body is currently <= 0. base_length is calculated by "
         "(surface_length-(height/side_slope)*2). Adjust your input "
-        "parameters to calculate a positive base_length value."
+        "attributes to calculate a positive base_length value."
     )
 
 def test_num_vals_is_7_surface_elev_is_0():

@@ -9,12 +9,9 @@ examples
 build
 *.egg-info
 
-
 .ruff_cache
 .pytest_cache
 
-scratch*/
-scratch.py
 # glm*/
 glmpy/setup.py
 

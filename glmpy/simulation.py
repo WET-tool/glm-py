@@ -8,10 +8,10 @@ from typing import Union
 from fastapi import UploadFile
 
 
-class GlmSim:
+class GLMSim:
     """Prepare inputs and run a GLM simulation.
 
-    The `GlmSim` class has attributes and methods that handle running
+    The `GLMSim` class has attributes and methods that handle running
     GLM simulations and processing the results.
 
     The class is designed to work with GLM simulations running on local
@@ -24,6 +24,18 @@ class GlmSim:
     and will be processed as a FastAPI `UploadFile` object:
     https://fastapi.tiangolo.com/tutorial/request-files/#uploadfile
 
+    Attributes
+    ----------
+    input_files : Union[UploadFile, dict]
+        FastAPI `UploadFile` object storing input files for a GLM
+        simulation or, if running GLM locally or outside a FastAPI
+        environment a dict of filenames (keys) and paths to files (values).
+    api : bool
+        If True, GLM is run using FastAPI engine.
+        Otherwise, local GLM versions.
+    inputs_dir : str
+        File path to directory to save input files for GLM simulation.
+
     Examples
     --------
 
@@ -31,7 +43,7 @@ class GlmSim:
     `files` is a FastAPI `UploadFile` object.
 
     >>> import glmpy.simulation as sim
-    >>> glm_sim = sim.GlmSim(files, True, "/inputs")
+    >>> glm_sim = sim.GLMSim(files, True, "/inputs")
     >>> inputs_dir = glm_sim.prepare_inputs()
     >>> glm_sim.glm_run(inputs_dir, "/glm/glm")
 
@@ -43,7 +55,7 @@ class GlmSim:
     >>>    "glm3.nml": "/path/to/glm3.nml",
     >>>    "met.csv": "/path/to/met.csv"
     >>> }
-    >>> glm_sim = sim.GlmSim(files, False, "/inputs")
+    >>> glm_sim = sim.GLMSim(files, False, "/inputs")
     >>> inputs_dir = glm_sim.prepare_inputs()
     >>> glm_sim.glm_run(inputs_dir, "/glm/glm")
 
@@ -51,21 +63,6 @@ class GlmSim:
     def __init__(
         self, input_files: Union[UploadFile, dict], api: bool, inputs_dir: str
     ):
-        """Initialise a `GlmSim` object.
-
-        Attributes
-        ----------
-        input_files : Union[UploadFile, dict]
-            FastAPI `UploadFile` object storing input files for a GLM
-            simulation or, if running GLM locally or outside a FastAPI
-            environment a dict of filenames (keys) and paths to files (values).
-        api : bool
-            If True, GLM is run using FastAPI engine.
-            Otherwise, local GLM versions.
-        inputs_dir : str
-            File path to directory to save input files for GLM simulation.
-
-        """
         self.input_files = input_files
         self.fast_api = api
         self.inputs_dir = inputs_dir
@@ -175,8 +172,13 @@ class GlmSim:
         os.system(run_command)
 
 
-class GlmPostProcessor:
+class GLMPostProcessor:
     """Class to process outputs of GLM simulation.
+
+    Attributes
+    ----------
+    outputs_path : str
+        Path to directory where GLM outputs have been written.
 
     Examples
     --------
@@ -191,15 +193,15 @@ class GlmPostProcessor:
     >>> }
 
     >>> # running local instance of GLM
-    >>> glm_run = sim.GlmSim(files, False, "/inputs")
+    >>> glm_run = sim.GLMSim(files, False, "/inputs")
     >>> inputs_dir = glm_run.prepare_inputs()
 
     >>> glm_run.glm_run(inputs_dir, "/glm/glm")
 
     >>> outputs_dir = os.path.join(inputs_dir, "output")
 
-    >>> # initialise GlmPostProcessor object
-    >>> glm_process = sim.GlmPostProcessor(outputs_dir)
+    >>> # initialise GLMPostProcessor object
+    >>> glm_process = sim.GLMPostProcessor(outputs_dir)
 
     >>> # create zipfile of GLM outputs
     >>> # csv file and netcdf
@@ -215,13 +217,7 @@ class GlmPostProcessor:
     """
 
     def __init__(self, outputs_path: str):
-        """Class to process outputs of GLM simulation.
 
-        Attributes
-        ----------
-        outputs_path : str
-            Path to directory where GLM outputs have been written.
-        """
         self.outputs_path = outputs_path
 
     def zip_outputs(self):

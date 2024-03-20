@@ -18,7 +18,7 @@ files = {
 }
 
 
-glm_run = sim.GlmSim(files, False, "/inputs")
+glm_run = sim.GLMSim(files, False, "/inputs")
 inputs_dir = glm_run.prepare_inputs()
 
 glm_run.glm_run(inputs_dir, "/glm/glm")
@@ -26,7 +26,7 @@ glm_run.glm_run(inputs_dir, "/glm/glm")
 outputs_dir = os.path.join(inputs_dir, "output")
 
 # test `zip_outputs()` endpoint
-glm_process = sim.GlmPostProcessor(outputs_dir)
+glm_process = sim.GLMPostProcessor(outputs_dir)
 files_zip_path = glm_process.zip_outputs()
 
 if "glm_outputs.zip" in os.listdir(outputs_dir):

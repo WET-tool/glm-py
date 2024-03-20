@@ -1,2 +1,2 @@
-::: glmpy.json
+::: glmpy.glm_json
 

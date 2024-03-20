@@ -1,23 +1,23 @@
-# Tutorials
+---
+draft: true 
+date: 2024-03-20 
+authors:
+  - gknight
+categories:
+  - Tutorials
+readtime: 20
+---
 
-## Sparkling Lake
+# Modelling Sparkling Lake with glm-py
 
-### Introduction
+**This tutorial guides users through the process of setting up a model of 
+Sparkling Lake using glm-py.**
 
-Sparkling Lake is an [oligotrophic, northern temperate lake](https://microbes.limnology.wisc.edu/sites/default/files/Modelling%20phytoplankton-zooplanktoninteractions%20in%20Sparkling%20Lake.pdf) (89.7 ºN, 46.3 ºW) in Winconsin, USA. The lake has a surface area of 0.638 km<sup>2</sup>, and is about 20 m deep. This tutorial will guide users through the process of setting up a model of Sparkling Lake using the `glmpy` package. The model will be configured to  simulate the hydrological domain of Sparkling Lake for 2 years, from 1980-04-15 to 1982-04-15, with water balance and heat fluxes [hypothetically calculated](http://aed.see.uwa.edu.au/research/models/GLM/downloads/AED_GLM_v2_0b0_20141025.pdf) based on the lake configuration and input data.
+Sparkling Lake is an oligotrophic, northern temperate lake (89.7 ºN, 46.3 ºW) in Winconsin, USA. The lake is approximately 20m deep and covers a surface area of 0.638km<sup>2</sup>. We will use glm-py to simulate the hydrological domain of Sparkling Lake for 2 years (1980-04-15 to 1982-04-15). The water balance and heat fluxes will be hypothetically calculated based on the lake configuration and input data.
 
-<div id="mapid" style="height: 400px;">
-<script>
-    var mymap = L.map('mapid').setView([46.008605420259336, -89.70028793742644], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-    }).addTo(mymap);
-    L.marker([46.008605420259336, -89.70028793742644]).addTo(mymap)
-        // .bindPopup("<b>Sparkling Lake!</b><br />Winconsin, USA.").openPopup();
-</script>
-</div>
+<!-- more -->
 
-### The GLM `.nml` file
+## The GLM `.nml` file
 
 To begin, start by importing the `nml` module from `glmpy`:
 
@@ -48,7 +48,7 @@ The `nml` module provides a set of methods and classes to work with namelist fil
 
 The `nml` module provides a set of classes that are used to define each of these blocks.
 
-### Model setup
+## Model setup
 
 As a 1-dimensional model, GLM simulates the dynamics of a water body by dividing it into a vertically stacked series of layers. The compulsory `&glm_setup` block defines the structure of these layers, e.g., the maximum number of layers, the minimum layer volume, and the minimum and maximum layer thicknesses. Let's configure the `&glm_setup` block using the `NMLSetup` class:
 
@@ -101,7 +101,7 @@ print(setup)
 /
 ```
 
-### Mixing
+## Mixing
 
 Next, let's set the parameters that control the mixing processes between the simulated layers of Sparkling lake. Just as `NMLSetup` defines the `&glm_setup` block, we can configure the `&glm_mixing` block using the `NMLMixing` class:
 
@@ -139,9 +139,7 @@ print(mixing)
 /
 ```
 
-
-
-### Morphometry
+## Morphometry
 
 The `&morphometry` block defines the physical measurements and structure of the lake. Comma-separated lists are used to detail the area at various elevations of the lake. These are listed from the lake bottom to the surface. Set the following attributes and inspect the result:
 
@@ -185,7 +183,7 @@ print(morphometry)
 /
 ```
 
-### Setting the remaining blocks
+## Setting the remaining blocks
 
 There are up to 14 configurable blocks in the GLM namelist file - setting each will take some time! Let's speed up the process by importing a JSON file that contains the parameters for the remaining blocks. We'll use the `JSONToNML` class to extract the relevant attributes from each respective block. Download the JSON file [here](/data/sparkling_lake.json).
 
@@ -287,8 +285,7 @@ sediment.set_attributes(sediment_attrs)
 wq_setup.set_attributes(wq_setup_attrs)
 ```
 
-
-### Writing the namelist file
+## Writing the namelist file
 
 Now that we have the attributes set for each block, the `.nml` file can be compiled and written to disk. First, create an instance of the `NML` class and pass in the configured blocks. Using the `write_nml()` method, the `.nml` can be saved to your directory.
 
@@ -309,7 +306,7 @@ nml = nml.NML(
 nml.write_nml(nml_file_path='glm3.nml')
 ```
 
-### Running the model
+## Running the model
 
 Model configuration is now complete! To run glm, first import the `simulation` module:
 

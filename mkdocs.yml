@@ -1,15 +1,17 @@
-site_name: GLM-py
+site_name: glm-py
 repo_url: https://github.com/WET-tool/glm-py
 repo_name: WET-tool/glm-py
 
 theme:
     name: material
-    logo: 'img/glm-icon2.png'
+    logo: img/glm_icon_text_square.png
     custom_dir: docs/custom_theme/
     features:
       - content.code.copy
       - navigation.tabs
       - navigation.top
+      - navigation.indexes
+      - navigation.sections
     palette:
     # Palette toggle for light mode
     - scheme: default
@@ -31,6 +33,12 @@ extra_css:
 
 plugins:
 - search
+- blog:
+    blog_dir: blog
+    authors: true
+    authors_file: blog/authors.yml
+    list_length: 25
+
 - mkdocstrings:
     default_handler: python
     handlers:
@@ -50,6 +58,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - md_in_html
   - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
@@ -62,14 +71,21 @@ extra:
 
 nav:
   - Home: index.md
-  - How-to: how-to.md
-  - Tutorials:
-    - Sparkling Lake: sparkling-lake-tutorial.md
-    - Farm Dam: farm-dam-tutorial.md
+  - Install: installation.md
+  - How-to: 
+    - NML: how_to/how-to-nml.md
+    - Dimensions: how_to/how-to-dimensions.md
+    - Outflows: how_to/how-to-outflows.md
+    - Inflows: how_to/how-to-inflows.md
+    - GLM JSON: how_to/how-to-glm_json.md
   - API Reference:
     - NML: nml.md
     - Dimensions: dimensions.md
-    - JSON: json-to-nml.md
+    - GLM_JSON: json-to-nml.md
     - Simulations: simulation.md
     - Inflows: inflows.md
     - Outflows: outflows.md
+  - Contributing:
+    - contributing/index.md
+  - Blog:
+    - blog/index.md

@@ -4,7 +4,7 @@ files = {
    "glm3.nml": "glm3.nml",
    "nldas_driver.csv": "bcs/nldas_driver.csv"
 }
-glm_sim = simulation.GlmSim(
+glm_sim = simulation.GLMSim(
     input_files=files, 
     api=False,
     inputs_dir="inputs"
